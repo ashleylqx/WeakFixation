@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="dgx-r48-1" autoUploadExternalChanges="true">
+    <serverData>
+      <paths name="dgx-r48-1">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/hz1/QX/Codes/wk4" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="dgx-r69-1">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/raid/QX/Codes/wk4" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
