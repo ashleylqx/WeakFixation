@@ -444,21 +444,21 @@ class MS_COCO_map_full_aug(Dataset):
         #                     RandomShear(0.05)]
         #                    ) # _aug3
 
-        self.seq = Sequence([#RandomHSV(10, 10, 10),
-                             RandomHorizontalFlip(), #p=0.5
-                             RandomScale(0.1, diff=True),
-                             RandomTranslate(0.1, diff=True),
-                             RandomRotate(5)], [0.2,0.2,0.2,0.2]
-                             #RandomShear(0.1)]
-                            ) # _aug4
+        # self.seq = Sequence([#RandomHSV(10, 10, 10),
+        #                      RandomHorizontalFlip(), #p=0.5
+        #                      RandomScale(0.1, diff=True),
+        #                      RandomTranslate(0.1, diff=True),
+        #                      RandomRotate(5)], [0.2,0.2,0.2,0.2]
+        #                      #RandomShear(0.1)]
+        #                     ) # _aug4
 
-        # self.seq = Sequence([RandomHSV(5, 5, 5),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     RandomScale(0.1, diff=True),
-        #                     RandomTranslate(0.1, diff=True),
-        #                     RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
-        #                     #RandomShear(0.1)]
-        #                    ) # _aug5
+        self.seq = Sequence([RandomHSV(5, 5, 5),
+                            RandomHorizontalFlip(), #p=0.5
+                            RandomScale(0.1, diff=True),
+                            RandomTranslate(0.1, diff=True),
+                            RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
+                            #RandomShear(0.1)]
+                           ) # _aug5
 
         # if mode=='train':
         #     random.shuffle(self.list_names)
@@ -797,6 +797,11 @@ class ILSVRC_map_full_aug_wrong(Dataset):
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
 
+            np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+
             boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
             boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
             boxes_[:, 1] = boxes_[:, 1] / image.shape[0] * self.img_h
@@ -1083,6 +1088,11 @@ class ILSVRC_map_full_aug(Dataset):
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
+
+            np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
 
             boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
             boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
