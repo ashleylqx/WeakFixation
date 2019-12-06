@@ -1,6 +1,7 @@
 import numpy as np
 from numbers import Number
 import math
+import pdb
 
 import torch
 import torchvision.models as models
@@ -420,10 +421,12 @@ class attention_module_multi_head_RN_cls(torch.nn.Module):
     def forward(self, bbox, roi_feat):
         nongt_dim = roi_feat.size(0)
         # nongt_roi_feat = roi_feat[:nongt_dim, :]
-        nongt_roi_feat = roi_feat.detach()
-
+        # nongt_roi_feat = roi_feat.detach()
+        nongt_roi_feat = roi_feat
+        # bbox contains negative values
         position_matrix = self.extract_position_matrix(bbox, nongt_dim=nongt_dim)
         # print('position_matrix', position_matrix.max(), position_matrix.min())
+        # position_matrix contains nan
         position_embedding = self.extract_position_embedding(position_matrix, feat_dim=self.emb_dim)
 
         # [num_rois, nongt_dim, emb_dim]-->[num_rois*nongt_dim, emb_dim]
@@ -431,7 +434,14 @@ class attention_module_multi_head_RN_cls(torch.nn.Module):
 
         # WG in eq.5
         # [num_rois*nongt_dim, emb_dim] position_embedding_reshape --> [num_rois*nongt_dim, fc_dim] position_feat_1
-        position_feat_1_relu = F.relu(self.pair_pos_fc1(position_embedding_reshape))
+        # position_embedding_reshape contains nan
+        position_feat_1 = self.pair_pos_fc1(position_embedding_reshape)
+        if torch.isnan(position_feat_1).any():
+            pdb.set_trace()
+        position_feat_1_relu = F.relu(position_feat_1)
+        if torch.isnan(position_feat_1_relu).any():
+            pdb.set_trace()
+        # position_feat_1_relu = F.relu(self.pair_pos_fc1(position_embedding_reshape))
         # aff_weight, [num_rois, nongt_dim, fc_dim]
         aff_weight = position_feat_1_relu.view(-1, nongt_dim, self.fc_dim)
         # aff_weight, [num_rois, fc_dim, nongt_dim]
@@ -816,7 +826,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A(torch.nn.Module):
 
         hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
                         torch.sigmoid(cw_maps)).sum(1, keepdim=True)
-        hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
+        hard_scores_sum = hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)
+        hard_scores_sum[hard_scores_sum == 0.] = 1e-8
+        hard_sal_map = torch.div(hard_sal_map, hard_scores_sum)
+        # hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
 
         # hard_sal_map = self.to_cw_feature_size(hard_sal_map)
         # gs_map = torch.mul(hard_scores[:, -n_gaussian:].unsqueeze(-1).unsqueeze(-1).expand_as(gaussian),  # TODO change map to hd_map

@@ -179,7 +179,7 @@ class RandomScale(object):
 
         img = canvas
         map = canvas_map
-        bboxes = clip_box(bboxes, [0,0,1 + img_shape[1], img_shape[0]], 0.25)
+        bboxes = clip_box(bboxes, np.array([0,0,1 + img_shape[1], img_shape[0]]), 0.25)
     
     
         return img, map, bboxes
@@ -248,7 +248,7 @@ class Scale(object):
 
         img = canvas
         map = canvas_map
-        bboxes = clip_box(bboxes, [0,0,1 + img_shape[1], img_shape[0]], 0.25)
+        bboxes = clip_box(bboxes, np.array([0,0,1 + img_shape[1], img_shape[0]]), 0.25)
 
     
         return img, map, bboxes
@@ -337,7 +337,7 @@ class RandomTranslate(object):
         bboxes[:,:4] += [corner_x, corner_y, corner_x, corner_y]
         
         
-        bboxes = clip_box(bboxes, [0,0,img_shape[1], img_shape[0]], 0.25)
+        bboxes = clip_box(bboxes, np.array([0,0,img_shape[1], img_shape[0]]), 0.25)
         
     
         
@@ -420,7 +420,7 @@ class Translate(object):
         bboxes[:,:4] += [corner_x, corner_y, corner_x, corner_y]
         
         
-        bboxes = clip_box(bboxes, [0,0,img_shape[1], img_shape[0]], 0.25)
+        bboxes = clip_box(bboxes, np.array([0,0,img_shape[1], img_shape[0]]), 0.25)
         
 
         
@@ -496,7 +496,7 @@ class RandomRotate(object):
     
         bboxes  = new_bbox
     
-        bboxes = clip_box(bboxes, [0,0,w, h], 0.25)
+        bboxes = clip_box(bboxes, np.array([0,0,w, h]), 0.25)
     
         return img, map, bboxes
 
@@ -574,7 +574,7 @@ class Rotate(object):
         
         bboxes  = new_bbox
 
-        bboxes = clip_box(bboxes, [0,0,w, h], 0.25)
+        bboxes = clip_box(bboxes, np.array([0,0,w, h]), 0.25)
         
         return img, map, bboxes
 
