@@ -516,16 +516,30 @@ class attention_module_multi_head_RN_cls(torch.nn.Module):
         delta_x[delta_x.abs() < 1e-3] = 1e-3
         delta_x = torch.log(delta_x.abs())
 
+        if torch.isnan(delta_x).any():
+            pdb.set_trace()
+
         delta_y = center_y.repeat(1, xmin.size(0)) - torch.transpose(center_y, 1, 0).repeat(xmin.size(0), 1)
         delta_y = torch.div(delta_y, bbox_height)
         delta_y[delta_y.abs() < 1e-3] = 1e-3
         delta_y = torch.log(delta_y.abs())
 
+        if torch.isnan(delta_y).any():
+            pdb.set_trace()
+
         delta_width = torch.div(bbox_width, torch.transpose(bbox_width, 1, 0))
+        delta_width[delta_width.abs() < 1e-3] = 1e-3
         delta_width = torch.log(delta_width)
 
+        if torch.isnan(delta_width).any():
+            pdb.set_trace()
+
         delta_height = torch.div(bbox_height, torch.transpose(bbox_height, 1, 0))
+        delta_height[delta_height.abs() < 1e-3] = 1e-3
         delta_height = torch.log(delta_height)
+
+        if torch.isnan(delta_height).any():
+            pdb.set_trace()
 
         # len(concat_list)=4, each element is of [num_boxes, num_boxes]
         concat_list = [delta_x, delta_y, delta_width, delta_height]
@@ -647,20 +661,25 @@ class Wildcat_WK_hd_gs_compf_cls_att_A(torch.nn.Module):
 
             # self.embed_grid_feature = torch.nn.Conv2d(num_features, 1024, kernel_size=1, stride=1, padding=0, bias=True)
             # self.embed_grid_feature = torch.nn.Linear(model_gd.layer4[1].conv1.in_channels, 1024, bias=True)
+
+            feature_dim = FEATURE_DIM
             if self.normalize_feature==True:
                 self.embed_grid_feature = torch.nn.Sequential(
-                    torch.nn.Conv2d(num_features, 1024, kernel_size=1, stride=1, padding=0, bias=True),
+                    torch.nn.Conv2d(num_features, feature_dim, kernel_size=1, stride=1, padding=0, bias=True),
+                    # torch.nn.Conv2d(num_features, 1024, kernel_size=1, stride=1, padding=0, bias=True),
                     torch.nn.Sigmoid()
                     # torch.nn.ReLU(inplace=True)
                 )
             else:
                 self.embed_grid_feature = torch.nn.Sequential(
-                    torch.nn.Conv2d(num_features, 1024, kernel_size=1, stride=1, padding=0, bias=True),
+                    torch.nn.Conv2d(num_features, feature_dim, kernel_size=1, stride=1, padding=0, bias=True),
+                    # torch.nn.Conv2d(num_features, 1024, kernel_size=1, stride=1, padding=0, bias=True),
                     # torch.nn.Sigmoid()
                     torch.nn.ReLU(inplace=True)
                 )
 
-        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=1024, fc_dim=1, group=1, cls_num=n_classes)
+        # self.relation_net = attention_module_multi_head_RN_cls(feat_dim=1024, fc_dim=1, group=1, cls_num=n_classes)
+        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=feature_dim, dim=[feature_dim]*3, fc_dim=1, group=1, cls_num=n_classes)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         # self.to_cw_feature_size = torch.nn.Upsample(size=(14, 14))
@@ -678,7 +697,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A(torch.nn.Module):
             sampling_ratio=2)
 
         resolution = self.box_roi_pool.output_size[0]
-        representation_size = 1024
+        # representation_size = 1024
+        representation_size = feature_dim
         out_channels = 256
         if self.normalize_feature==True:
             self.box_head = TwoMLPHead_my(

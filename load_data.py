@@ -444,21 +444,28 @@ class MS_COCO_map_full_aug(Dataset):
         #                     RandomShear(0.05)]
         #                    ) # _aug3
 
-        # self.seq = Sequence([#RandomHSV(10, 10, 10),
-        #                      RandomHorizontalFlip(), #p=0.5
-        #                      RandomScale(0.1, diff=True),
-        #                      RandomTranslate(0.1, diff=True),
-        #                      RandomRotate(5)], [0.2,0.2,0.2,0.2]
-        #                      #RandomShear(0.1)]
-        #                     ) # _aug4
+        #self.seq = Sequence([#RandomHSV(10, 10, 10),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.1, diff=True),
+        #                     RandomTranslate(0.1, diff=True),
+        #                     RandomRotate(5)], [0.2,0.2,0.2,0.2]
+        #                     #RandomShear(0.1)]
+        #                    ) # _aug4
 
-        self.seq = Sequence([RandomHSV(5, 5, 5),
-                            RandomHorizontalFlip(), #p=0.5
-                            RandomScale(0.1, diff=True),
-                            RandomTranslate(0.1, diff=True),
-                            RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
-                            #RandomShear(0.1)]
-                           ) # _aug5
+        #self.seq = Sequence([RandomHSV(5, 5, 5),
+        #                    RandomHorizontalFlip(), #p=0.5
+        #                    RandomScale(0.1, diff=True),
+        #                    RandomTranslate(0.1, diff=True),
+        #                    RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
+        #                    #RandomShear(0.1)]
+        #                   ) # _aug5
+
+        #self.seq = RandomHorizontalFlip() # _aug6
+        self.seq = RandomRotate(5) # _aug7
+        # self.seq = RandomRotate(10) # _aug7_2
+        # self.seq = RandomScale(0.1, diff=True) # _aug8
+        # self.seq = RandomScale(0.01, diff=True) # _aug8_2
+
 
         # if mode=='train':
         #     random.shuffle(self.list_names)
@@ -501,10 +508,25 @@ class MS_COCO_map_full_aug(Dataset):
             # if boxes_.min()<0:
             #     pdb.set_trace()
 
+            #np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            #np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            #np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            #np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+
+            #boxes_[boxes_[:, 0] < 0., 0] = 0.
+            #boxes_[boxes_[:, 0] > image.shape[1], 0] = image.shape[1]
+            #boxes_[boxes_[:, 2] < boxes_[:, 0], 2] = boxes_[:, 0]
+            #boxes_[boxes_[:, 2] > image.shape[1], 2] = image.shape[1]
+
+            #boxes_[boxes_[:, 1] < 0., 1] = 0.
+            #boxes_[boxes_[:, 1] > image.shape[0], 1] = image.shape[0]
+            #boxes_[boxes_[:, 3] < boxes_[:, 1], 3] = boxes_[:, 1]
+            #boxes_[boxes_[:, 3] > image.shape[0], 3] = image.shape[0]
+
             np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
             np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
-            np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
-            np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+            boxes_[:, 1] = np.minimum(np.maximum(boxes_[:, 0], boxes_[:, 1]), image.shape[0])
+            boxes_[:, 3] = np.minimum(np.maximum(boxes_[:, 2], boxes_[:, 3]), image.shape[0])
 
             boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
             boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
@@ -797,10 +819,25 @@ class ILSVRC_map_full_aug_wrong(Dataset):
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
 
+            # np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            # np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            # np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            # np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+
+            # boxes_[boxes_[:, 0] < 0., 0] = 0.
+            # boxes_[boxes_[:, 0] > image.shape[1], 0] = image.shape[1]
+            # boxes_[boxes_[:, 2] < boxes_[:, 0], 2] = boxes_[:, 0]
+            # boxes_[boxes_[:, 2] > image.shape[1], 2] = image.shape[1]
+
+            # boxes_[boxes_[:, 1] < 0., 1] = 0.
+            # boxes_[boxes_[:, 1] > image.shape[0], 1] = image.shape[0]
+            # boxes_[boxes_[:, 3] < boxes_[:, 1], 3] = boxes_[:, 1]
+            # boxes_[boxes_[:, 3] > image.shape[0], 3] = image.shape[0]
+
             np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
             np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
-            np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
-            np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+            boxes_[:, 1] = np.minimum(np.maximum(boxes_[:, 0], boxes_[:, 1]), image.shape[0])
+            boxes_[:, 3] = np.minimum(np.maximum(boxes_[:, 2], boxes_[:, 3]), image.shape[0])
 
             boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
             boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
@@ -1089,10 +1126,25 @@ class ILSVRC_map_full_aug(Dataset):
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
 
+            # np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            # np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            # np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            # np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+
+            # boxes_[boxes_[:, 0] < 0., 0] = 0.
+            # boxes_[boxes_[:, 0] > image.shape[1], 0] = image.shape[1]
+            # boxes_[boxes_[:, 2] < boxes_[:, 0], 2] = boxes_[:, 0]
+            # boxes_[boxes_[:, 2] > image.shape[1], 2] = image.shape[1]
+
+            # boxes_[boxes_[:, 1] < 0., 1] = 0.
+            # boxes_[boxes_[:, 1] > image.shape[0], 1] = image.shape[0]
+            # boxes_[boxes_[:, 3] < boxes_[:, 1], 3] = boxes_[:, 1]
+            # boxes_[boxes_[:, 3] > image.shape[0], 3] = image.shape[0]
+
             np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
             np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
-            np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
-            np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+            boxes_[:, 1] = np.minimum(np.maximum(boxes_[:, 0], boxes_[:, 1]), image.shape[0])
+            boxes_[:, 3] = np.minimum(np.maximum(boxes_[:, 2], boxes_[:, 3]), image.shape[0])
 
             boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
             boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
