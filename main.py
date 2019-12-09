@@ -981,7 +981,7 @@ def test_Wildcat_WK_hd_compf(model, folder_name, best_model_file, dataloader, ar
         model.cuda()
     model.eval()
 
-    out_folder = os.path.join(args.path_out, folder_name, best_model_file)
+    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'salgan')
 
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
