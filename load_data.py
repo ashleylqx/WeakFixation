@@ -1079,13 +1079,15 @@ class ILSVRC_map_full_aug(Dataset):
             self.list_names = list_names[:N]
             self.labels = labels[:N]
 
-        self.seq = Sequence([RandomHSV(10, 10, 10),
-                             RandomHorizontalFlip(),  # p=0.5
-                             RandomScale(0.05, diff=True),
-                             RandomTranslate(0.05, diff=True),
-                             RandomRotate(5),
-                             RandomShear(0.05)]
-                            )  # _aug3
+        # self.seq = Sequence([RandomHSV(10, 10, 10),
+        #                      RandomHorizontalFlip(),  # p=0.5
+        #                      RandomScale(0.05, diff=True),
+        #                      RandomTranslate(0.05, diff=True),
+        #                      RandomRotate(5),
+        #                      RandomShear(0.05)]
+        #                     )  # _aug3
+
+        self.seq = RandomRotate(5)  # _aug7
 
         # if mode=='train':
         #     random.shuffle(self.list_names)
