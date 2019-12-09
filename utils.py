@@ -65,7 +65,7 @@ def postprocess_prediction_salgan(prediction, size=None):
 
     blur_size = 5
     # resize back to original size
-    saliency_map = cv2.resize(saliency_map, size, interpolation=cv2.INTER_CUBIC)
+    saliency_map = cv2.resize(saliency_map, (size[1], size[0]), interpolation=cv2.INTER_CUBIC)
     # blur
     saliency_map = cv2.GaussianBlur(saliency_map, (blur_size, blur_size), 0)
     # clip again
