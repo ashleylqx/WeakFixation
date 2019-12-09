@@ -76,6 +76,7 @@ n_gaussian_A = 16# default 8
 
 rn_emb_dim=64 # default 64
 
+
 # graph network
 embed_dim = 128
 
