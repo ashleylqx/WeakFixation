@@ -9,7 +9,7 @@ import math
 import scipy.misc
 
 import torch
-torch.cuda.set_device(0)
+# torch.cuda.set_device(0)
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
