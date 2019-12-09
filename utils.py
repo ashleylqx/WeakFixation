@@ -26,6 +26,7 @@ def postprocess_prediction(prediction, size=None):
     returns:
         numpy array with saliency map normalized 0-255 (int8)
     """
+    prediction = prediction - np.min(prediction)
     print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
     if np.max(prediction) != 0:
         saliency_map = (prediction/np.max(prediction) * 255).astype(np.uint8)
@@ -63,7 +64,7 @@ def postprocess_prediction_salgan(prediction, size=None):
     print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
     saliency_map = (prediction * 255).astype(np.uint8)
 
-    blur_size = 5
+    blur_size = 7
     # resize back to original size
     saliency_map = cv2.resize(saliency_map, (size[1], size[0]), interpolation=cv2.INTER_CUBIC)
     # blur
