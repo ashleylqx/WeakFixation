@@ -51,6 +51,28 @@ def postprocess_prediction(prediction, size=None):
 
     return saliency_map
 
+def postprocess_prediction_salgan(prediction, size=None):
+    """
+    Postprocess saliency maps by resizing and applying gaussian blurringself.
+    args:
+        prediction: numpy array with saliency postprocess_prediction
+        size: original (H,W) of the image
+    returns:
+        numpy array with saliency map normalized 0-255 (int8)
+    """
+    print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
+    saliency_map = (prediction * 255).astype(np.uint8)
+
+    blur_size = 5
+    # resize back to original size
+    saliency_map = cv2.resize(saliency_map, size, interpolation=cv2.INTER_CUBIC)
+    # blur
+    saliency_map = cv2.GaussianBlur(saliency_map, (blur_size, blur_size), 0)
+    # clip again
+    saliency_map = np.clip(saliency_map, 0, 255)
+
+    return saliency_map
+
 # preserve aspect ratio
 def postprocess_hd_prediction(prediction, size=None):
     """
