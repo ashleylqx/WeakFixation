@@ -61,6 +61,8 @@ def postprocess_prediction_salgan(prediction, size=None):
     returns:
         numpy array with saliency map normalized 0-255 (int8)
     """
+    prediction = prediction - np.min(prediction)
+
     print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
     saliency_map = (prediction * 255).astype(np.uint8)
 
