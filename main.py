@@ -2757,7 +2757,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
         for i_epoch in range(args.n_epochs):
             train_Wildcat_WK_hd_compf_map_bst(i_epoch, model, model_aux, optimizer, logits_loss, h_loss,
-                                              train_dataloader, args)
+                                              train_dataloader, args, model_name)
 
             tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             # tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss, eval_map_dataloader, args)
