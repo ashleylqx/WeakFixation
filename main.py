@@ -34,9 +34,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 1.0 # 0.1#
+hth_weight =  0.1#1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 1.0 #0.1 #
+rf_weight = 0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -47,8 +47,8 @@ rf_weight = 1.0 #0.1 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
-run = 'hd_gs_A{}_alt2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
-# run = 'hd_gs_A{}_sup2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
+# run = 'hd_gs_A{}_alt2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
+run = 'hd_gs_A{}_sup2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normNd_eb_sm_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normNd_eb_sm1_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_smb_a'.format(n_gaussian) # 1.0
@@ -81,6 +81,9 @@ run = 'hd_gs_A{}_alt2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MA
 print('log dir: {}'.format(os.path.join(PATH_LOG, run)))
 
 writer = SummaryWriter(os.path.join(PATH_LOG, run))
+#  tensorboard --logdir=/raid/QX/WF/log --port=6000 # will display all the subfolders within it
+#  ssh -NfL or -L localhost:8898:localhost:6000 hz1@172.31.20.57 # at local pc
+#  https://127.0.0.1:8898 # local explorer
 
 
 def train_Wildcat_WK_hd_compf_map(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
@@ -676,7 +679,7 @@ def train_Wildcat_WK_hd_compf_map_sup_alpha(epoch, model, model_aux, optimizer, 
         # if epoch > 0:
         _, _, aux_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
-        rf_maps = ALPHA*aux_maps + (1-ALPHA)*(prior_maps.unsqueeze(1))
+        rf_maps = ALPHA*aux_maps.detach().squeeze() + (1-ALPHA)*prior_maps
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -692,7 +695,7 @@ def train_Wildcat_WK_hd_compf_map_sup_alpha(epoch, model, model_aux, optimizer, 
         #     rf_losses = 0. * info_loss(pred_maps.squeeze(1))
 
         rf_losses = rf_weight * torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0),
-                                                  torch.clamp(rf_maps.detach().squeeze(), min=0.0, max=1.0))
+                                                  torch.clamp(rf_maps, min=0.0, max=1.0))
 
         losses.backward(retain_graph=True)
         cps_losses.backward(retain_graph=True)
