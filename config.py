@@ -1,5 +1,6 @@
 # base_path = '/home/qx/'
-base_path = '/home/hz1/QX/'
+# base_path = '/home/hz1/QX/'
+base_path = '/research/dept2/qxlai/'
 # base_path = '/raid/QX/'
 
 
@@ -25,7 +26,8 @@ eval_log_interval = 100
 test_log_interval = 20
 
 tb_log_interval = 50
-PATH_LOG = base_path + 'WF/log/'
+PATH_LOG = base_path + 'tbx_log/'
+# PATH_LOG = base_path + 'WF/log/'
 # SALICON
 PATH_SALICON = base_path + 'DataSets/SALICON/'
 bgr_mean = [103.939, 116.779, 123.68]
@@ -86,6 +88,6 @@ augment_range = int(6./augment_ratio)+1
 
 scales = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
 
-MAX_BNUM = 50 #100 # 50 for all the augs
+MAX_BNUM = 100 #100 # 50 for all the augs
 
 FEATURE_DIM = 1024 #128 #256 #512 # 1024
