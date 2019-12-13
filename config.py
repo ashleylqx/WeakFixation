@@ -1,7 +1,7 @@
 # base_path = '/home/qx/'
 # base_path = '/home/hz1/QX/'
-base_path = '/research/dept2/qxlai/'
-# base_path = '/raid/QX/'
+# base_path = '/research/dept2/qxlai/'
+base_path = '/raid/QX/'
 
 
 input_h = 224 #224
@@ -26,8 +26,8 @@ eval_log_interval = 100
 test_log_interval = 20
 
 tb_log_interval = 50
-PATH_LOG = base_path + 'tbx_log/'
-# PATH_LOG = base_path + 'WF/log/'
+# PATH_LOG = base_path + 'tbx_log/'
+PATH_LOG = base_path + 'WF/log/'
 # SALICON
 PATH_SALICON = base_path + 'DataSets/SALICON/'
 bgr_mean = [103.939, 116.779, 123.68]
