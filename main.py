@@ -3555,7 +3555,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        e_num = 6  # 1 2 3 5 6
+        e_num = 7  # 1 2 3 5 6
         # best_model_file = 'resnet50_wildcat_wk_epoch%02d'%e_num
         # best_model_file = 'resnet101_wildcat_wk_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_448_ms_epoch{:02d}'.format(
         #     kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
