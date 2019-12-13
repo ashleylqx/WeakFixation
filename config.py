@@ -71,7 +71,7 @@ PATH_TINY_I = base_path + 'DataSets/tiny-imagenet'
 
 # image mixed with mask
 # rf_maps = alpha * aux_map + (1-alpha)*prior_map
-ALPHA = 0.85
+ALPHA = 0.95
 
 n_gaussian = 16# default 8
 n_gaussian_A = 16# default 8
