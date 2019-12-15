@@ -34,9 +34,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.1#1.0 #
+hth_weight = 0.05 #0.1#1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.1 #1.0 #
+rf_weight = 0.05 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -48,7 +48,7 @@ rf_weight = 0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_bst_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
-run = 'hd_gs_A{}_alt2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
+run = 'hd_gs_A{}_alt3_{}_gd_nf4_normF_eb_{}_aug7_2_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normNd_eb_sm_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normNd_eb_sm1_a'.format(n_gaussian) # 1.0
@@ -1412,7 +1412,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test'
+    phase = 'train_alt_alpha'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -2130,7 +2130,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     elif phase == 'train_alt_alpha':
         print('lr %.4f' % args.lr)
 
-        #########################################3
+        #########################################
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_G(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=False)
@@ -2206,7 +2206,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                                 hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
         # Note that _4 and _5 go not have res in rn, but _, _2, _3 have ###############################################3
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_2_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt3_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_2_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
             n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature,
             dilate)  # _gcn_all
 
