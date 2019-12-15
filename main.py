@@ -34,9 +34,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.1 #0.1#1.0 #
+hth_weight = 1.0 #0.1 #0.1#
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.1 #0.1 #1.0 #
+rf_weight = 1.0 #0.1 #0.1 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -48,7 +48,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_bst_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
-run = 'hd_gs_A{}_alt3_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
+# run = 'hd_gs_A{}_alt3_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normNd_eb_sm_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normNd_eb_sm1_a'.format(n_gaussian) # 1.0
@@ -70,8 +70,8 @@ run = 'hd_gs_A{}_alt3_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MA
 # run = 'hd_cbA{}_M4_tgt{}_hth{}_rf{}_ils_eb_pll'.format(n_gaussian, ilsvrc_num_tgt_classes, hth_weight, rf_weight)
 # run = 'hd_cbA{}_M4_tgt{}_hth{}_rf{}_ils_eb_pll_one5'.format(n_gaussian, ilsvrc_num_tgt_classes, hth_weight, rf_weight)
 
-# run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a'.format(n_gaussian,
-#                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM) # 1.0
+run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a'.format(n_gaussian,
+                        ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM) # 1.0
 
 # run = 'hd_cbA{}_M2_hth{}_rf{}_ils_eb_pll'.format(n_gaussian, hth_weight, rf_weight)
 
@@ -1412,7 +1412,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'train_alt_alpha'
+    phase = 'train_ils_tgt_aug'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -3660,7 +3660,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=44*torch.cuda.device_count(), # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=48*torch.cuda.device_count(), # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,

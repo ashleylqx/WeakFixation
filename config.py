@@ -58,7 +58,7 @@ coco_num_classes = 91
 PATH_ILSVRC = base_path + 'DataSets/ILSVRC2012/'
 
 ilsvrc_num_classes = 1000
-ilsvrc_num_tgt_classes = 124 # 85 124 169 207
+ilsvrc_num_tgt_classes = 108 # 85 124 169 207
 # ILSVRC_TGT_CLS = [49, 91, 122, 131, 149, 333]
 ILSVRC_TGT_CLS = [207, 176, 169, 140, 130, 124, 116, 108, 85]
 
