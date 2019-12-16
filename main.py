@@ -34,9 +34,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 1.0 #0.1 #0.1#
+hth_weight = 0.1 #0.1#1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 1.0 #0.1 #0.1 #
+rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
