@@ -548,6 +548,171 @@ class MS_COCO_map_full_aug(Dataset):
         else:
             return img_processed, label, boxes_, sal_processed
 
+class MS_COCO_map_full_aug_sf(Dataset):
+    def __init__(self, mode='train', return_path=False, N=None, prior = 'nips08',
+                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
+
+        self.path_dataset = PATH_COCO
+        self.path_images = os.path.join(self.path_dataset, mode+'2014')
+        # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
+        # self.path_features = os.path.join(self.path_dataset, 'features', mode)
+        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_eb500')
+
+        self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s'%prior)
+        self.return_path = return_path
+
+        self.img_h = img_h
+        self.img_w = img_w
+
+        # self.normalize_feature = normalize_feature
+
+        # get list images
+        list_names = os.listdir(self.path_images)
+        list_names = np.array([n.split('.')[0] for n in list_names])
+        # list_names = os.listdir(self.edge_boxes)
+        # list_names = np.array([n.split('.')[0][:-7] for n in list_names])
+        self.list_names = list_names
+
+        if N is not None:
+            self.list_names = list_names[:N]
+
+
+        # self.coco = COCO(os.path.join(PATH_COCO, 'annotations', 'instances_%s2014.json'%mode))
+        self.imgNsToCat = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_{}.p'.format(mode)), "rb"))
+
+        #self.seq = Sequence([RandomHSV(40, 40, 40),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.2, diff=True),
+        #                     RandomTranslate(0.2, diff=True),
+        #                     RandomRotate(10),
+        #                     RandomShear(0.2)]
+        #                    ) # 1st attempt _aug
+
+        # self.seq = Sequence([RandomHSV(20, 20, 20),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.1, diff=True),
+        #                     RandomTranslate(0.1, diff=True),
+        #                     RandomRotate(10),
+        #                     RandomShear(0.1)]
+        #                    ) # 2nd attempt _aug2
+
+        #self.seq = Sequence([RandomHSV(10, 10, 10),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.05, diff=True),
+        #                     RandomTranslate(0.05, diff=True),
+        #                     RandomRotate(5),
+        #                     RandomShear(0.05)]
+        #                    ) # _aug3
+
+        #self.seq = Sequence([#RandomHSV(10, 10, 10),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.1, diff=True),
+        #                     RandomTranslate(0.1, diff=True),
+        #                     RandomRotate(5)], [0.2,0.2,0.2,0.2]
+        #                     #RandomShear(0.1)]
+        #                    ) # _aug4
+
+        #self.seq = Sequence([RandomHSV(5, 5, 5),
+        #                    RandomHorizontalFlip(), #p=0.5
+        #                    RandomScale(0.1, diff=True),
+        #                    RandomTranslate(0.1, diff=True),
+        #                    RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
+        #                    #RandomShear(0.1)]
+        #                   ) # _aug5
+
+        #self.seq = RandomHorizontalFlip() # _aug6
+        self.seq = RandomRotate(5) # _aug7
+        # self.seq = RandomRotate(10) # _aug7_2
+        # self.seq = RandomScale(0.1, diff=True) # _aug8
+        # self.seq = RandomScale(0.01, diff=True) # _aug8_2
+
+
+        # if mode=='train':
+        #     random.shuffle(self.list_names)
+
+        # embed()
+        print("Init MS_COCO full dataset in mode {}".format(mode))
+        print("\t total of {} images.".format(self.list_names.shape[0]))
+
+    def __len__(self):
+        return self.list_names.shape[0]
+
+    def __getitem__(self, index):
+
+        # Image and saliency map paths
+        rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
+        sal_path = os.path.join(self.path_saliency, self.list_names[index] + '.png')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
+
+        image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
+        saliency = cv2.imread(sal_path, 0)
+        tmp_boxes = scipy.io.loadmat(box_path)['bboxes']
+        if tmp_boxes.shape[0] > MAX_BNUM:
+            box_indices = random.sample(population=range(tmp_boxes.shape[0]), k=MAX_BNUM)
+            boxes = tmp_boxes[box_indices, :]
+        else:
+            boxes = tmp_boxes
+
+        if boxes.shape[0]==0:
+            img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
+            boxes_ = np.zeros_like(boxes)
+            boxes_[:, 0] = boxes[:, 0] * self.img_w
+            boxes_[:, 2] = boxes[:, 2] * self.img_w
+            boxes_[:, 1] = boxes[:, 1] * self.img_h
+            boxes_[:, 3] = boxes[:, 3] * self.img_h
+        else:
+            boxes[:, 0] = boxes[:, 0] * image.shape[1]
+            boxes[:, 2] = boxes[:, 2] * image.shape[1]
+            boxes[:, 1] = boxes[:, 1] * image.shape[0]
+            boxes[:, 3] = boxes[:, 3] * image.shape[0]
+
+            image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
+
+            img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
+
+            # if boxes_.min()<0:
+            #     pdb.set_trace()
+
+            #np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            #np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            #np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            #np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+
+            #boxes_[boxes_[:, 0] < 0., 0] = 0.
+            #boxes_[boxes_[:, 0] > image.shape[1], 0] = image.shape[1]
+            #boxes_[boxes_[:, 2] < boxes_[:, 0], 2] = boxes_[:, 0]
+            #boxes_[boxes_[:, 2] > image.shape[1], 2] = image.shape[1]
+
+            #boxes_[boxes_[:, 1] < 0., 1] = 0.
+            #boxes_[boxes_[:, 1] > image.shape[0], 1] = image.shape[0]
+            #boxes_[boxes_[:, 3] < boxes_[:, 1], 3] = boxes_[:, 1]
+            #boxes_[boxes_[:, 3] > image.shape[0], 3] = image.shape[0]
+
+            np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            boxes_[:, 1] = np.minimum(np.maximum(boxes_[:, 0], boxes_[:, 1]), image.shape[0])
+            boxes_[:, 3] = np.minimum(np.maximum(boxes_[:, 2], boxes_[:, 3]), image.shape[0])
+
+            boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
+            boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
+            boxes_[:, 1] = boxes_[:, 1] / image.shape[0] * self.img_h
+            boxes_[:, 3] = boxes_[:, 3] / image.shape[0] * self.img_h
+
+        # get coco label
+        label_indices = self.imgNsToCat[self.list_names[index]]
+        # label_indices = self.coco.imgNsToCat[self.list_names[index]]
+        label = torch.zeros(coco_num_classes)
+        if len(label_indices)>0:
+            label[label_indices] = 1
+        else:
+            label[0] = 1
+
+
+        if self.return_path:
+            return img_processed, label, boxes_, sal_processed, self.list_names[index]
+        else:
+            return img_processed, label, boxes_, sal_processed
+
 # if num_tgt_cls is not None, use collate_coco since its also multi_label
 class ILSVRC_full_wrong(Dataset):
     def __init__(self, mode='train', return_path=False, N=None,
