@@ -2080,9 +2080,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A_sm12(torch.nn.Module):
             # model = resnet50_dilate()
             # model = resnet50_dilate_one()
             # model = resnet50_dilate_one2()
-            # model = resnet50_dilate_one3()
+            model = resnet50_dilate_one3()
             # model = resnet50_dilate_one4()
-            model = resnet50_dilate_one5()
+            # model = resnet50_dilate_one5()
 
         else:
             model = models.resnet50(pretrained=False)
