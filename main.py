@@ -45,8 +45,8 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_sm_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_sm_aug2_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_bst_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
@@ -1416,7 +1416,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         os.makedirs(path_models)
 
     # phase = 'test'
-    phase = 'train_aug_sf'
+    phase = 'train_aug'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -3865,7 +3865,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=52*torch.cuda.device_count(), # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=24*torch.cuda.device_count(), #52 # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
