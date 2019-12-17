@@ -72,7 +72,7 @@ PATH_TINY_I = base_path + 'DataSets/tiny-imagenet'
 
 # image mixed with mask
 # rf_maps = alpha * aux_map + (1-alpha)*prior_map
-ALPHA = 0.25
+ALPHA = 0.95
 
 n_gaussian = 16# default 8
 n_gaussian_A = 16# default 8
@@ -89,6 +89,6 @@ augment_range = int(6./augment_ratio)+1
 
 scales = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
 
-MAX_BNUM = 50 #100 # 50 for all the augs
+MAX_BNUM = 100 #100 # 50 for all the augs
 
 FEATURE_DIM = 1024 #128 #256 #512 # 1024

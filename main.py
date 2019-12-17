@@ -45,7 +45,8 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_sm_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_sm_aug2_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_a'.format(n_gaussian, MAX_BNUM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_bst_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
@@ -1414,8 +1415,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test'
-    # phase = 'train_aug_sf'
+    # phase = 'test'
+    phase = 'train_aug'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -1849,7 +1850,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         model = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
         # # #
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_2_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
         #
         # prior = 'nips08'
@@ -2247,6 +2248,11 @@ def main_Wildcat_WK_hd_compf_map(args):
                                                      normalize_feature=normf)
 
         if normf == True:
+            # one5 0。95
+            checkpoint = torch.load(os.path.join(path_models,
+                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch03.pt').format(
+                n_gaussian, normf))  # checkpoint is a dict, containing much info
+
             # 0.50
             # checkpoint = torch.load(os.path.join(path_models,
             #     'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
@@ -2257,9 +2263,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch04.pt').format(
             #     n_gaussian, ALPHA, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
 
-            checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch05.pt').format(
-                n_gaussian, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(path_models,
+            #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch05.pt').format(
+            #     n_gaussian, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
 
             # checkpoint = torch.load(os.path.join(path_models,
             #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch00.pt').format(
@@ -3859,7 +3865,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=52*torch.cuda.device_count(), # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=26*torch.cuda.device_count(), # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
