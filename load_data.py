@@ -647,11 +647,17 @@ class MS_COCO_map_full_aug_sf(Dataset):
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
         saliency = cv2.imread(sal_path, 0)
         tmp_boxes = scipy.io.loadmat(box_path)['bboxes']
-        if tmp_boxes.shape[0] > MAX_BNUM:
-            box_indices = random.sample(population=range(tmp_boxes.shape[0]), k=MAX_BNUM)
+        if tmp_boxes.shape[0]//2 > MAX_BNUM:
+            box_indices = random.sample(population=range(tmp_boxes.shape[0]//2), k=MAX_BNUM)
             boxes = tmp_boxes[box_indices, :]
         else:
-            boxes = tmp_boxes
+            boxes = tmp_boxes[:tmp_boxes.shape[0]//2, :]
+
+        # if tmp_boxes.shape[0] > MAX_BNUM:
+        #     box_indices = random.sample(population=range(tmp_boxes.shape[0]), k=MAX_BNUM)
+        #     boxes = tmp_boxes[box_indices, :]
+        # else:
+        #     boxes = tmp_boxes
 
         if boxes.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
