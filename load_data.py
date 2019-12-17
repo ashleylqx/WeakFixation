@@ -647,8 +647,8 @@ class MS_COCO_map_full_aug_sf(Dataset):
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
         saliency = cv2.imread(sal_path, 0)
         tmp_boxes = scipy.io.loadmat(box_path)['bboxes']
-        if tmp_boxes.shape[0] >= 150 and 150 > MAX_BNUM:
-            box_indices = random.sample(population=range(150), k=MAX_BNUM)
+        if min(tmp_boxes.shape[0], 150) > MAX_BNUM:
+            box_indices = random.sample(population=range(min(tmp_boxes.shape[0], 150)), k=MAX_BNUM)
             boxes = tmp_boxes[box_indices, :]
         else:
             boxes = tmp_boxes[:MAX_BNUM, :]
