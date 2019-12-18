@@ -26,7 +26,7 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
                 Wildcat_WK_hd_gs_compf_cls_att_A_sm, Wildcat_WK_hd_gs_compf_cls_att_A2,\
                 Wildcat_WK_hd_gs_compf_cls_att_A2_sm12, Wildcat_WK_hd_gs_compf_cls_att_A_sm12,\
                 Wildcat_WK_hd_gs_compf_cls_att_A3, Wildcat_WK_hd_gs_compf_cls_att_A3_sm12,\
-                Wildcat_WK_hd_gs_compf_cls_att_A4
+                Wildcat_WK_hd_gs_compf_cls_att_A4, Wildcat_WK_hd_gs_compf_cls_att_A5
 
 from custom_loss import HLoss_th
 from config import *
