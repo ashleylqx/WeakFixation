@@ -2756,18 +2756,18 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4(torch.nn.Module):
             extra_blocks=LastLevelMaxPool(),
         )
 
-        if self.normalize_feature==True:
-            self.embed_grid_feature = torch.nn.Sequential(
-                torch.nn.Linear(out_channels * resolution ** 2, FEATURE_DIM, bias=True),
-                torch.nn.Sigmoid()
-                # torch.nn.ReLU(inplace=True)
-            )
-        else:
-            self.embed_grid_feature = torch.nn.Sequential(
-                torch.nn.Linear(out_channels * resolution ** 2, FEATURE_DIM, bias=True),
-                # torch.nn.Sigmoid()
-                torch.nn.ReLU(inplace=True)
-            )
+        # if self.normalize_feature==True:
+        #     self.embed_grid_feature = torch.nn.Sequential(
+        #         torch.nn.Linear(out_channels * resolution ** 2, FEATURE_DIM, bias=True),
+        #         torch.nn.Sigmoid()
+        #         # torch.nn.ReLU(inplace=True)
+        #     )
+        # else:
+        #     self.embed_grid_feature = torch.nn.Sequential(
+        #         torch.nn.Linear(out_channels * resolution ** 2, FEATURE_DIM, bias=True),
+        #         # torch.nn.Sigmoid()
+        #         torch.nn.ReLU(inplace=True)
+        #     )
         # self.cuda_num = torch.cuda.device_count()
 
     def forward(self, img, boxes, boxes_nums):  # img size 224
@@ -2799,7 +2799,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4(torch.nn.Module):
         boxes_per_image = [len(boxes_in_image) for boxes_in_image in boxes_list]
         box_feature = processed_features.split(boxes_per_image, 0)
 
-        pdb.set_trace()
+        # pdb.set_trace()
         # print('box_feature[0]', box_feature[0].max(), box_feature[0].min())
 
         if self.use_grid:
@@ -2807,7 +2807,15 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4(torch.nn.Module):
             # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
 
             # x = self.features(img.detach())
-            box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
+            # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
+            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
+            if FEATURE_DIM==256:
+                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
+            elif FEATURE_DIM==1024:
+                box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2']),
+                                              self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                                             dim=1).permute(0, 2, 3, 1)
+
             box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
 
             if self.normalize_feature=='Ndiv':

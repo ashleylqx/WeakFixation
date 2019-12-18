@@ -91,4 +91,4 @@ scales = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
 
 MAX_BNUM = 50 #100 # 50 for all the augs
 
-FEATURE_DIM = 1024 #128 #256 #512 # 1024
+FEATURE_DIM = 256 #128 #256 #512 # 1024
