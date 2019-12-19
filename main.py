@@ -28,7 +28,7 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
                 Wildcat_WK_hd_gs_compf_cls_att_A3, Wildcat_WK_hd_gs_compf_cls_att_A3_sm12,\
                 Wildcat_WK_hd_gs_compf_cls_att_A4, Wildcat_WK_hd_gs_compf_cls_att_A5
 
-from custom_loss import HLoss_th
+from custom_loss import HLoss_th, loss_HM
 from config import *
 from utils import *
 
@@ -1423,8 +1423,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    # phase = 'test'
-    phase = 'train_aug'
+    phase = 'test'
+    # phase = 'train_aug'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -1432,7 +1432,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     fix_feature = False
     dilate = True
 
-    normf = True #'Ndiv'
+    normf = False #'Ndiv'
     # normf = 'Ndiv'
 
 

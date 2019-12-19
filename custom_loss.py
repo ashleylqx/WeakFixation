@@ -89,6 +89,24 @@ class HLoss_th(torch.nn.Module):
         b = -1.0 * b.sum(dim=-1)
         return b.mean()
 
+# modified from https://github.com/xiaoboCASIA/SV-X-Softmax/blob/master/loss.py
+def loss_HM(pred, label, save_rate=0.9, gamma=2.0):
+    # elif loss_type == 'FocalLoss':
+    #     assert (gamma >= 0)
+    #     input = F.cross_entropy(pred, label, reduce=False)
+    #     pt = torch.exp(-input)
+    #     loss = (1 - pt) ** gamma * input
+    #     loss_final = loss.mean()
+    # loss_type == 'HardMining':
+    batch_size = pred.shape[0]
+    loss = F.cross_entropy(pred, label, reduce=False)
+    ind_sorted = torch.argsort(-loss) # from big to small
+    num_saved = int(save_rate * batch_size)
+    ind_update = ind_sorted[:num_saved]
+    loss_final = torch.sum(F.cross_entropy(pred[ind_update], label[ind_update]))
+
+    return loss_final
+
 
 class Compress_percent(torch.nn.Module):
     def __init__(self):

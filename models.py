@@ -2815,12 +2815,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4(torch.nn.Module):
             elif FEATURE_DIM==512:
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
                 #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
+                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                                             dim=1).permute(0, 2, 3, 1)
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer2']), self.to_grid_size(features['layer4'])],
                 #                              dim=1).permute(0, 2, 3, 1)
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
-                                             dim=1).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
+                #                              dim=1).permute(0, 2, 3, 1)
 
             elif FEATURE_DIM==1024:
                 box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2']),
