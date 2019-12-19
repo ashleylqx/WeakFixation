@@ -49,8 +49,8 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A4_fdim{}_34_mxp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_alt2_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_alt2_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_hm_a'.format(n_gaussian, MAX_BNUM) # 1.0
@@ -1433,8 +1433,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    # phase = 'test'
-    phase = 'train_alt_alpha'
+    phase = 'test'
+    # phase = 'train_alt_alpha'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -1442,7 +1442,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     fix_feature = False
     dilate = True
 
-    normf = True #'Ndiv'
+    normf = False #'Ndiv'
     # normf = 'Ndiv'
 
 
