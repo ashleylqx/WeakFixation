@@ -7,6 +7,7 @@ import datetime
 import numpy as np
 import math
 import scipy.misc
+import pdb
 
 import torch
 # torch.cuda.set_device(0)
@@ -129,6 +130,10 @@ def train_Wildcat_WK_hd_compf_map(epoch, model, optimizer, logits_loss, info_los
         # cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
         # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(torch.sigmoid(cps_logits), gt_labels)
+
+        if torch.isnan(pred_maps).any():
+            pdb.set_trace()
+
         h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
         # print('pred_maps', pred_maps.size(), pred_maps.max(), pred_maps.min())
         # print('rf_maps', rf_maps.size(), rf_maps.max(), rf_maps.min())
