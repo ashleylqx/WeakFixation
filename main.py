@@ -2254,8 +2254,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         if normf == True:
             # A4 fdim512 layer34 0.95
             checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
-                n_gaussian, normf, FEATURE_DIM))  # checkpoint is a dict, containing much info
+                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
+                n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # # one5 0.95
             # checkpoint = torch.load(os.path.join(path_models,
