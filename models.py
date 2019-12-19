@@ -2815,11 +2815,11 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4(torch.nn.Module):
             elif FEATURE_DIM==512:
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
                 #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([torch.max_pool2d(features['layer3'], kernel_size=features['layer3'].size(2)//7),
-                #                               torch.max_pool2d(features['layer4'], kernel_size=features['layer4'].size(2)//7)],
-                #                              dim=1).permute(0, 2, 3, 1)
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                box_feature_grid = torch.cat([torch.max_pool2d(features['layer3'], kernel_size=features['layer3'].size(2)//7),
+                                              torch.max_pool2d(features['layer4'], kernel_size=features['layer4'].size(2)//7)],
                                              dim=1).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                #                              dim=1).permute(0, 2, 3, 1)
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer2']), self.to_grid_size(features['layer4'])],
                 #                              dim=1).permute(0, 2, 3, 1)
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
