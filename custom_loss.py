@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import math
+import pdb
 import torch
 import torch.nn.functional as F
 import torchvision
@@ -104,6 +105,7 @@ def loss_HM(pred, label, save_rate=0.9, gamma=2.0):
     ind_sorted = torch.argsort(-loss) # from big to small
     num_saved = int(save_rate * batch_size)
     ind_update = ind_sorted[:num_saved]
+    pdb.set_trace()
     loss_final = torch.sum(F.binary_cross_entropy_with_logits(pred[ind_update], label[ind_update]))
     # loss_final = torch.sum(F.cross_entropy(pred[ind_update], label[ind_update]))
 
