@@ -595,6 +595,59 @@ class TwoMLPHead_my(torch.nn.Module):
 
         return x
 
+class TwoMLPHead_my_BR(torch.nn.Module):
+    """
+    Standard heads for FPN-based models
+
+    Arguments:
+        in_channels (int): number of input channels
+        representation_size (int): size of the intermediate representation
+    """
+
+    def __init__(self, in_channels, representation_size):
+        super(TwoMLPHead_my_BR, self).__init__()
+
+        self.fc6 = torch.nn.Linear(in_channels, representation_size)
+        self.bn6 = torch.nn.BatchNorm2d(representation_size)
+        self.fc7 = torch.nn.Linear(representation_size, representation_size)
+        self.bn7 = torch.nn.BatchNorm2d(representation_size)
+
+    def forward(self, x):
+        x = x.flatten(start_dim=1)
+
+        x = F.relu(self.bn6(self.fc6(x)))
+        x = torch.relu(self.bn7(self.fc7(x)))
+
+        return x
+
+class TwoMLPHead_my_RB(torch.nn.Module):
+    """
+    Standard heads for FPN-based models
+
+    Arguments:
+        in_channels (int): number of input channels
+        representation_size (int): size of the intermediate representation
+    """
+
+    def __init__(self, in_channels, representation_size):
+        super(TwoMLPHead_my_RB, self).__init__()
+
+        self.fc6 = torch.nn.Linear(in_channels, representation_size)
+        self.bn6 = torch.nn.BatchNorm2d(representation_size)
+        self.fc7 = torch.nn.Linear(representation_size, representation_size)
+        self.bn7 = torch.nn.BatchNorm2d(representation_size)
+
+
+    def forward(self, x):
+        x = x.flatten(start_dim=1)
+
+        x = F.relu(self.fc6(x))
+        x = self.bn6(x)
+        x = F.relu(self.fc7(x))
+        x = self.bn7(x)
+
+        return x
+
 class Wildcat_WK_hd_gs_compf_cls_att_A(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
                  use_grid=False, normalize_feature= False):
@@ -670,6 +723,16 @@ class Wildcat_WK_hd_gs_compf_cls_att_A(torch.nn.Module):
                     torch.nn.Sigmoid()
                     # torch.nn.ReLU(inplace=True)
                 )
+            elif self.normalize_feature=='BR':
+                self.embed_grid_feature = torch.nn.Sequential(
+                    torch.nn.Conv2d(num_features, feature_dim, kernel_size=1, stride=1, padding=0, bias=True),
+                    torch.nn.BatchNorm2d(feature_dim),
+                    torch.nn.ReLU(inplace=True))
+            elif self.normalize_feature=='RB':
+                self.embed_grid_feature = torch.nn.Sequential(
+                    torch.nn.Conv2d(num_features, feature_dim, kernel_size=1, stride=1, padding=0, bias=True),
+                    torch.nn.ReLU(inplace=True),
+                    torch.nn.BatchNorm2d(feature_dim))
             else:
                 self.embed_grid_feature = torch.nn.Sequential(
                     torch.nn.Conv2d(num_features, feature_dim, kernel_size=1, stride=1, padding=0, bias=True),
@@ -702,6 +765,14 @@ class Wildcat_WK_hd_gs_compf_cls_att_A(torch.nn.Module):
         out_channels = 256
         if self.normalize_feature==True:
             self.box_head = TwoMLPHead_my(
+                out_channels * resolution ** 2,
+                representation_size)
+        elif self.normalize_feature=='BR':
+            self.box_head = TwoMLPHead_my_BR(
+                out_channels * resolution ** 2,
+                representation_size)
+        elif self.normalize_feature=='RB':
+            self.box_head = TwoMLPHead_my_RB(
                 out_channels * resolution ** 2,
                 representation_size)
         else:
