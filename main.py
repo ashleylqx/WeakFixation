@@ -54,7 +54,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_hm_a'.format(n_gaussian, MAX_BNUM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_BR_a'.format(n_gaussian, MAX_BNUM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_RB_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_bst_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_alt2_{}_gd_nf4_normF_eb_{}_aug7_a'.format(n_gaussian, ALPHA, MAX_BNUM) # 1.0
@@ -1445,8 +1445,8 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # normf = True #'Ndiv'
     # normf = 'Ndiv'
-    normf = 'BR'
-    # normf = 'RB'
+    # normf = 'BR'
+    normf = 'RB'
 
 
     # train soft attention model
