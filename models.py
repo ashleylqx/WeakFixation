@@ -608,9 +608,9 @@ class TwoMLPHead_my_BR(torch.nn.Module):
         super(TwoMLPHead_my_BR, self).__init__()
 
         self.fc6 = torch.nn.Linear(in_channels, representation_size)
-        self.bn6 = torch.nn.BatchNorm2d(representation_size)
+        self.bn6 = torch.nn.BatchNorm1d(representation_size)
         self.fc7 = torch.nn.Linear(representation_size, representation_size)
-        self.bn7 = torch.nn.BatchNorm2d(representation_size)
+        self.bn7 = torch.nn.BatchNorm1d(representation_size)
 
     def forward(self, x):
         x = x.flatten(start_dim=1)
@@ -633,9 +633,9 @@ class TwoMLPHead_my_RB(torch.nn.Module):
         super(TwoMLPHead_my_RB, self).__init__()
 
         self.fc6 = torch.nn.Linear(in_channels, representation_size)
-        self.bn6 = torch.nn.BatchNorm2d(representation_size)
+        self.bn6 = torch.nn.BatchNorm1d(representation_size)
         self.fc7 = torch.nn.Linear(representation_size, representation_size)
-        self.bn7 = torch.nn.BatchNorm2d(representation_size)
+        self.bn7 = torch.nn.BatchNorm1d(representation_size)
 
 
     def forward(self, x):
