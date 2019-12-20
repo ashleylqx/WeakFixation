@@ -2649,7 +2649,7 @@ def main_Wildcat_WK_hd_compf_map(args):
                                                  fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                  normalize_feature=normf)
 
-        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                      num_maps=num_maps,
                                                      fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                      normalize_feature=normf)
