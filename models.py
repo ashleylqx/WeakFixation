@@ -614,8 +614,9 @@ class TwoMLPHead_my_BR(torch.nn.Module):
 
     def forward(self, x):
         x = x.flatten(start_dim=1)
-
-        x = F.relu(self.bn6(self.fc6(x)))
+        if x.size(0)==0:
+            pdb.set_trace()
+        x = torch.relu(self.bn6(self.fc6(x)))
         x = torch.relu(self.bn7(self.fc7(x)))
 
         return x
