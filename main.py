@@ -525,6 +525,167 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha(epoch, model, model_aux, optimizer, 
                                                  np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)),
                                                                    np.mean(np.array(total_map_loss))))
 
+def train_Wildcat_WK_hd_compf_map_alt_alpha_msl(epoch, model, model_aux, optimizer, logits_loss, info_loss, dataloader, args, name_model, tgt_sizes):
+    model.train()
+
+    N = len(dataloader)
+    total_loss = list()
+    total_h_loss = list()
+    total_cps_loss = list()
+    total_map_loss = list()
+
+    if os.path.exists(os.path.join(args.path_out,'{}_epoch{:02d}.pt'.format(name_model, epoch-1))):
+        checkpoint = torch.load(os.path.join(args.path_out,'{}_epoch{:02d}.pt'.format(name_model, epoch-1))) # checkpoint is a dict, containing much info
+        model_aux.load_state_dict(checkpoint['state_dict'])
+
+    for i, X in enumerate(dataloader):
+        optimizer.zero_grad()
+
+        # COCO image, label, boxes(, image_name)
+        # ILSVRC  image, label, boxes(, image_name)
+        # inputs, gt_labels, box_features, boxes, boxes_nums, rf_maps = X
+        ori_inputs, gt_labels, ori_boxes, boxes_nums, prior_maps = X
+
+        if args.use_gpu:
+            ori_inputs = ori_inputs.cuda()
+            gt_labels = gt_labels.cuda()
+            ori_boxes = ori_boxes.cuda()
+            prior_maps = prior_maps.cuda()
+
+        pred_logits, cps_logits, pred_maps = model(img=F.interpolate(ori_inputs, size=(input_h, input_w)),
+                                                   boxes=ori_boxes/2,
+                                                   boxes_nums=boxes_nums)
+        # pred_logits, cps_logits, pred_maps = model(img=ori_inputs, boxes=ori_boxes, boxes_nums=boxes_nums)
+        # if epoch > 0:
+        # _, _, aux_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+        aux_maps = torch.zeros(pred_maps.size(0), 1, output_h, output_w).to(pred_maps.device)
+        for tgt_s in tgt_sizes:
+            inputs = F.interpolate(ori_inputs, size=(tgt_s, tgt_s), mode='bilinear', align_corners=True)
+            boxes = torch.zeros_like(ori_boxes)
+            boxes[:, :, 0] = ori_boxes[:, :, 0] / input_w * tgt_s
+            boxes[:, :, 2] = ori_boxes[:, :, 2] / input_h * tgt_s
+            boxes[:, :, 1] = ori_boxes[:, :, 1] / input_w * tgt_s
+            boxes[:, :, 3] = ori_boxes[:, :, 3] / input_h * tgt_s
+
+            _, _, tmp_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+
+            aux_maps += F.interpolate(tmp_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
+
+        aux_maps = aux_maps / len(tgt_sizes)
+
+        aux_maps = aux_maps - aux_maps.min()
+        rf_maps = ALPHA * aux_maps + (1 - ALPHA) * (prior_maps.unsqueeze(1))
+
+        losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
+        # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
+        cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
+        # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
+        # cps_losses = cps_weight*logits_loss(torch.sigmoid(cps_logits), gt_labels)
+        h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
+
+        # if epoch > 0:
+        #     rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0),
+        #                                          torch.clamp(rf_maps.detach().squeeze(), min=0.0, max=1.0))
+        # else:
+        #     rf_losses = 0. * info_loss(pred_maps.squeeze(1))
+
+        rf_losses = rf_weight * torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0),
+                                                  torch.clamp(rf_maps.detach().squeeze(), min=0.0, max=1.0))
+
+        losses.backward(retain_graph=True)
+        cps_losses.backward(retain_graph=True)
+        # losses.backward(retain_graph=True)
+        h_losses.backward(retain_graph=True)
+        rf_losses.backward()
+
+        optimizer.step()
+        total_loss.append(losses.item())
+        total_h_loss.append(h_losses.item())
+        total_cps_loss.append(cps_losses.item())
+        total_map_loss.append(rf_losses.item())
+
+        if i%train_log_interval == 0:
+            print("Train [{}][{}/{}]\tloss:{:.4f}({:.4f})\tcps_loss:{:.4f}({:.4f})"
+                  "\th_loss:{:.4f}({:.4f})\trf_loss:{:.4f}({:.4f})".format(
+                epoch, i, int(N), losses.item(), np.mean(np.array(total_loss)),
+                cps_losses.item(), np.mean(np.array(total_cps_loss)),
+                h_losses.item(), np.mean(np.array(total_h_loss)),
+                rf_losses.item(), np.mean(np.array(total_map_loss))))
+
+        if i%tb_log_interval == 0:
+            niter = epoch * len(dataloader) + i
+            writer.add_scalar('Train_hd/Loss', losses.item(), niter)
+            writer.add_scalar('Train_hd/Cps_loss', cps_losses.item(), niter)
+            writer.add_scalar('Train_hd/Rf_loss', rf_losses.item(), niter)
+
+            if torch.cuda.device_count() < 2:
+                if model.features[0].weight.grad is not None:
+                    writer.add_scalar('Grad_hd/features0', model.features[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/f_layer4[-1]', model.features[-1][-1].conv3.weight.grad.abs().mean().item(), niter)
+                writer.add_scalar('Grad_hd/classifier0', model.classifier[0].weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin1', model.relation_net.lin1.weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin3', model.relation_net.lin3.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model, 'relation_net'):
+                    writer.add_scalar('Grad_hd/pair_pos_fc1', model.relation_net.pair_pos_fc1.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/linear_out', model.relation_net.linear_out.weight.grad.abs().mean().item(), niter)
+
+                    # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
+
+                if hasattr(model, 'centerbias'):
+                    if hasattr(model.centerbias, 'fc1'):
+                        if model.centerbias.fc1.weight.grad is not None:
+                            writer.add_scalar('Grad_hd/gs_fc1', model.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                            writer.add_scalar('Grad_hd/gs_fc2', model.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                            # writer.add_scalar('Grad_hd/gen_g_feature',
+                            #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                    else:
+                        if model.centerbias.params.grad is not None:
+                            writer.add_scalar('Grad_hd/gs_params', model.centerbias.params.grad.abs().mean().item(), niter)
+                            # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                            #                   niter)
+
+                if hasattr(model, 'box_head'):
+                    writer.add_scalar('Grad_hd/box_head_fc6', model.box_head.fc6.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/box_head_fc7', model.box_head.fc7.weight.grad.abs().mean().item(), niter)
+            else:
+                if model.module.features[0].weight.grad is not None:
+                    writer.add_scalar('Grad_hd/features0', model.module.features[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/f_layer4[-1]', model.module.features[-1][-1].conv3.weight.grad.abs().mean().item(), niter)
+                writer.add_scalar('Grad_hd/classifier0', model.module.classifier[0].weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin1', model.relation_net.lin1.weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin3', model.relation_net.lin3.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model.module, 'relation_net'):
+                    writer.add_scalar('Grad_hd/pair_pos_fc1', model.module.relation_net.pair_pos_fc1.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/linear_out', model.module.relation_net.linear_out.weight.grad.abs().mean().item(), niter)
+
+                    # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
+
+                if hasattr(model.module, 'centerbias'):
+                    if hasattr(model.centerbias, 'fc1'):
+                        if model.module.centerbias.fc1.weight.grad is not None:
+                            writer.add_scalar('Grad_hd/gs_fc1', model.module.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                            writer.add_scalar('Grad_hd/gs_fc2', model.module.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                            # writer.add_scalar('Grad_hd/gen_g_feature',
+                            #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                    else:
+                        if model.module.centerbias.params.grad is not None:
+                            writer.add_scalar('Grad_hd/gs_params', model.module.centerbias.params.grad.abs().mean().item(), niter)
+                            # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                            #                   niter)
+
+                if hasattr(model.module, 'box_head'):
+                    writer.add_scalar('Grad_hd/box_head_fc6', model.module.box_head.fc6.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/box_head_fc7', model.module.box_head.fc7.weight.grad.abs().mean().item(), niter)
+
+
+
+    print("Train [{}]\tAverage loss:{:.4f}\tAverage cps_loss:{:.4f}"
+          "\tAverage h_loss:{:.4f}\tAverage rf_loss:{:.4f}".format(epoch, np.mean(np.array(total_loss)),
+                                                 np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)),
+                                                                   np.mean(np.array(total_map_loss))))
+
 def train_Wildcat_WK_hd_compf_map_sup(epoch, model, model_aux, optimizer, logits_loss, info_loss, dataloader, args):
     model.train()
 
@@ -1003,7 +1164,7 @@ def train_Wildcat_WK_hd_compf_map_sup_msl(epoch, model, model_aux, optimizer, lo
             rf_maps += F.interpolate(tmp_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
 
         rf_maps = rf_maps/len(tgt_sizes)
-
+        rf_maps = rf_maps - rf_maps.min()
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -1435,8 +1596,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test_multiscale'
-    # phase = 'train_alt_alpha'
+    # phase = 'test_multiscale'
+    phase = 'train_alt_msl_alpha'
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -2495,9 +2656,9 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         if normf == True:
             # A4 fdim1024 0.95
-            checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
-                n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(path_models,
+            #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
+            #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # A4 fdim512 layer34 0.95
             # checkpoint = torch.load(os.path.join(path_models,
@@ -2505,9 +2666,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     n_gaussian, ALPHA, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # A4 fdim512 layer34 0.95
-            # checkpoint = torch.load(os.path.join(path_models,
-            #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
-            #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+            checkpoint = torch.load(os.path.join(path_models,
+                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
+                n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # # one5 0.95
             # checkpoint = torch.load(os.path.join(path_models,
@@ -2574,12 +2735,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                                 hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
         # Note that _4 and _5 go not have res in rn, but _, _2, _3 have ###############################################3
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
-            n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
-            dilate)  # _gcn_all
-        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
         #     dilate)  # _gcn_all
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_msl_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+            n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
+            dilate)  # _gcn_all
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature,
         #     dilate)  # _gcn_all
@@ -2623,8 +2784,10 @@ def main_Wildcat_WK_hd_compf_map(args):
             model = torch.nn.DataParallel(model)
             model_aux = torch.nn.DataParallel(model_aux)
 
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+
         # ds_train = MS_COCO_map_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=max(tgt_sizes), img_w=max(tgt_sizes))
         # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
 
@@ -2658,7 +2821,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             h_loss = h_loss.cuda()
 
             # optimizer = optimizer.cuda()
-
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
         eval_loss = np.inf
 
         # eval_salicon_loss = np.inf
@@ -2666,8 +2829,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
 
         for i_epoch in range(args.n_epochs):
-            train_Wildcat_WK_hd_compf_map_alt_alpha(i_epoch, model, model_aux, optimizer, logits_loss, h_loss,
-                                                    train_dataloader, args, model_name)
+            train_Wildcat_WK_hd_compf_map_alt_alpha_msl(i_epoch, model, model_aux, optimizer, logits_loss, h_loss,
+                                                    train_dataloader, args, model_name, tgt_sizes)
 
             tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
 
@@ -4147,7 +4310,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=52*torch.cuda.device_count(), #52 # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=26*torch.cuda.device_count(), #52 # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
