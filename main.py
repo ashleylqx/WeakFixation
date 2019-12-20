@@ -1606,9 +1606,9 @@ def main_Wildcat_WK_hd_compf_map(args):
     fix_feature = False
     dilate = True
 
-    # normf = True #'Ndiv'
+    normf = True #'Ndiv'
     # normf = 'Ndiv'
-    normf = 'BR'
+    # normf = 'BR'
     # normf = 'RB'
 
 
