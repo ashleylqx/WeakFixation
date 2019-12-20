@@ -1434,8 +1434,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    # phase = 'test'
-    phase = 'train_alt_alpha'
+    phase = 'test'
+    # phase = 'train_alt_alpha'
     kmax = 1
     kmin = None
     alpha = 0.7
