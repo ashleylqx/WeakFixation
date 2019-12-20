@@ -2434,15 +2434,10 @@ def main_Wildcat_WK_hd_compf_map(args):
                                                      normalize_feature=normf)
 
         if normf == True:
-            # A BR fdim1024 0.95
-            checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
-                n_gaussian, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
-
             # # A4 fdim1024 0.95
-            # checkpoint = torch.load(os.path.join(path_models,
-            #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
-            #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+            checkpoint = torch.load(os.path.join(path_models,
+                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
+                n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # A4 fdim512 layer34 0.95
             # checkpoint = torch.load(os.path.join(path_models,
@@ -2489,6 +2484,13 @@ def main_Wildcat_WK_hd_compf_map(args):
             checkpoint = torch.load(os.path.join(path_models,
                 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
                 n_gaussian, normf))  # checkpoint is a dict, containing much info
+
+        elif normf == 'BR':
+            # A BR fdim1024 0.95
+            checkpoint = torch.load(os.path.join(path_models,
+                                                 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03.pt').format(
+                n_gaussian, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
+
 
         else:
             checkpoint = torch.load(os.path.join(path_models,
