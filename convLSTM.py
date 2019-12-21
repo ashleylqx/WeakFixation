@@ -56,8 +56,12 @@ class ConvLSTMCell(torch.nn.Module):
         return h_next, c_next
 
     def init_hidden(self, batch_size):
-        return (Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda(),
-                Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda())
+        # if torch.cuda.is_available():
+        #     return (Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda(),
+        #             Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda())
+        # else:
+        return (Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)),
+                Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)))
 
 
 class ConvLSTM(torch.nn.Module):
@@ -166,11 +170,17 @@ class ConvLSTM(torch.nn.Module):
         return param
 
 if __name__ == '__main__':
+    x = torch.rand((1, 8, 14, 14))
+    x_rpt = torch.cat([x.unsqueeze(1), x.unsqueeze(1)], dim=1)
     model = ConvLSTM(input_size=(14, 14),
-                     input_dim=3,
-                     hidden_dim=[64, 64, 128],
+                     input_dim=8,
+                     hidden_dim=[8, 8],
                      kernel_size=(3, 3),
-                     num_layers=3,
+                     num_layers=2,
                      batch_first=True,
                      bias = True,
                      return_all_layers = False)
+
+    out = model(x_rpt)
+    print(out[0][0].size())
+    print(out[1][0][-1].size())
