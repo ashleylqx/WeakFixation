@@ -50,11 +50,12 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
-run = 'hd_gs_A{}_alt2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
+# run = 'hd_gs_A{}_alt2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_hm_a'.format(n_gaussian, MAX_BNUM) # 1.0
@@ -363,7 +364,7 @@ def train_Wildcat_WK_hd_compf_map_alt(epoch, model, model_aux, optimizer, logits
                     # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
 
                 if hasattr(model.module, 'centerbias'):
-                    if hasattr(model.module.centerbias, 'fc1'):
+                    if hasattr(model.centerbias, 'fc1'):
                         if model.module.centerbias.fc1.weight.grad is not None:
                             writer.add_scalar('Grad_hd/gs_fc1', model.module.centerbias.fc1.weight.grad.abs().mean().item(), niter)
                             writer.add_scalar('Grad_hd/gs_fc2', model.module.centerbias.fc2.weight.grad.abs().mean().item(), niter)
@@ -1602,7 +1603,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         os.makedirs(path_models)
 
     # phase = 'test'
-    phase = 'train_alt_alpha'
+    # phase = 'train_alt_alpha'
+    phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
     kmin = None
@@ -2042,7 +2044,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_avg_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_lstm_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_boi{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
@@ -2452,9 +2454,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # A4 fdim512 layer34 0.95
-            checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_alt2_2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch07.pt').format(
-                n_gaussian, ALPHA, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(path_models,
+            #     'resnet50_wildcat_wk_hd_cbA{}_alt2_2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch07.pt').format(
+            #     n_gaussian, ALPHA, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # A4 fdim512 layer34 0.95
             # checkpoint = torch.load(os.path.join(path_models,
@@ -2597,6 +2599,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         if torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model)
             model_aux = torch.nn.DataParallel(model_aux)
+
 
         # ds_train = MS_COCO_map_full(mode='train', img_h=input_h, img_w=input_w)
         ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
@@ -4351,7 +4354,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=24*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=28*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
