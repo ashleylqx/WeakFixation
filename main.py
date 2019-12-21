@@ -28,7 +28,8 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
                 Wildcat_WK_hd_gs_compf_cls_att_A2_sm12, Wildcat_WK_hd_gs_compf_cls_att_A_sm12,\
                 Wildcat_WK_hd_gs_compf_cls_att_A3, Wildcat_WK_hd_gs_compf_cls_att_A3_sm12,\
                 Wildcat_WK_hd_gs_compf_cls_att_A4, Wildcat_WK_hd_gs_compf_cls_att_A5,\
-    Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale, Wildcat_WK_hd_gs_compf_cls_att_A6
+    Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale, Wildcat_WK_hd_gs_compf_cls_att_A6,\
+    Wildcat_WK_hd_gs_compf_cls_att_A4_lstm
 
 from custom_loss import HLoss_th, loss_HM
 from config import *
@@ -2038,7 +2039,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
         # # #
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
@@ -4354,7 +4355,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=48*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=40*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
