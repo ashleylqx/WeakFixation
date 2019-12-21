@@ -363,7 +363,7 @@ def train_Wildcat_WK_hd_compf_map_alt(epoch, model, model_aux, optimizer, logits
                     # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
 
                 if hasattr(model.module, 'centerbias'):
-                    if hasattr(model.centerbias, 'fc1'):
+                    if hasattr(model.module.centerbias, 'fc1'):
                         if model.module.centerbias.fc1.weight.grad is not None:
                             writer.add_scalar('Grad_hd/gs_fc1', model.module.centerbias.fc1.weight.grad.abs().mean().item(), niter)
                             writer.add_scalar('Grad_hd/gs_fc2', model.module.centerbias.fc2.weight.grad.abs().mean().item(), niter)
@@ -507,7 +507,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha(epoch, model, model_aux, optimizer, 
                     # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
 
                 if hasattr(model.module, 'centerbias'):
-                    if hasattr(model.centerbias, 'fc1'):
+                    if hasattr(model.module.centerbias, 'fc1'):
                         if model.module.centerbias.fc1.weight.grad is not None:
                             writer.add_scalar('Grad_hd/gs_fc1', model.module.centerbias.fc1.weight.grad.abs().mean().item(), niter)
                             writer.add_scalar('Grad_hd/gs_fc2', model.module.centerbias.fc2.weight.grad.abs().mean().item(), niter)
