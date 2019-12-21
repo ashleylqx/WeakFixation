@@ -2807,7 +2807,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4(torch.nn.Module):
 
         self.box_roi_pool = MultiScaleRoIAlign(
             featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
-            output_size=7,
+            output_size=BOI_SIZE,
             sampling_ratio=2)
 
         resolution = self.box_roi_pool.output_size[0]
