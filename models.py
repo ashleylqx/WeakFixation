@@ -3281,8 +3281,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm(torch.nn.Module):
         #     gaussian = F.interpolate(gaussian, size=(x.size(2), x.size(3)))
         x = self.gen_g_feature(torch.cat([x, gaussian], dim=1))
 
-        cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
-        cw_maps = self.feature_refine(cw_maps)
+        cw_maps_tmp = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
+        cw_maps_rpt = torch.cat([cw_maps_tmp.unsqueeze(1), cw_maps_tmp.unsqueeze(1)], dim=1)
+        cw_maps = self.feature_refine(cw_maps_rpt)
         pred_logits = self.spatial_pooling.spatial(cw_maps)  # (N, 1000)
 
         # sft_scores = torch.sigmoid(pred_logits)  # the combined maps looks better...
