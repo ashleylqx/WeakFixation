@@ -49,11 +49,12 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_sm_aug2_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
+run = 'hd_gs_A{}_alt2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_hm_a'.format(n_gaussian, MAX_BNUM) # 1.0
@@ -1600,8 +1601,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test'
-    # phase = 'train_aug'
+    # phase = 'test'
+    phase = 'train_alt_alpha'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
     kmin = None
@@ -2460,6 +2461,11 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
             #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
+            # A4 fdim512 layer34 boi 5 0.95
+            checkpoint = torch.load(os.path.join(path_models,
+                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_boi{}_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch04.pt').format(
+                n_gaussian, normf, MAX_BNUM, FEATURE_DIM, BOI_SIZE))  # checkpoint is a dict, containing much info
+
             # # one5 0.95
             # checkpoint = torch.load(os.path.join(path_models,
             #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch03.pt').format(
@@ -2538,9 +2544,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
         #     dilate)  # _gcn_all
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt3_2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
-            n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
-            dilate)  # _gcn_all
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_boi{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+            n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, BOI_SIZE,kmax, kmin, alpha, num_maps, fix_feature,dilate)  # _gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt3_2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature,
         #     dilate)  # _gcn_all
