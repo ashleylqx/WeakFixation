@@ -55,8 +55,9 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
 # run = 'hd_gs_A{}_alt2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
+run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_boi{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BOI_SIZE) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_2_a_one5'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug7_sf_3_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_hm_a'.format(n_gaussian, MAX_BNUM) # 1.0
@@ -870,6 +871,7 @@ def train_Wildcat_WK_hd_compf_map_sup_alpha(epoch, model, model_aux, optimizer, 
 
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
         rf_maps = ALPHA*aux_maps.detach().squeeze() + (1-ALPHA)*prior_maps
+        rf_maps = rf_maps - rf_maps.min()
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -1603,8 +1605,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test'
-    # phase = 'train_alt_alpha'
+    # phase = 'test'
+    phase = 'train_sup_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
@@ -3076,20 +3078,25 @@ def main_Wildcat_WK_hd_compf_map(args):
         # checkpoint = torch.load(os.path.join(path_models,
         #         'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att_gd_nf4_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch04.pt').format(n_gaussian))  # checkpoint is a dict, containing much info
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                  num_maps=num_maps,
                                                  fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                  normalize_feature=normf)
 
-        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                      num_maps=num_maps,
                                                      fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                      normalize_feature=normf)
 
         if normf==True:
+            # A4 fdim512 layer34 boi 5 0.95
             checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch05.pt').format(
-                n_gaussian, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
+                                                 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_boi{}_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch04.pt').format(
+                n_gaussian, normf, MAX_BNUM, FEATURE_DIM, BOI_SIZE))  # checkpoint is a dict, containing much info
+
+        # checkpoint = torch.load(os.path.join(path_models,
+            #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch05.pt').format(
+            #     n_gaussian, normf, MAX_BNUM))  # checkpoint is a dict, containing much info
 
             # checkpoint = torch.load(os.path.join(path_models,
             #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch00.pt').format(
@@ -3133,8 +3140,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                                 hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # Note that _4 and _5 go not have res in rn, but _, _2, _3 have ###############################################3
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_sup2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
-            n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_sup2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_boi{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+            n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, BOI_SIZE, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_sup2_{}_2_compf_cls_att_gd_nf4_norm{}_hb_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #     n_gaussian, ALPHA, normf, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
