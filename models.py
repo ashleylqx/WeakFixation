@@ -3367,10 +3367,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm(torch.nn.Module):
     #             {'params': self.features.parameters(), 'lr': lr*lr_f}
     #             ]
 
-class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_r5(torch.nn.Module):
+class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
                  use_grid=False, normalize_feature= False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_r5, self).__init__()
+        super(Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         self.normalize_feature = normalize_feature
@@ -3411,8 +3411,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_r5(torch.nn.Module):
 
         self.spatial_pooling = pooling
         self.feature_refine = ConvLSTM(input_size=(14, 14),
-                     input_dim=num_features,
-                     hidden_dim=[num_features, num_features],
+                     input_dim=n_classes,
+                     hidden_dim=[n_classes, n_classes],
                      kernel_size=(3, 3),
                      num_layers=2,
                      batch_first=True,
@@ -3602,25 +3602,25 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_r5(torch.nn.Module):
             boxes_list = [boxes[b_i, :boxes_nums[b_i], :] for b_i in range(len(boxes_nums))]
 
 
-        x_rpt = torch.cat([x.unsqueeze(1), x.unsqueeze(1)], dim=1)
-        x_out = self.feature_refine(x_rpt)
-        x_refined = x_out[1][0][0]
         # ori_logits = F.adaptive_avg_pool2d(x, output_size=(1, 1)).squeeze(-1).squeeze(-1)
         # print('ori_logits', ori_logits.size())
-        x_refined = self.classifier(x_refined)  # (N, 1000, 7, 7) # previously, mask x, then pass to self.comp_pooling
+        x = self.classifier(x)  # (N, 1000, 7, 7) # previously, mask x, then pass to self.comp_pooling
 
         # ori_logits = F.adaptive_avg_pool2d(x, output_size=(1, 1)).squeeze(-1).squeeze(-1)
 
 
-        gaussian = self.centerbias(x_refined) #previous n_gaussian=8 use this settings; as all other n_gaussians
-        if gaussian.size(0) != x_refined.size(0):
-            gaussian = gaussian.repeat(x_refined.size(0), 1, 1, 1)
-        # if gaussian.size(2) != x_refined.size(2):
-        #     gaussian = F.interpolate(gaussian, size=(x_refined.size(2), x_refined.size(3)))
+        gaussian = self.centerbias(x) #previous n_gaussian=8 use this settings; as all other n_gaussians
+        if gaussian.size(0) != x.size(0):
+            gaussian = gaussian.repeat(x.size(0), 1, 1, 1)
+        # if gaussian.size(2) != x.size(2):
+        #     gaussian = F.interpolate(gaussian, size=(x.size(2), x.size(3)))
 
-        x_refined = self.gen_g_feature(torch.cat([x_refined, gaussian], dim=1))
-        cw_maps = self.spatial_pooling.class_wise(x_refined)  # (N, 1000, 7, 7)
-        pred_logits = self.spatial_pooling.spatial(cw_maps)  # (N, 1000)
+        x = self.gen_g_feature(torch.cat([x, gaussian], dim=1))
+        cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
+        cw_maps_rpt = torch.cat([cw_maps.unsqueeze(1), cw_maps.unsqueeze(1)], dim=1)
+        cw_maps_out = self.feature_refine(cw_maps_rpt)
+        cw_maps_refined = cw_maps_out[1][0][0]
+        pred_logits = self.spatial_pooling.spatial(cw_maps_refined)  # (N, 1000)
 
         # sft_scores = torch.sigmoid(pred_logits)  # the combined maps looks better...
         #
