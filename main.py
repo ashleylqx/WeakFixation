@@ -3124,7 +3124,16 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         # checkpoint = torch.load(os.path.join(path_models,
         #         'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(n_gaussian))  # checkpoint is a dict, containing much info
-        model_aux.load_state_dict(checkpoint['state_dict'])
+        saved_state_dict = checkpoint['state_dict']
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            new_params = model.state_dict().copy()
+            for k, y in saved_state_dict.items():
+                new_params[k[7:]] = y
+        else:
+            new_params = saved_state_dict.copy()
+        model_aux.load_state_dict(new_params)
+
+        # model_aux.load_state_dict(checkpoint['state_dict'])
         for param in model_aux.parameters():
             param.requires_grad = False
 
