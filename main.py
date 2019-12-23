@@ -52,7 +52,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -136,7 +136,7 @@ def train_Wildcat_WK_hd_compf_map(epoch, model, optimizer, logits_loss, info_los
             print('pred_maps contains nan')
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
-        losses = 0*logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
+        losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         # cps_losses = cps_weight*loss_HM(cps_logits, gt_labels)
         cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
@@ -1310,7 +1310,7 @@ def eval_Wildcat_WK_hd_compf_salicon(epoch, model, logits_loss, info_loss, datal
         # losses = logits_loss(pred_logits, torch.argmax(ori_logits, 1))
 
         # losses = loss_HM(pred_logits, gt_labels)  # use bce loss with sigmoid
-        losses = 0*logits_loss(pred_logits, gt_labels)  # use bce loss with sigmoid
+        losses = logits_loss(pred_logits, gt_labels)  # use bce loss with sigmoid
         # losses = torch.nn.BCEWithLogitsLoss()(pred_logits, gt_labels)  # use bce loss with sigmoid
         # cps_losses = cps_weight * logits_loss(cps_logits, (torch.sigmoid(pred_logits) > 0.5).float())
         # cps_losses = cps_weight * loss_HM(cps_logits, gt_labels)
@@ -1606,9 +1606,9 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    # phase = 'test'
+    phase = 'test'
     # phase = 'train_sup_alpha'
-    phase = 'train_aug'
+    # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
     kmin = None
@@ -2042,13 +2042,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_x(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
         # # #
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_1_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_lstm_x_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
@@ -2068,22 +2068,22 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                               n_gaussian, normf, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # A4 fdim512 layer34 0.95
-        # checkpoint = torch.load(os.path.join(path_models,
-        #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
-        #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
-        #
-        # saved_state_dict = checkpoint['state_dict']
-        # new_params = model.state_dict().copy()
-        # if list(saved_state_dict.keys())[0][:7] == 'module.':
-        #     for k, y in saved_state_dict.items():
-        #         if k[7:] in new_params.keys():
-        #             new_params[k[7:]] = y
-        # else:
-        #     for k, y in saved_state_dict.items():
-        #         if k in new_params.keys():
-        #             new_params[k] = y
-        #
-        # model.load_state_dict(new_params)
+        checkpoint = torch.load(os.path.join(path_models,
+            'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
+            n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+
+        saved_state_dict = checkpoint['state_dict']
+        new_params = model.state_dict().copy()
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            for k, y in saved_state_dict.items():
+                if k[7:] in new_params.keys():
+                    new_params[k[7:]] = y
+        else:
+            for k, y in saved_state_dict.items():
+                if k in new_params.keys():
+                    new_params[k] = y
+
+        model.load_state_dict(new_params)
 
         print(model_name)
 
@@ -4154,7 +4154,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        e_num = 1 #1 2 3 5 6
+        e_num = 6 #1 2 3 5 6
 
         prior = 'nips08'
         # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_gbvs_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
