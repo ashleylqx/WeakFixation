@@ -687,7 +687,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha(epoch, model, model_aux, optimizer, 
         rf_maps = ALPHA * aux_maps + (1 - ALPHA) * (prior_maps.unsqueeze(1))
         rf_maps = rf_maps - rf_maps.min()
 
-        losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
+        losses = 0*logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
         # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
@@ -1573,7 +1573,7 @@ def eval_Wildcat_WK_hd_compf_salicon(epoch, model, logits_loss, info_loss, datal
         # losses = logits_loss(pred_logits, torch.argmax(ori_logits, 1))
 
         # losses = loss_HM(pred_logits, gt_labels)  # use bce loss with sigmoid
-        losses = logits_loss(pred_logits, gt_labels)  # use bce loss with sigmoid
+        losses = 0*logits_loss(pred_logits, gt_labels)  # use bce loss with sigmoid
         # losses = torch.nn.BCEWithLogitsLoss()(pred_logits, gt_labels)  # use bce loss with sigmoid
         # cps_losses = cps_weight * logits_loss(cps_logits, (torch.sigmoid(pred_logits) > 0.5).float())
         # cps_losses = cps_weight * loss_HM(cps_logits, gt_labels)
