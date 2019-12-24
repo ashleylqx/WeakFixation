@@ -2340,22 +2340,22 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                               n_gaussian, normf, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # A4 fdim512 layer34 0.95
-        checkpoint = torch.load(os.path.join(path_models,
-            'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
-            n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
-
-        saved_state_dict = checkpoint['state_dict']
-        new_params = model.state_dict().copy()
-        if list(saved_state_dict.keys())[0][:7] == 'module.':
-            for k, y in saved_state_dict.items():
-                if k[7:] in new_params.keys():
-                    new_params[k[7:]] = y
-        else:
-            for k, y in saved_state_dict.items():
-                if k in new_params.keys():
-                    new_params[k] = y
-
-        model.load_state_dict(new_params)
+        # checkpoint = torch.load(os.path.join(path_models,
+        #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
+        #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+        #
+        # saved_state_dict = checkpoint['state_dict']
+        # new_params = model.state_dict().copy()
+        # if list(saved_state_dict.keys())[0][:7] == 'module.':
+        #     for k, y in saved_state_dict.items():
+        #         if k[7:] in new_params.keys():
+        #             new_params[k[7:]] = y
+        # else:
+        #     for k, y in saved_state_dict.items():
+        #         if k in new_params.keys():
+        #             new_params[k] = y
+        #
+        # model.load_state_dict(new_params)
 
         print(model_name)
 
