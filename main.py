@@ -40,9 +40,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 1.0 #0.1 #0.1#
+hth_weight = 0.1 #0.1#1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 1.0 #0.1 #0.1 #
+rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -57,7 +57,7 @@ rf_weight = 1.0 #0.1 #0.1 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_snd'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-# run = 'hd_gs_A{}_alt3_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_alt3_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_4'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -99,8 +99,8 @@ rf_weight = 1.0 #0.1 #0.1 #
 #                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian,
 #                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34_cw'.format(n_gaussian,
-                        ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34_cw'.format(n_gaussian,
+#                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
 
 # run = 'hd_cbA{}_M2_hth{}_rf{}_ils_eb_pll'.format(n_gaussian, hth_weight, rf_weight)
 
@@ -144,7 +144,7 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
             print('pred_maps contains nan')
 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
-        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -720,7 +720,7 @@ def train_Wildcat_WK_hd_compf_map_alt(epoch, model, model_aux, optimizer, logits
         _, _, rf_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
         # rf_maps = rf_maps - rf_maps.min()
-        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -864,7 +864,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha(epoch, model, model_aux, optimizer, 
         _, _, aux_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
         # aux_maps = aux_maps - aux_maps.min()
-        aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
         rf_maps = ALPHA * aux_maps + (1 - ALPHA) * (prior_maps.unsqueeze(1))
         # rf_maps = rf_maps - rf_maps.min()
 
@@ -1027,7 +1027,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_msl(epoch, model, model_aux, optimiz
         aux_maps = aux_maps / len(tgt_sizes)
 
         # aux_maps = aux_maps - aux_maps.min()
-        aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
         rf_maps = ALPHA * aux_maps + (1 - ALPHA) * (prior_maps.unsqueeze(1))
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -1172,7 +1172,7 @@ def train_Wildcat_WK_hd_compf_map_sup(epoch, model, model_aux, optimizer, logits
         _, _, rf_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
         # rf_maps = rf_maps - rf_maps.min()
-        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
@@ -1315,7 +1315,7 @@ def train_Wildcat_WK_hd_compf_map_sup_alpha(epoch, model, model_aux, optimizer, 
         # if epoch > 0:
         _, _, aux_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
-        aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
 
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
         rf_maps = ALPHA*aux_maps.detach().squeeze() + (1-ALPHA)*prior_maps
@@ -1622,7 +1622,7 @@ def train_Wildcat_WK_hd_compf_map_sup_msl(epoch, model, model_aux, optimizer, lo
 
         rf_maps = rf_maps/len(tgt_sizes)
         # rf_maps = rf_maps - rf_maps.min()
-        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -2059,10 +2059,10 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
-    # phase = 'train_alt_alpha'
+    phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
-    phase = 'train_cw_ils_tgt_aug'
+    # phase = 'train_cw_ils_tgt_aug'
 
     kmax = 1
     kmin = None
