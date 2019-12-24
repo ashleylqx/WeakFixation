@@ -57,9 +57,9 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_snd'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_alt3_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_alt3_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_4'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -140,6 +140,9 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
         cps_logits, pred_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
         if torch.isnan(pred_maps).any():
             print('pred_maps contains nan')
+
+        # rf_maps = rf_maps - rf_maps.min() # do not have this previously
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -662,7 +665,8 @@ def train_Wildcat_WK_hd_compf_map_alt(epoch, model, model_aux, optimizer, logits
         # if epoch > 0:
         _, _, rf_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
-        rf_maps = rf_maps - rf_maps.min()
+        # rf_maps = rf_maps - rf_maps.min()
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -1113,7 +1117,8 @@ def train_Wildcat_WK_hd_compf_map_sup(epoch, model, model_aux, optimizer, logits
         # if epoch > 0:
         _, _, rf_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
-        rf_maps = rf_maps - rf_maps.min()
+        # rf_maps = rf_maps - rf_maps.min()
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
@@ -1562,7 +1567,8 @@ def train_Wildcat_WK_hd_compf_map_sup_msl(epoch, model, model_aux, optimizer, lo
             rf_maps += F.interpolate(tmp_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
 
         rf_maps = rf_maps/len(tgt_sizes)
-        rf_maps = rf_maps - rf_maps.min()
+        # rf_maps = rf_maps - rf_maps.min()
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=1, keepdim=True).values, dim=1, keepdim=True).values
 
         losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
@@ -1996,9 +2002,9 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'test_cw_multiscale'
     # phase = 'test'
-    # phase = 'train_cw_aug'
+    phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
-    phase = 'train_alt_alpha'
+    # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
@@ -2561,7 +2567,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_3_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
