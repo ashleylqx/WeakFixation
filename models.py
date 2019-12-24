@@ -4043,10 +4043,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw(torch.nn.Module):
     #             {'params': self.features.parameters(), 'lr': lr*lr_f}
     #             ]
 
-class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_fst(torch.nn.Module):
+class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_snd(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
                  use_grid=False, normalize_feature= False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_fst, self).__init__()
+        super(Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_snd, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         self.normalize_feature = normalize_feature
@@ -4340,10 +4340,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_fst(torch.nn.Module):
         # hard_scores = torch.add(torch.mul(pred_logits, hard_scores), hard_scores)
         # hard_scores = torch.add(torch.mul(torch.sigmoid(pred_logits), hard_scores), hard_scores)
 
-        hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps_refined),
-                                 torch.sigmoid(cw_maps_refined)).sum(1, keepdim=True) ## 2
-        # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
-        #                 torch.sigmoid(cw_maps)).sum(1, keepdim=True) ## 1
+        # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps_refined),
+        #                          torch.sigmoid(cw_maps_refined)).sum(1, keepdim=True) ## 2
+        hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
+                        torch.sigmoid(cw_maps)).sum(1, keepdim=True) ## 1
         hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
 
         # hard_sal_map = self.to_cw_feature_size(hard_sal_map)
@@ -4360,12 +4360,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_fst(torch.nn.Module):
 
         # hard_sal_map = gauss(hard_sal_map)
 
-        # masked_cw_maps = torch.mul(cw_maps_refined, hard_sal_map)
-        # masked_cw_maps = masked_cw_maps + cw_maps_refined  # TODO: comp_self_res
-        # pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps) ## 2
-        masked_cw_maps = torch.mul(cw_maps, hard_sal_map)
-        masked_cw_maps = masked_cw_maps + cw_maps  # TODO: comp_self_res
-        pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps) ## 1
+        masked_cw_maps = torch.mul(cw_maps_refined, hard_sal_map)
+        masked_cw_maps = masked_cw_maps + cw_maps_refined  # TODO: comp_self_res
+        pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps) ## 2
+        # masked_cw_maps = torch.mul(cw_maps, hard_sal_map)
+        # masked_cw_maps = masked_cw_maps + cw_maps  # TODO: comp_self_res
+        # pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps) ## 1
 
         sal_map = self.to_attention_size(hard_sal_map)
         # sal_map = torch.sigmoid(sal_map)
