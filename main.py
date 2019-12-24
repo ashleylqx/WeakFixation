@@ -39,9 +39,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.1 #0.1#1.0 #
+hth_weight = 0.05 #0.1#1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.1 #0.1 #1.0 #
+rf_weight = 0.05 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -55,9 +55,9 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_alt2_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_alt3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_alt3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_hth{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -135,8 +135,7 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
             boxes = boxes.cuda()
             rf_maps = rf_maps.cuda()
 
-        cps_logits, pred_maps = model(img=inputs,
-                                                 boxes=boxes, boxes_nums=boxes_nums)
+        cps_logits, pred_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
         if torch.isnan(pred_maps).any():
             print('pred_maps contains nan')
 
@@ -144,7 +143,7 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         # cps_losses = cps_weight*loss_HM(cps_logits, gt_labels)
-        cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
+        cps_losses = logits_loss(cps_logits, gt_labels)
         # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(torch.sigmoid(cps_logits), gt_labels)
 
@@ -281,7 +280,7 @@ def eval_Wildcat_WK_hd_compf_salicon_cw(epoch, model, logits_loss, info_loss, da
         # losses = torch.nn.BCEWithLogitsLoss()(pred_logits, gt_labels)  # use bce loss with sigmoid
         # cps_losses = cps_weight * logits_loss(cps_logits, (torch.sigmoid(pred_logits) > 0.5).float())
         # cps_losses = cps_weight * loss_HM(cps_logits, gt_labels)
-        cps_losses = cps_weight * logits_loss(cps_logits, gt_labels)
+        cps_losses = logits_loss(cps_logits, gt_labels)
         # cps_losses = cps_weight*torch.nn.BCEWithLogitsLoss()(cps_logits, gt_labels)
         # cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
         # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
@@ -343,7 +342,7 @@ def eval_Wildcat_WK_hd_compf_cw(epoch, model, logits_loss, info_loss, dataloader
 
         # losses = logits_loss(pred_logits, gt_labels)  # use bce loss with sigmoid
         # cps_losses = cps_weight * logits_loss(cps_logits, (torch.sigmoid(pred_logits) > 0.5).float())
-        cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
+        cps_losses = logits_loss(cps_logits, gt_labels)
         # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(torch.sigmoid(cps_logits), gt_labels)
         h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
@@ -1872,9 +1871,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         os.makedirs(path_models)
 
     # phase = 'test'
-    # phase = 'train_cw_aug'
+    phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
-    phase = 'train_alt_alpha'
+    # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
@@ -2434,7 +2433,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
