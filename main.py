@@ -374,6 +374,58 @@ def eval_Wildcat_WK_hd_compf_cw(epoch, model, logits_loss, info_loss, dataloader
 
     return np.mean(np.array(total_cps_loss))+np.mean(np.array(total_h_loss))
 
+def eval_Wildcat_WK_hd_compf_map_cw(epoch, model, logits_loss, info_loss, dataloader, args):
+    model.eval()
+    N = len(dataloader)
+    # total_loss = list()
+    # total_cps_loss = list()
+    total_h_loss = list()
+    total_map_loss = list()
+    for i, X in enumerate(dataloader):
+        # SALICON images_batch, labels_batch, boxes_batch, boxes_nums, sal_maps_batch, fix_maps_batch, image_names_
+        inputs, gt_labels, boxes, boxes_nums, sal_maps, _ = X
+
+        if args.use_gpu:
+            inputs = inputs.cuda()
+            gt_labels = gt_labels.cuda()
+            boxes = boxes.cuda()
+            sal_maps = sal_maps.cuda()
+
+        cps_logits, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+
+        # losses = logits_loss(pred_logits, ori_logits)
+        # losses = logits_loss(pred_logits, torch.argmax(ori_logits, 1))
+
+        # losses = logits_loss(pred_logits, gt_labels)  # use bce loss with sigmoid
+        # cps_losses = cps_weight * logits_loss(cps_logits, (torch.sigmoid(pred_logits) > 0.5).float())
+        # cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
+        # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
+        # cps_losses = cps_weight*logits_loss(torch.sigmoid(cps_logits), gt_labels)
+        h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
+        map_losses = torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), sal_maps)
+        # map_losses = torch.nn.BCELoss()(pred_maps.squeeze(), sal_maps)
+
+
+        # total_loss.append(losses.item())
+        # total_cps_loss.append(cps_losses.item())
+        total_h_loss.append(h_losses.item())
+        total_map_loss.append(map_losses.item())
+
+        if i%train_log_interval == 0:
+            print("Eval [{}][{}/{}]\th_loss:{:.4f}({:.4f})\tmap_loss:{:.4f}({:.4f})".format(
+                epoch, i, int(N),
+                h_losses.item(), np.mean(np.array(total_h_loss)),
+                map_losses.item(), np.mean(np.array(total_map_loss))))
+
+        if i%tb_log_interval == 0:
+            niter = epoch * len(dataloader) + i
+            writer.add_scalar('Eval_hd/Map_loss', map_losses.item(), niter)
+
+    print("Eval [{}]\tAverage h_loss:{:.4f}"
+          "\tAverage map_loss:{:.4f}".format(epoch, np.mean(np.array(total_h_loss)), np.mean(np.array(total_map_loss))))
+
+    return np.mean(np.array(total_map_loss))
+
 def test_Wildcat_WK_hd_compf_cw(model, folder_name, best_model_file, dataloader, args):
     if best_model_file != 'no_training':
         checkpoint = torch.load(os.path.join(args.path_out, 'Models', best_model_file+'.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
@@ -2002,12 +2054,14 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'test_cw_multiscale'
     # phase = 'test'
-    phase = 'test_cw'
+    # phase = 'test_cw'
     # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
+    phase = 'train_cw_ils_tgt_aug'
+
     kmax = 1
     kmin = None
     alpha = 0.7
@@ -4648,6 +4702,127 @@ def main_Wildcat_WK_hd_compf_map(args):
             # tmp_eval_loss = 0
             tmp_eval_loss = eval_Wildcat_WK_hd_compf(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss,
+                                                                 eval_map_dataloader, args)
+
+            if tmp_eval_loss < eval_loss:
+                cnt = 0
+                eval_loss = tmp_eval_loss
+                print('Saving model ...')
+                save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
+            else:
+                cnt += 1
+
+            if tmp_eval_salicon_loss < eval_salicon_loss:
+                eval_salicon_loss = tmp_eval_salicon_loss
+                print('Map loss decrease ...')
+
+            if cnt >= args.patience:
+                break
+
+    elif phase == 'train_cw_ils_tgt_aug':
+        print('lr %.4f' % args.lr)
+
+        # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                    fix_feature=fix_feature, dilate=dilate)
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=ilsvrc_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=False, normalize_feature=False) #################
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=ilsvrc_num_tgt_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+                                                 num_maps=num_maps,
+                                                 fix_feature=fix_feature, dilate=dilate, use_grid=True,
+                                                 normalize_feature=normf)  #################
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=False) #################
+        #
+        # model = Wildcat_WK_hd_compf_rn(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate)
+        #
+        # model = Wildcat_WK_hd_compf(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # model = Wildcat_WK_hd_compf(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate)
+        #
+        # model_name = 'resnet50_wildcat_wk_hd_gcn_compf_grid7_sig_3_nf_all_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # Note that _4 and _5 go not have res in rn, but _, _2, _3 have
+        # model_name = 'resnet50_wildcat_wk_sft_cbA{}_compf_cls_att_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                n_gaussian, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        ##############################
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_rf{}_hth{}_ils_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 n_gaussian, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_aug7_compf_cls_att_gd_nf4_norm{}_hb_{}_tgt{}_rf{}_hth{}_ils4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+            n_gaussian, normf, MAX_BNUM,ilsvrc_num_tgt_classes, rf_weight, hth_weight, FEATURE_DIM,kmax, kmin, alpha, num_maps, fix_feature,
+            dilate)  # _gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_aug7_compf_cls_att_gd_nf4_norm{}_hb_tgt{}_rf{}_hth{}_ils_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #     n_gaussian, normf, ilsvrc_num_tgt_classes, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature,
+        #     dilate)  # _gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_compf_rn_3_nf_all_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_gcn_compf_sameb2_nf_all_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_compf_sameb2_gs_nf_all_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn
+
+        # ------------------------------------------
+        # model = Wildcat_WK_hd_compf_x(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                    fix_feature=fix_feature, dilate=dilate)
+
+        # model_name = 'resnet50_wildcat_wk_hd_gcn_compf_x_divs_nr_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate)
+        ###########################################
+        print(model_name)
+
+        if args.use_gpu:
+            model.cuda()
+        if torch.cuda.device_count()>1:
+            model = torch.nn.DataParallel(model)
+
+        # ds_train = MS_COCO_map_full_ils(mode='train', img_h=input_h, img_w=input_w, normalize_feature=normf)
+        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, normalize_feature=normf)
+        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = ILSVRC_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+
+        ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
+        ds_validate_map = SALICON_full(mode='val', img_h=input_h, img_w=input_w)
+
+        # train_dataloader = DataLoader(ds_train, batch_size=args.batch_size, collate_fn=collate_fn_coco_map_rn_multiscale,
+        #                               shuffle=True, num_workers=2)
+
+        train_dataloader = DataLoader(ds_train, batch_size=args.batch_size, collate_fn=collate_fn_ilsvrc_map_rn, #collate_fn_coco_map_rn,
+                                      shuffle=True, num_workers=2)
+
+        eval_dataloader = DataLoader(ds_validate, batch_size=args.batch_size, collate_fn=collate_fn_ilsvrc_rn, #collate_fn_coco_rn,
+                                     shuffle=False, num_workers=2)
+
+        eval_map_dataloader = DataLoader(ds_validate_map, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
+                                         shuffle=False, num_workers=2)
+
+        # eval_map_dataloader = DataLoader(ds_validate_map, batch_size=args.batch_size, collate_fn=collate_fn_salicon,
+        #                              shuffle=False, num_workers=2)
+
+        logits_loss = torch.nn.CrossEntropyLoss()
+        # logits_loss = torch.nn.BCEWithLogitsLoss()
+        # logits_loss = torch.nn.BCELoss()
+        h_loss = HLoss_th()
+        # h_loss = HLoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ######################3
+        # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
+        print('relation lr factor: 1.0')
+
+        if args.use_gpu:
+            logits_loss = logits_loss.cuda()
+            h_loss = h_loss.cuda()
+            # optimizer = optimizer.cuda()
+
+        eval_loss = np.inf
+        eval_salicon_loss = np.inf
+        cnt = 0
+        # args.n_epochs = 5
+        for i_epoch in range(args.n_epochs):
+            # train_Wildcat_WK_hd_compf_map_cw(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            # tmp_eval_loss = 0
+            tmp_eval_loss = eval_Wildcat_WK_hd_compf_cw(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
+            tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map_cw(i_epoch, model, logits_loss, h_loss,
                                                                  eval_map_dataloader, args)
 
             if tmp_eval_loss < eval_loss:
