@@ -30,7 +30,8 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
                 Wildcat_WK_hd_gs_compf_cls_att_A4, Wildcat_WK_hd_gs_compf_cls_att_A5,\
     Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale, Wildcat_WK_hd_gs_compf_cls_att_A6,\
     Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_x,\
-    Wildcat_WK_hd_gs_compf_cls_att_A4_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_fst
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_fst,\
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_multiscale
 
 from custom_loss import HLoss_th, loss_HM
 from config import *
@@ -366,9 +367,122 @@ def eval_Wildcat_WK_hd_compf_cw(epoch, model, logits_loss, info_loss, dataloader
             writer.add_scalar('Eval_hd/Cps_loss', cps_losses.item(), niter)
 
     print("Eval [{}]\tAverage cps_loss:{:.4f}\tAverage h_loss:{:.4f}".format(epoch,
-              nnp.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss))))
+              np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss))))
 
     return np.mean(np.array(total_cps_loss))+np.mean(np.array(total_h_loss))
+
+def test_Wildcat_WK_hd_compf_cw(model, folder_name, best_model_file, dataloader, args):
+    if best_model_file != 'no_training':
+        checkpoint = torch.load(os.path.join(args.path_out, 'Models', best_model_file+'.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
+        saved_state_dict = checkpoint['state_dict']
+        if list(saved_state_dict.keys())[0][:7]=='module.':
+            new_params = model.state_dict().copy()
+            for k,y in saved_state_dict.items():
+                new_params[k[7:]] = y
+        else:
+            new_params = saved_state_dict.copy()
+        model.load_state_dict(new_params)
+
+    if args.use_gpu:
+        model.cuda()
+    model.eval()
+
+    out_folder = os.path.join(args.path_out, folder_name, best_model_file)
+
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
+
+    N = len(dataloader) // args.batch_size
+    for i, X in enumerate(dataloader):
+        # MIT1003 image, boxes, sal_map, fix_map(, image_name)
+        inputs, boxes, boxes_nums, _, _, img_name = X
+
+        if args.use_gpu:
+            inputs = inputs.cuda()
+
+            boxes = boxes.cuda()
+
+        ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0]+'.jpeg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        _, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+        # pred_maps = torch.nn.Sigmoid()(pred_maps)
+        print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+
+        # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
+        #                   postprocess_prediction_salgan(pred_maps.squeeze().detach().cpu().numpy(),
+        #                                          size=[ori_img.shape[0], ori_img.shape[1]]))
+        scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
+                          postprocess_prediction(pred_maps.squeeze().detach().cpu().numpy(),
+                                                 size=[ori_img.shape[0], ori_img.shape[1]]))
+        # scipy.misc.imsave(os.path.join(out_folder, img_name+'_my.png'),
+        #                   postprocess_prediction_my(pred_maps.detach().cpu().numpy(),
+        #                                             shape_r=ori_img.shape[0],
+        #                                             shape_c=ori_img.shape[1])) # the ratio is not right..
+
+def test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, dataloader, args, tgt_sizes):
+    if best_model_file != 'no_training':
+        checkpoint = torch.load(os.path.join(args.path_out, 'Models', best_model_file+'.pt'))  # checkpoint is a dict, containing much info
+        # model.load_state_dict(checkpoint['state_dict'])
+        saved_state_dict = checkpoint['state_dict']
+        new_params = model.state_dict().copy()
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            for k, y in saved_state_dict.items():
+                if k[7:] in new_params.keys():
+                    new_params[k[7:]] = y
+        else:
+            for k, y in saved_state_dict.items():
+                if k in new_params.keys():
+                    new_params[k] = y
+        model.load_state_dict(new_params)
+
+
+    if args.use_gpu:
+        model.cuda()
+    model.eval()
+
+    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_multiscale')
+
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
+
+    N = len(dataloader) // args.batch_size
+    for i, X in enumerate(dataloader):
+        # MIT1003 image, boxes, sal_map, fix_map(, image_name)
+        ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+        if args.use_gpu:
+            ori_inputs = ori_inputs.cuda()
+            ori_boxes = ori_boxes.cuda()
+
+        ori_img = scipy.misc.imread(
+            os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+
+        ori_size = ori_inputs.size(-1)
+        pred_maps_all = torch.zeros(ori_inputs.size(0), 1, output_h, output_w).to(ori_inputs.device)
+        for tgt_s in tgt_sizes:
+            inputs = F.interpolate(ori_inputs, size=(tgt_s, tgt_s), mode='bilinear', align_corners=True)
+            boxes = torch.zeros_like(ori_boxes)
+            boxes[:, :, 0] = ori_boxes[:, :, 0] / ori_size*tgt_s
+            boxes[:, :, 2] = ori_boxes[:, :, 2] / ori_size*tgt_s
+            boxes[:, :, 1] = ori_boxes[:, :, 1] / ori_size*tgt_s
+            boxes[:, :, 3] = ori_boxes[:, :, 3] / ori_size*tgt_s
+
+            _, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+            # pred_maps = torch.nn.Sigmoid()(pred_maps)
+            # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+            # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+            pred_maps_all += F.interpolate(pred_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
+
+        # print(pred_maps_all.squeeze().size())
+        scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
+                          postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
+                                                 size=[ori_img.shape[0], ori_img.shape[1]]))
+        # scipy.misc.imsave(os.path.join(out_folder, img_name+'_my.png'),
+        #                   postprocess_prediction_my(pred_maps.detach().cpu().numpy(),
+        #                                             shape_r=ori_img.shape[0],
+        #                                             shape_c=ori_img.shape[1])) # the ratio is not right..
+
+
 
 # logit loss and cps loss
 def train_Wildcat_WK_hd_compf_map(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
@@ -1877,11 +1991,12 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
+    phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_alpha'
-    phase = 'train_aug'
+    # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
     kmax = 1
     kmin = None
@@ -4684,6 +4799,65 @@ def main_Wildcat_WK_hd_compf_map(args):
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
         test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+
+    elif phase == 'test_cw_multiscale':
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_multiscale(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                            fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A_multiscale(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_compf_rn(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate)
+
+        # model = Wildcat_WK_hd_compf(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate)
+
+        # ------------------------------------------
+        #model = Wildcat_WK_hd_compf_x(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                   fix_feature=fix_feature, dilate=dilate)
+
+        if args.use_gpu:
+            model.cuda()
+
+        folder_name = 'Preds/MIT1003'
+        # best_model_file = 'no_training'
+        e_num = 9 #1 2 3 5 6
+        # best_model_file = 'resnet50_wildcat_wk_epoch%02d'%e_num
+        # best_model_file = 'resnet101_wildcat_wk_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_448_ms_epoch{:02d}'.format(
+        #     kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+        # best_model_file = 'resnet50_wildcat_wk_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_448_epoch{:02d}'.format(
+        #     hth_weight,kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+        # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+        #     n_gaussian, normf, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
+        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_alt2_2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_1_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+                 n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
+
+        # best_model_file = 'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att2_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+        #     n_gaussian, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
+        # best_model_file = 'resnet50_wildcat_wk_hd_compf_rn_3_nf_all_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+        #     rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
+        # best_model_file = 'resnet50_wildcat_wk_hd_gcn_compf_grid7_sig_nf_all_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+        #     hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
+        # best_model_file = 'resnet50_wildcat_wk_hth{}_ms_signorm_nosigmap_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_448_epoch{:02d}'.format(
+        #     hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+        # best_model_file = 'resnet50_wildcat_wk_hth{}_ms_sft_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_448_epoch{:02d}'.format(
+        #     hth_weight,kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+        # # #
+        print("Testing %s ..."%best_model_file)
+        # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  #N=4,
+        # args.batch_size = 1
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+        #                              shuffle=False, num_workers=2)
+        # test_Wildcat_WK_hd_compf(model, folder_name, best_model_file, test_dataloader, args)
+
+
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+        ds_test = MIT1003_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
+        args.batch_size = 1
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+                                     shuffle=False, num_workers=2)
+        test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
     elif phase == 'test_ils_tgt':
         model = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=ilsvrc_num_tgt_classes, kmax=kmax, kmin=kmin, alpha=alpha,
