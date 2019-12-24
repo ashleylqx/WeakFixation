@@ -4821,9 +4821,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
         # args.n_epochs = 5
         for i_epoch in range(args.n_epochs):
-            # train_Wildcat_WK_hd_compf_map_cw(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            train_Wildcat_WK_hd_compf_map_cw(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
             # tmp_eval_loss = 0
-            # tmp_eval_loss = eval_Wildcat_WK_hd_compf_cw(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
+            tmp_eval_loss = eval_Wildcat_WK_hd_compf_cw(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map_cw(i_epoch, model, logits_loss, h_loss,
                                                                  eval_map_dataloader, args)
 
@@ -5244,7 +5244,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=56*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=60*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
