@@ -4293,7 +4293,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_multiscale(torch.nn.Module):
 
         x = self.gen_g_feature(torch.cat([x, gaussian], dim=1))
         cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
-        cw_maps_rpt = torch.cat([torch.nn.Upsample(size=(14,14)(cw_maps)).unsqueeze(1), torch.nn.Upsample(size=(14,14)(cw_maps)).unsqueeze(1)], dim=1)
+        cw_maps_rpt = torch.cat([torch.nn.Upsample(size=(14,14))(cw_maps).unsqueeze(1), torch.nn.Upsample(size=(14,14))(cw_maps).unsqueeze(1)], dim=1)
         cw_maps_out = self.feature_refine(cw_maps_rpt)
         # cw_maps_out = self.feature_refine(F.interpolate(cw_maps_rpt, size=(14,14)))
         cw_maps_refined = cw_maps_out[1][0][0]
