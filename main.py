@@ -3386,7 +3386,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
         #     dilate)  # _gcn_all
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_msl_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_msl_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #     n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
+        #     dilate)  # _gcn_all
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_1_msl_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
             n_gaussian, ALPHA, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
             dilate)  # _gcn_all
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt2_{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
