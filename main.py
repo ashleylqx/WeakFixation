@@ -31,7 +31,7 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
     Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale, Wildcat_WK_hd_gs_compf_cls_att_A6,\
     Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_x,\
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try,\
-    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_multiscale
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_multiscale, Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_multiscale
 
 from custom_loss import HLoss_th, loss_HM
 from config import *
@@ -54,9 +54,10 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_try_g3g1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_try_g3g1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_sup2_msl_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_alt3_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_4'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
@@ -1030,7 +1031,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_msl(epoch, model, model_aux, optimiz
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
         rf_maps = ALPHA * aux_maps + (1 - ALPHA) * (prior_maps.unsqueeze(1))
 
-        losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
+        losses = 0*logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
         # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
@@ -2057,8 +2058,9 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
-    phase = 'train_cw_aug'
+    # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
+    phase = 'train_alt_msl_alpha'
     # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
@@ -3276,12 +3278,22 @@ def main_Wildcat_WK_hd_compf_map(args):
         # checkpoint = torch.load(os.path.join(path_models,
         #         'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att_gd_nf4_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch04.pt').format(n_gaussian))  # checkpoint is a dict, containing much info
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        #                                          num_maps=num_maps,
+        #                                          fix_feature=fix_feature, dilate=dilate, use_grid=True,
+        #                                          normalize_feature=normf)
+        #
+        # model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        #                                              num_maps=num_maps,
+        #                                              fix_feature=fix_feature, dilate=dilate, use_grid=True,
+        #                                              normalize_feature=normf)
+
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                  num_maps=num_maps,
                                                  fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                  normalize_feature=normf)
 
-        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_multiscale(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_multiscale(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                      num_maps=num_maps,
                                                      fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                      normalize_feature=normf)
@@ -3298,11 +3310,15 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     n_gaussian, ALPHA, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
             # A4 fdim512 layer34 0.95
+            # checkpoint = torch.load(os.path.join(path_models,
+            #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
+            #     n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
+
             checkpoint = torch.load(os.path.join(path_models,
-                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01.pt').format(
+                'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf0.1_hth0.1_ms4_fdim{}_34_lstm_cw_1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch09.pt').format(
                 n_gaussian, normf, MAX_BNUM, FEATURE_DIM))  # checkpoint is a dict, containing much info
 
-            # # one5 0.95
+        # # one5 0.95
             # checkpoint = torch.load(os.path.join(path_models,
             #     'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch03.pt').format(
             #     n_gaussian, normf))  # checkpoint is a dict, containing much info
@@ -5244,7 +5260,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=72*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=68*torch.cuda.device_count(), #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int,
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
