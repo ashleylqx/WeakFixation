@@ -144,7 +144,7 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
             print('pred_maps contains nan')
 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
-        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
