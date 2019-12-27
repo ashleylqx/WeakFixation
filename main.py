@@ -2058,10 +2058,10 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'test_cw_multiscale'
     # phase = 'test'
-    phase = 'test_cw'
+    # phase = 'test_cw'
     # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
-    # phase = 'train_alt_msl_alpha'
+    phase = 'train_alt_msl_alpha'
     # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
