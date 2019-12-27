@@ -2057,8 +2057,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         os.makedirs(path_models)
 
     # phase = 'test_cw_multiscale'
-    phase = 'test'
-    # phase = 'test_cw'
+    # phase = 'test'
+    phase = 'test_cw'
     # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
@@ -4951,7 +4951,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
     elif phase == 'test_cw':
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                             fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
 
         if args.use_gpu:
@@ -4959,7 +4959,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        e_num = 3 #1 2 3 5 6
+        e_num = 4 #1 2 3 5 6
 
         prior = 'nips08'
         # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_gbvs_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
@@ -4991,8 +4991,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224_epoch{:02d}'.format(
         #          n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
 
-        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224_epoch{:02d}'.format(
+        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_cw_try_g3_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224_epoch{:02d}'.format(
                  n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
+
+        # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224_epoch{:02d}'.format(
+        #          n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
 
         # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_boi{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
         #          n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, BOI_SIZE,kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
