@@ -5168,7 +5168,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=3)
-        self.gen_g_feature_2 = torch.nn.Conv2d(n_classes * num_maps, n_classes * num_maps, kernel_size=1)
+        # self.gen_g_feature_2 = torch.nn.Conv2d(n_classes * num_maps, n_classes * num_maps, kernel_size=1)
 
         self.box_roi_pool = MultiScaleRoIAlign(
             featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
@@ -5316,7 +5316,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
         #     gaussian = F.interpolate(gaussian, size=(x.size(2), x.size(3)))
 
         x = self.gen_g_feature(torch.cat([x, gaussian], dim=1))
-        x = self.gen_g_feature_2(x)
+        # x = self.gen_g_feature_2(x)
 
         cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
         # cw_maps_rpt = torch.cat([cw_maps.unsqueeze(1), cw_maps.unsqueeze(1)], dim=1)

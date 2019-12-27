@@ -40,9 +40,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight =1.0 # 0.1 #0.1#
+hth_weight =0.1#1.0 # 0.1 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 1.0 #0.1 #0.1 #
+rf_weight = 0.1 #1.0 #0.1 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -55,6 +55,7 @@ rf_weight = 1.0 #0.1 #0.1 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_try_g3g1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_try_g3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_sup2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_sup2_msl_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_cw_1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -100,8 +101,8 @@ rf_weight = 1.0 #0.1 #0.1 #
 #                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian,
 #                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34_cw'.format(n_gaussian,
-                        ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34_cw'.format(n_gaussian,
+#                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
 
 # run = 'hd_cbA{}_M2_hth{}_rf{}_ils_eb_pll'.format(n_gaussian, hth_weight, rf_weight)
 
@@ -2058,13 +2059,13 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
-    # phase = 'train_cw_aug'
+    phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
     # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
-    phase = 'train_cw_ils_tgt_aug'
+    # phase = 'train_cw_ils_tgt_aug'
 
     kmax = 1
     kmin = None
@@ -2626,7 +2627,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_try_g3g1_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_try_g3_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
@@ -4087,7 +4088,6 @@ def main_Wildcat_WK_hd_compf_map(args):
             if cnt >= args.patience:
                 break
 
-
     elif phase == 'train_sm_sup':
         print('lr %.4f' % args.lr)
         #########################################3
@@ -5268,7 +5268,7 @@ def parse_arguments():
                         help="""Set batch size""")
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
-    parser.add_argument("--lr", type=float, default=1e-3,
+    parser.add_argument("--lr", type=float, default=1e-4,
                         help="""Learning rate for training""")
     parser.add_argument("--patience", type=int, default=5,
                         help="""Patience for learning rate scheduler (default 3)""")
