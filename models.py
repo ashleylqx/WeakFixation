@@ -5121,8 +5121,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
         # ----------------------------------------
         self.to_img_size = torch.nn.Upsample(size=(input_h, input_w))
         self.to_attention_size = torch.nn.Upsample(size=(output_h, output_w))
-        self.to_grid_size = torch.nn.Upsample(size=(7, 7))
-        self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
+        self.to_grid_size = torch.nn.Upsample(size=(GRID_SIZE, GRID_SIZE))
+        self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=GRID_SIZE)  # 7 with features_fd
+        # self.to_grid_size = torch.nn.Upsample(size=(7, 7))
+        # self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
         # if self.use_grid:
@@ -5168,7 +5170,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
-        self.gen_g_feature_2 = torch.nn.Conv2d(n_classes * num_maps, n_classes * num_maps, kernel_size=1)
+        # self.gen_g_feature_2 = torch.nn.Conv2d(n_classes * num_maps, n_classes * num_maps, kernel_size=1)
 
         self.box_roi_pool = MultiScaleRoIAlign(
             featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
