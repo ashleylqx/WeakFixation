@@ -2058,8 +2058,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         os.makedirs(path_models)
 
     # phase = 'test_cw_multiscale'
-    phase = 'test'
-    # phase = 'test_cw'
+    # phase = 'test'
+    phase = 'test_cw'
     # phase = 'train_cw_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
@@ -4966,7 +4966,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        e_num = 4 #1 2 3 5 6
+        e_num = 2 #1 2 3 5 6
 
         prior = 'nips08'
         # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_gbvs_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
@@ -5281,7 +5281,7 @@ def parse_arguments():
                         help="""set output path for the trained model""")
     parser.add_argument("--batch_size", default=56*torch.cuda.device_count(), #cw 72(26xxx) or larger #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int, # 76 for cw: 27xxx M, can use 80 later.
-                        help="""Set batch size""") # 48 for msl training: 19303 M, 52: 23xxx M, no further enlarge; can use 56 later.
+                        help="""Set batch size""") # 48 for msl training: 19303 M, 52: 23xxx M, no further enlarge; 56:24601 M.
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
     parser.add_argument("--lr", type=float, default=1e-4,
