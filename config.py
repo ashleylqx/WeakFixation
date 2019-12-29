@@ -93,4 +93,4 @@ MAX_BNUM = 50 #100 # 50 for all the augs
 
 FEATURE_DIM = 512 #128 #256 #512 # 1024
 BOI_SIZE = 7 # default 7
-GRID_SIZE = 5 # default 7
+GRID_SIZE = 9 # default 7
