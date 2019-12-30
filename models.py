@@ -5179,7 +5179,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
 
         resolution = self.box_roi_pool.output_size[0]
         representation_size = FEATURE_DIM
-        out_channels = 256
+        # out_channels = 256
+        out_channels = FEATURE_DIM//2
         if self.normalize_feature==True:
             self.box_head = TwoMLPHead_my(
                 out_channels * resolution ** 2,
@@ -5256,7 +5257,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
             # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
             # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
             if FEATURE_DIM==256:
-                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
+                # box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
+                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                                            dim=1).permute(0, 2, 3, 1)
             elif FEATURE_DIM==512:
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
                 #                              dim=1).permute(0, 2, 3, 1)
