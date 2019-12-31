@@ -5288,7 +5288,7 @@ def parse_arguments():
                         type=str,
                         help="""set output path for the trained model""")
     parser.add_argument("--batch_size", default=52*torch.cuda.device_count(), #cw 72(26xxx) or larger #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
-                        type=int, # 76 for cw512: 27xxx M, can use 80
+                        type=int, # 76 for cw512: 27xxx M, can use 80 ; cw1024, 52
                         help="""Set batch size""") # 48 for msl training: 19303 M, 52: 23xxx M, no further enlarge; 56:24601 M. use 64
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
