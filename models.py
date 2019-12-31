@@ -5173,8 +5173,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
         # self.gen_g_feature_2 = torch.nn.Conv2d(n_classes * num_maps, n_classes * num_maps, kernel_size=1)
 
         self.box_roi_pool = MultiScaleRoIAlign(
-            # featmap_names=['layer3', 'layer4'],
-            featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
+            featmap_names=['layer3', 'layer4'],
+            # featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
             output_size=BOI_SIZE,
             sampling_ratio=2)
 
@@ -5193,8 +5193,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
 
         in_channels_stage2 = 256
         in_channels_list = [
-            in_channels_stage2,
-            in_channels_stage2 * 2,
+            # in_channels_stage2,
+            # in_channels_stage2 * 2,
             in_channels_stage2 * 4,
             in_channels_stage2 * 8,
         ]
@@ -5226,9 +5226,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
         # if self.use_grid:
         features = OrderedDict()
         x = self.features[:5](img)
-        features['layer1'] = x
+        # features['layer1'] = x
         x = self.features[5](x)
-        features['layer2'] = x
+        # features['layer2'] = x
         x = self.features[6](x)
         features['layer3'] = x
         x = self.features[7](x)
@@ -5258,9 +5258,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(torch.nn.Module):
             # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
             # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
             if FEATURE_DIM==256:
-                # box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                            dim=1).permute(0, 2, 3, 1)
+                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                #                             dim=1).permute(0, 2, 3, 1)
             elif FEATURE_DIM==512:
                 # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
                 #                              dim=1).permute(0, 2, 3, 1)
