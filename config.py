@@ -27,8 +27,8 @@ test_log_interval = 20
 
 tb_log_interval = 50
 # PATH_LOG = base_path + 'tbx_log/'
-PATH_LOG = base_path + 'WF/log/'
-# PATH_LOG = base_path + 'WF/log2/'
+# PATH_LOG = base_path + 'WF/log/'
+PATH_LOG = base_path + 'WF/log2/'
 # SALICON
 PATH_SALICON = base_path + 'DataSets/SALICON/'
 bgr_mean = [103.939, 116.779, 123.68]
