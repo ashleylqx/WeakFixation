@@ -579,7 +579,8 @@ def train_Wildcat_WK_hd_compf_map_cw_vib_logits(epoch, model, optimizer, logits_
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
         rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
 
-        class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
+        class_loss = logits_loss(recon_logits, gt_labels).div(math.log(2))
+        # class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
         inf_loss = -0.5 * (1 + 2 * std.log() - mu.pow(2) - std.pow(2)).sum(1).mean().div(math.log(2))
         vib_loss = class_loss + VIB_beta * inf_loss
 
@@ -724,7 +725,8 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_vib_logits(epoch, model, logits_loss, in
 
         recon_logits, mu, std, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
-        class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
+        class_loss = logits_loss(recon_logits, gt_labels).div(math.log(2))
+        # class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
         inf_loss = -0.5 * (1 + 2 * std.log() - mu.pow(2) - std.pow(2)).sum(1).mean().div(math.log(2))
         vib_loss = class_loss + VIB_beta * inf_loss
 
@@ -785,7 +787,8 @@ def eval_Wildcat_WK_hd_compf_cw_vib_logits(epoch, model, logits_loss, info_loss,
 
         recon_logits, mu, std, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
-        class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
+        class_loss = logits_loss(recon_logits, gt_labels).div(math.log(2))
+        # class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
         inf_loss = -0.5 * (1 + 2 * std.log() - mu.pow(2) - std.pow(2)).sum(1).mean().div(math.log(2))
         vib_loss = class_loss + VIB_beta * inf_loss
 

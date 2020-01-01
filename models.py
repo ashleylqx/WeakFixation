@@ -7004,7 +7004,7 @@ class VIB(torch.nn.Module):
 def xavier_init(ms):
     for m in ms :
         if isinstance(m, torch.nn.Linear) or isinstance(m, torch.nn.Conv2d):
-            torch.nn.init.xavier_uniform(m.weight,gain=torch.nn.init.calculate_gain('relu'))
+            torch.nn.init.xavier_uniform_(m.weight,gain=torch.nn.init.calculate_gain('relu'))
             m.bias.data.zero_()
 
 
