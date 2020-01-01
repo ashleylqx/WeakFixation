@@ -6944,3 +6944,314 @@ class Wildcat_WK_hd_gs_compf_cls_att_A_sm(torch.nn.Module):
     #             ]
 
 
+# ====================================================================
+# ==============================
+# modified from https://github.com/1Konny/VIB-pytorch/blob/master/model.py
+class VIB(torch.nn.Module):
+    def __init__(self, K=256, n_classes=coco_num_classes):
+        super(VIB, self).__init__()
+        self.K = K
+
+        self.encode = torch.nn.Sequential(
+            torch.nn.Linear(n_classes, 1024),
+            torch.nn.ReLU(True),
+            torch.nn.Linear(1024, 1024),
+            torch.nn.ReLU(True),
+            torch.nn.Linear(1024, 2*self.K))
+
+        self.decode = torch.nn.Sequential(
+                torch.nn.Linear(self.K, n_classes))
+
+    def forward(self, x, num_sample=1):
+        if x.dim() > 2 : x = x.view(x.size(0),-1)
+
+        statistics = self.encode(x)
+        mu = statistics[:,:self.K]
+        std = F.softplus(statistics[:,self.K:]-5,beta=1)
+
+        encoding = self.reparametrize_n(mu,std,num_sample)
+        logit = self.decode(encoding)
+
+        if num_sample == 1 : pass
+        elif num_sample > 1 : logit = F.softmax(logit, dim=2).mean(0)
+
+        return logit, mu, std
+        # return (mu, std), logit
+
+    def reparametrize_n(self, mu, std, n=1):
+        # reference :
+        # http://pytorch.org/docs/0.3.1/_modules/torch/distributions.html#Distribution.sample_n
+        def expand(v):
+            if isinstance(v, Number):
+                return torch.Tensor([v]).expand(n, 1)
+            else:
+                return v.expand(n, *v.size())
+
+        if n != 1 :
+            mu = expand(mu)
+            std = expand(std)
+
+        eps = torch.autograd.Variable(std.data.new(std.size()).normal_(), std.is_cuda)
+        eps = eps.to(mu.device)
+
+        return mu + eps * std
+
+    def weight_init(self):
+        for m in self._modules:
+            xavier_init(self._modules[m])
+
+
+def xavier_init(ms):
+    for m in ms :
+        if isinstance(m, torch.nn.Linear) or isinstance(m, torch.nn.Conv2d):
+            torch.nn.init.xavier_uniform(m.weight,gain=torch.nn.init.calculate_gain('relu'))
+            m.bias.data.zero_()
+
+
+class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_vib_logits(torch.nn.Module):
+    def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
+                 use_grid=False, normalize_feature=False, n_samples = VIB_n_sample):
+        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_vib_logits, self).__init__()
+        self.n_classes = n_classes
+        self.use_grid = use_grid
+        self.normalize_feature = normalize_feature
+        if dilate:
+            # model = resnet50_dilate()
+            # model = resnet50_dilate_one()
+            # model = resnet50_dilate_one2()
+            model = resnet50_dilate_one3()
+            # model = resnet50_dilate_one4()
+            # model = resnet50_dilate_one5()
+
+        else:
+            model = models.resnet50(pretrained=False)
+
+        ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet50.pth'
+        pretrained_dict = torch.load(ckpt_file)
+        model.load_state_dict(pretrained_dict)
+
+        pooling = torch.nn.Sequential()
+        pooling.add_module('class_wise', ClassWisePool(num_maps))
+        pooling.add_module('spatial', WildcatPool2d(kmax, kmin, alpha))
+
+        # ---------------------------------------------
+        self.features = torch.nn.Sequential(
+            model.conv1, model.bn1, model.relu, model.maxpool,
+            model.layer1, model.layer2, model.layer3, model.layer4)
+
+        if fix_feature:
+            for param in self.features.parameters():
+                param.requires_grad = False
+            # for name, parameter in self.features.named_parameters():
+            #     if 'layer2' not in name and 'layer3' not in name and 'layer4' not in name:
+            #         parameter.requires_grad_(False)
+        # classification layer
+        num_features = model.layer4[1].conv1.in_channels
+        self.classifier = torch.nn.Sequential(
+            torch.nn.Conv2d(num_features, n_classes * num_maps, kernel_size=1, stride=1, padding=0, bias=True))
+
+        self.spatial_pooling = pooling
+
+        self.to_img_size = torch.nn.Upsample(size=(input_h, input_w))
+        self.to_attention_size = torch.nn.Upsample(size=(output_h, output_w))
+        self.to_grid_size = torch.nn.Upsample(size=(7, 7))
+        self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
+        self.grid_N = self.boxes_grid.size(1)
+
+        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=1, group=1,
+                                                               cls_num=n_classes,
+                                                               dim=[FEATURE_DIM] * 3)
+
+        self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
+        # self.to_cw_feature_size = torch.nn.Upsample(size=(14, 14))
+        self.to_output_size = torch.nn.Upsample(size=(output_h, output_w))
+
+        # self.centerbias = CenterBias_A(n=n_gaussian, input_c=num_features) # gs_A_x
+        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes * num_maps)  # , in_h=28, in_w=28
+        # self.centerbias = CenterBias_G(n=n_gaussian)
+
+        self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
+
+        self.box_roi_pool = MultiScaleRoIAlign(
+            featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
+            output_size=BOI_SIZE,
+            sampling_ratio=2)
+
+        resolution = self.box_roi_pool.output_size[0]
+        representation_size = FEATURE_DIM
+        out_channels = 256
+        if self.normalize_feature == True:
+            self.box_head = TwoMLPHead_my(
+                out_channels * resolution ** 2,
+                representation_size)
+        else:
+            self.box_head = TwoMLPHead(
+                out_channels * resolution ** 2,
+                representation_size)
+
+        in_channels_stage2 = 256
+        in_channels_list = [
+            in_channels_stage2,
+            in_channels_stage2 * 2,
+            in_channels_stage2 * 4,
+            in_channels_stage2 * 8,
+        ]
+        self.fpn = FeaturePyramidNetwork(
+            in_channels_list=in_channels_list,
+            out_channels=out_channels,
+            extra_blocks=LastLevelMaxPool(),
+        )
+
+        # ========vib============
+        self.vib_logits = VIB(K=VIB_dim, n_classes=n_classes)
+        xavier_init(self.vib_logits.modules())
+
+        self.n_samples = n_samples
+
+    def forward(self, img, boxes, boxes_nums):  # img size 224
+        # define forward process
+        image_sizes = [im.size()[-2:] for im in img]
+        boxes_list = [boxes[b_i, :boxes_nums[b_i], :] for b_i in range(len(boxes_nums))]  # //self.cuda_num
+
+        # if self.use_grid:
+        features = OrderedDict()
+        x = self.features[:5](img)
+        features['layer1'] = x
+        x = self.features[5](x)
+        features['layer2'] = x
+        x = self.features[6](x)
+        features['layer3'] = x
+        x = self.features[7](x)
+        features['layer4'] = x
+
+        features = self.fpn(features)
+
+        processed_features = self.box_roi_pool(features, boxes_list, image_sizes)  # N, 256, 7, 7
+        processed_features = self.box_head(processed_features)  # N, 1024
+        if self.normalize_feature == 'Ndiv':
+            if processed_features.size(0) > 0:
+                box_f_max = torch.max(processed_features, dim=-1, keepdim=True).values
+                box_f_max[box_f_max == 0.] = 1e-8
+                processed_features = torch.div(processed_features, box_f_max)
+
+        boxes_per_image = [len(boxes_in_image) for boxes_in_image in boxes_list]
+        box_feature = processed_features.split(boxes_per_image, 0)
+
+        # pdb.set_trace()
+        # print('box_feature[0]', box_feature[0].max(), box_feature[0].min())
+
+        if self.use_grid:
+            # box_feature_grid = self.embed_grid_feature(x).permute(0, 2, 3, 1)  # embed layer using Conv2d
+            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
+
+            # x = self.features(img.detach())
+            # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
+            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
+            if FEATURE_DIM == 256:
+                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
+            elif FEATURE_DIM == 512:
+                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
+                #                              dim=1).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([F.adaptive_avg_pool2d(features['layer3'], output_size=(7,7)),
+                #                               F.adaptive_avg_pool2d(features['layer4'], output_size=(7,7))],
+                #                              dim=1).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([torch.max_pool2d(features['layer3'], kernel_size=features['layer3'].size(2)//7),
+                #                               torch.max_pool2d(features['layer4'], kernel_size=features['layer4'].size(2)//7)],
+                #                              dim=1).permute(0, 2, 3, 1)
+                box_feature_grid = torch.cat(
+                    [self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                    dim=1).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([self.to_grid_size(features['layer2']), self.to_grid_size(features['layer4'])],
+                #                              dim=1).permute(0, 2, 3, 1)
+                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
+                #                              dim=1).permute(0, 2, 3, 1)
+
+            elif FEATURE_DIM == 1024:
+                box_feature_grid = torch.cat(
+                    [self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2']),
+                     self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                    dim=1).permute(0, 2, 3, 1)
+
+            box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
+
+            if self.normalize_feature == 'Ndiv':
+                grid_max = torch.max(box_feature_grid, dim=-1, keepdim=True).values
+                grid_max[grid_max == 0.] = 1e-8
+                box_feature_grid = torch.div(box_feature_grid, grid_max)
+
+            # box_feature_grid = self.embed_grid_feature(
+            #     x_gd.permute(0, 2, 3, 1).contiguous().view(x_gd.size(0), -1, x_gd.size(1)))  # better?
+            # box_feature_grid = self.embed_grid_feature(x.detach().permute(0,2,3,1).contiguous().view(x.size(0), -1, x.size(1)))
+            # print(box_feature_grid.size())
+
+            # print(box_feature_grid.size(1), self.grid_N)
+
+            assert box_feature_grid.size(1) == self.grid_N
+
+            # box_feature = torch.cat([box_feature_grid, box_feature], dim=1)
+            box_feature = [torch.cat([box_feature_grid[b_i], box_feature[b_i]], dim=0) for b_i in
+                           range(len(boxes_nums))]
+            # print('box_feature[0]', box_feature[0].max(), box_feature[0].min())
+
+            self.boxes_grid = self.boxes_grid.to(img.device)
+            boxes = torch.cat([self.boxes_grid.repeat(img.size(0), 1, 1), boxes], dim=1)
+            boxes_nums = [n + self.grid_N for n in boxes_nums]
+            boxes_list = [boxes[b_i, :boxes_nums[b_i], :] for b_i in range(len(boxes_nums))]
+
+        # ori_logits = F.adaptive_avg_pool2d(x, output_size=(1, 1)).squeeze(-1).squeeze(-1)
+        # print('ori_logits', ori_logits.size())
+        x = self.classifier(x)  # (N, 1000, 7, 7) # previously, mask x, then pass to self.comp_pooling
+
+        # ori_logits = F.adaptive_avg_pool2d(x, output_size=(1, 1)).squeeze(-1).squeeze(-1)
+
+        gaussian = self.centerbias(x)  # previous n_gaussian=8 use this settings; as all other n_gaussians
+        if gaussian.size(0) != x.size(0):
+            gaussian = gaussian.repeat(x.size(0), 1, 1, 1)
+        # if gaussian.size(2) != x.size(2):
+        #     gaussian = F.interpolate(gaussian, size=(x.size(2), x.size(3)))
+
+        x = self.gen_g_feature(torch.cat([x, gaussian], dim=1))
+        cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
+        # cw_maps_rpt = torch.cat([cw_maps.unsqueeze(1), cw_maps.unsqueeze(1)], dim=1)
+        # cw_maps_out = self.feature_refine(cw_maps_rpt)
+        # cw_maps_refined = cw_maps_out[1][0][0]
+        # pred_logits = self.spatial_pooling.spatial(cw_maps_refined)  # (N, 1000)
+
+        # sft_scores = torch.sigmoid(pred_logits)  # the combined maps looks better...
+        #
+        # map = torch.mul(sft_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps), # TODO change map to hd_map
+        #                 torch.sigmoid(cw_maps))
+        # map = torch.div(map.sum(1, keepdim=True), sft_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1))
+
+        # hard_sal_map = torch.zeros(img.size(0), 1, img.size(-2), img.size(-1))
+
+        hard_scores = torch.zeros(img.size(0), self.n_classes)
+        hard_scores = hard_scores.to(img.device)
+        # hard_sal_map = torch.zeros(img.size(0), 1, self.grid_N, self.grid_N)
+        # hard_sal_map = hard_sal_map.to(img.device)
+
+        # print('boxes_nums', boxes_nums)
+        # if np.sum(np.array(boxes_nums))>0:
+        # box_scores = torch.zeros(img.size(0), np.array(boxes_nums).max()).to(img.device)
+
+        for b_i in range(img.size(0)):
+            if boxes_nums[b_i] > 0:
+                # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
+                hard_scores[b_i, :] = self.relation_net(boxes_list[b_i], box_feature[b_i])
+
+        hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),
+                                 # TODO change map to hd_map
+                                 torch.sigmoid(cw_maps)).sum(1, keepdim=True)  ## 1
+        hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1) + 1e-8)
+
+        masked_cw_maps = torch.mul(cw_maps, hard_sal_map)
+        masked_cw_maps = masked_cw_maps + cw_maps  # TODO: comp_self_res
+        pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps)  ## 1
+
+        recon_logits, mu, logvar = self.vib_logits(pred_comp_logits, num_sample=self.n_samples)
+
+        sal_map = self.to_attention_size(hard_sal_map)
+        # sal_map = torch.sigmoid(sal_map)
+
+        # return pred_comp_logits, sal_map  # , gaussian, gs_map
+        return recon_logits, mu, logvar, sal_map  # , gaussian, gs_map

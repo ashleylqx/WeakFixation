@@ -94,3 +94,8 @@ MAX_BNUM = 50 #100 # 50 for all the augs
 FEATURE_DIM = 512 #512 #128 #256 #512 # 1024
 BOI_SIZE = 7 # default 7
 GRID_SIZE = 7 # default 7
+
+
+VIB_n_sample = 6
+VIB_beta = 1e-3
+VIB_dim = 256
