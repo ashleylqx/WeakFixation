@@ -546,7 +546,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, 
         #                                             shape_r=ori_img.shape[0],
         #                                             shape_c=ori_img.shape[1])) # the ratio is not right..
 
-# for vib_logits
+# for vib_m_cw_maps
 def train_Wildcat_WK_hd_compf_map_cw_vib_logits(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
     model.train()
 
@@ -975,6 +975,235 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_vib_logits(model, folder_name, best_m
         #                                             shape_r=ori_img.shape[0],
         #                                             shape_c=ori_img.shape[1])) # the ratio is not right..
 
+
+# for vib_cw_maps, two cls losses
+def train_Wildcat_WK_hd_compf_map_cw_vib_cw_maps(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
+    model.train()
+
+    N = len(dataloader)
+    total_vib_loss = list()
+    total_h_loss = list()
+    total_loss = list()
+    total_cps_loss = list()
+    total_map_loss = list()
+    total_izy_bound = list()
+    total_izx_bound = list()
+    for i, X in enumerate(dataloader):
+        optimizer.zero_grad()
+
+        # COCO image, label, boxes(, image_name)
+        # ILSVRC  image, label, boxes(, image_name)
+        inputs, gt_labels, boxes, boxes_nums, rf_maps = X
+
+
+        if args.use_gpu:
+            inputs = inputs.cuda()
+            gt_labels = gt_labels.cuda()
+
+            boxes = boxes.cuda()
+            rf_maps = rf_maps.cuda()
+
+        recon_logits, cls_logits, mu, std, pred_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
+        if torch.isnan(pred_maps).any():
+            print('pred_maps contains nan')
+
+        # rf_maps = rf_maps - rf_maps.min() # do not have this previously
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
+
+        cps_losses = cps_weight*logits_loss(cls_logits, gt_labels)
+
+        class_loss = logits_loss(recon_logits, gt_labels).div(math.log(2))
+        # class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
+        inf_loss = -0.5 * (1 + 2 * std.log() - mu.pow(2) - std.pow(2)).sum(1).mean().div(math.log(2))
+        vib_loss = class_loss + VIB_beta * inf_loss
+
+        izy_bound = math.log(10, 2) - class_loss
+        izx_bound = inf_loss
+
+        h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
+        # print('pred_maps', pred_maps.size(), pred_maps.max(), pred_maps.min())
+        # print('rf_maps', rf_maps.size(), rf_maps.max(), rf_maps.min())
+        rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
+        # rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(torch.nn.Upsample((rf_maps.size(-2), rf_maps.size(-1)))(pred_maps).squeeze(),
+        #                                                      min=0.0, max=1.0), rf_maps)
+
+        cps_losses.backward(retain_graph=True)
+        vib_loss.backward(retain_graph=True)
+        # losses.backward(retain_graph=True)
+        h_losses.backward(retain_graph=True)
+        rf_losses.backward()
+
+        optimizer.step()
+        total_vib_loss.append(vib_loss.item())
+        total_loss.append(class_loss.item())
+        total_cps_loss.append(cps_losses.item())
+        total_h_loss.append(h_losses.item())
+        total_map_loss.append(rf_losses.item())
+        total_izy_bound.append(izy_bound.item())
+        total_izx_bound.append(izx_bound.item())
+
+        if i%train_log_interval == 0:
+            print("Train [{}][{}/{}]"
+                  "\tcps_loss:{:.4f}({:.4f})\tvib_cls_loss:{:.4f}({:.4f})\tvib_loss:{:.4f}({:.4f})"
+                  "\th_loss:{:.4f}({:.4f})\trf_loss:{:.4f}({:.4f})"
+                  "\tIZY:{:.2f}({:.4f})\tIZX:{:.2f}({:.4f})".format(
+                epoch, i, int(N),
+                cps_losses.item(), np.mean(np.array(total_cps_loss)),
+                class_loss.item(), np.mean(np.array(total_loss)),
+                vib_loss.item(), np.mean(np.array(total_vib_loss)),
+                h_losses.item(), np.mean(np.array(total_h_loss)),
+                rf_losses.item(), np.mean(np.array(total_map_loss)),
+                izy_bound.item(), np.mean(np.array(total_izy_bound)),
+                izx_bound.item(), np.mean(np.array(total_izx_bound))))
+
+        if i%tb_log_interval == 0:
+            niter = epoch * len(dataloader) + i
+            # writer.add_scalar('Train_hd/Loss', losses.item(), niter)
+            writer.add_scalar('Train_hd/Cps_loss', cps_losses.item(), niter)
+            writer.add_scalar('Train_hd/Rf_loss', rf_losses.item(), niter)
+
+            if torch.cuda.device_count() < 2:
+            # if True:
+                if model.features[0].weight.grad is not None:
+                    writer.add_scalar('Grad_hd/features0', model.features[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/f_layer4[-1]', model.features[-1][-1].conv3.weight.grad.abs().mean().item(), niter)
+                writer.add_scalar('Grad_hd/classifier0', model.classifier[0].weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin1', model.relation_net.lin1.weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin3', model.relation_net.lin3.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model, 'relation_net'):
+                    writer.add_scalar('Grad_hd/pair_pos_fc1', model.relation_net.pair_pos_fc1.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/linear_out', model.relation_net.linear_out.weight.grad.abs().mean().item(), niter)
+
+                    # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
+
+                if hasattr(model.centerbias, 'fc1'):
+                    if model.centerbias.fc1.weight.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_fc1', model.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                        writer.add_scalar('Grad_hd/gs_fc2', model.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature',
+                        #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                else:
+                    if model.centerbias.params.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_params', model.centerbias.params.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                        #                   niter)
+
+                if hasattr(model, 'box_head'):
+                    writer.add_scalar('Grad_hd/box_head_fc6', model.box_head.fc6.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/box_head_fc7', model.box_head.fc7.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model, 'vib_logits'):
+                    writer.add_scalar('Grad_hd/vib_encode0', model.vib_logits.encode[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/vib_decode0', model.vib_logits.decode[0].weight.grad.abs().mean().item(), niter)
+
+
+            else:
+                if model.module.features[0].weight.grad is not None:
+                    writer.add_scalar('Grad_hd/features0', model.module.features[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/f_layer4[-1]', model.module.features[-1][-1].conv3.weight.grad.abs().mean().item(), niter)
+                writer.add_scalar('Grad_hd/classifier0', model.module.classifier[0].weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin1', model.relation_net.lin1.weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin3', model.relation_net.lin3.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model.module, 'relation_net'):
+                    writer.add_scalar('Grad_hd/pair_pos_fc1', model.module.relation_net.pair_pos_fc1.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/linear_out', model.module.relation_net.linear_out.weight.grad.abs().mean().item(), niter)
+
+                    # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
+
+                if hasattr(model.module.centerbias, 'fc1'):
+                    if model.module.centerbias.fc1.weight.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_fc1', model.module.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                        writer.add_scalar('Grad_hd/gs_fc2', model.module.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature',
+                        #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                else:
+                    if model.module.centerbias.params.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_params', model.module.centerbias.params.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                        #                   niter)
+
+                if hasattr(model.module, 'box_head'):
+                    writer.add_scalar('Grad_hd/box_head_fc6', model.module.box_head.fc6.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/box_head_fc7', model.module.box_head.fc7.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model.mudule, 'vib_logits'):
+                    writer.add_scalar('Grad_hd/vib_encode0', model.mudule.vib_logits.encode[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/vib_decode0', model.mudule.vib_logits.decode[0].weight.grad.abs().mean().item(), niter)
+
+
+    print("Train [{}]\tAverage cps_loss:{:.4f}\tAverage vib_loss:{:.4f}"
+          "\tAverage h_loss:{:.4f}\tAverage rf_loss:{:.4f}"
+          "\tAverage izy_bound:{:.4f}\tAverage izx_bound:{:.4f}".format(epoch,
+                                                 np.mean(np.array(total_cps_loss)), np.mean(np.array(total_vib_loss)),
+                                                 np.mean(np.array(total_h_loss)), np.mean(np.array(total_map_loss)),
+                                                 np.mean(np.array(total_izy_bound)), np.mean(np.array(total_izx_bound))))
+
+def eval_Wildcat_WK_hd_compf_salicon_cw_vib_cw_maps(epoch, model, logits_loss, info_loss, dataloader, args):
+    model.eval()
+    N = len(dataloader)
+    total_vib_loss = list()
+    total_cps_loss = list()
+    total_loss = list()
+    total_h_loss = list()
+    total_map_loss = list()
+    for i, X in enumerate(dataloader):
+        # SALICON images_batch, labels_batch, boxes_batch, boxes_nums, sal_maps_batch, fix_maps_batch, image_names_
+        inputs, gt_labels, boxes, boxes_nums, sal_maps, _ = X
+
+        if args.use_gpu:
+            inputs = inputs.cuda()
+            gt_labels = gt_labels.cuda()
+
+            boxes = boxes.cuda()
+            sal_maps = sal_maps.cuda()
+
+        recon_logits, cls_logits, mu, std, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+
+        cps_losses = logits_loss(cls_logits, gt_labels)
+        class_loss = logits_loss(recon_logits, gt_labels).div(math.log(2))
+        # class_loss = F.cross_entropy(recon_logits, gt_labels).div(math.log(2))
+        inf_loss = -0.5 * (1 + 2 * std.log() - mu.pow(2) - std.pow(2)).sum(1).mean().div(math.log(2))
+        vib_loss = class_loss + VIB_beta * inf_loss
+
+        izy_bound = math.log(10, 2) - class_loss
+        izx_bound = inf_loss
+
+        h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
+        map_losses = torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), sal_maps)
+        # map_losses = torch.nn.BCELoss()(torch.clamp(torch.nn.Upsample((sal_maps.size(-2), sal_maps.size(-1)))(pred_maps).squeeze(),
+        #                                             min=0.0, max=1.0), sal_maps)
+        # map_losses = torch.nn.BCELoss()(pred_maps.squeeze(), sal_maps)
+
+        total_cps_loss.append(cps_losses.item())
+        total_loss.append(class_loss.item())
+        total_vib_loss.append(vib_loss.item())
+        total_h_loss.append(h_losses.item())
+        total_map_loss.append(map_losses.item())
+
+        if i%train_log_interval == 0:
+            print("Eval [{}][{}/{}]"
+                  "\tcps_loss:{:.4f}({:.4f})\tvib_cls_loss:{:.4f}({:.4f})\tvib_loss:{:.4f}({:.4f})"
+                  "\th_loss:{:.4f}({:.4f})\tmap_loss:{:.4f}({:.4f})".format(
+                epoch, i, int(N),
+                cps_losses.item(), np.mean(np.array(total_cps_loss)),
+                class_loss.item(), np.mean(np.array(total_loss)),
+                vib_loss.item(), np.mean(np.array(total_vib_loss)),
+                h_losses.item(), np.mean(np.array(total_h_loss)),
+                map_losses.item(), np.mean(np.array(total_map_loss))))
+
+        if i%tb_log_interval == 0:
+            niter = epoch * len(dataloader) + i
+            writer.add_scalar('Eval_hd/Cps_loss', cps_losses.item(), niter)
+            writer.add_scalar('Eval_hd/Map_loss', map_losses.item(), niter)
+
+    print("Eval [{}]\tAverage cps_loss:{:.4f}\tAverage vib_cls_loss:{:.4f}\tAverage vib_loss:{:.4f}"
+          "\\tAverage h_loss:{:.4f}tAverage map_loss:{:.4f}".format(epoch,
+              np.mean(np.array(total_cps_loss)), nnp.mean(np.array(total_loss)), np.mean(np.array(total_vib_loss)),
+              np.mean(np.array(total_h_loss)), np.mean(np.array(total_map_loss))))
+
+    return np.mean(np.array(total_cps_loss))+np.mean(np.array(total_h_loss))
 
 
 # logit loss and cps loss
@@ -3250,7 +3479,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
         # args.n_epochs = 5
         for i_epoch in range(args.n_epochs):
-            train_Wildcat_WK_hd_compf_map_cw_vib_logits(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            # train_Wildcat_WK_hd_compf_map_cw_vib_logits(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
 
             tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon_cw_vib_logits(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             # tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss, eval_map_dataloader, args)
