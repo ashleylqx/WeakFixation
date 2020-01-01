@@ -5212,8 +5212,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         #     n_gaussian, normf, ilsvrc_num_tgt_classes, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate,
         #     e_num)  ####_all
 
-        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_aug7_compf_cls_att_gd_nf4_norm{}_hb_tgt{}_rf{}_hth{}_ils4_fdim{}_34_cw_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
-            n_gaussian, normf, ilsvrc_num_tgt_classes, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
+        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_aug7_compf_cls_att_gd_nf4_norm{}_hb_{}_tgt{}_rf{}_hth{}_ils4_fdim{}_34_cw_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+            n_gaussian, normf, MAX_BNUM, ilsvrc_num_tgt_classes, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
             dilate, e_num)  ####_all
 
         # # best_model_file = 'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att2_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
