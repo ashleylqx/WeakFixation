@@ -96,6 +96,6 @@ BOI_SIZE = 7 # default 7
 GRID_SIZE = 7 # default 7
 
 
-VIB_n_sample = 1
+VIB_n_sample = 6
 VIB_beta = 1e-3
-VIB_dim = 256
+VIB_dim = 32
