@@ -6948,12 +6948,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A_sm(torch.nn.Module):
 # ==============================
 # modified from https://github.com/1Konny/VIB-pytorch/blob/master/model.py
 class VIB(torch.nn.Module):
-    def __init__(self, K=256, n_classes=coco_num_classes):
+    def __init__(self, f_cn, K=256, n_classes=coco_num_classes):
         super(VIB, self).__init__()
         self.K = K
 
         self.encode = torch.nn.Sequential(
-            torch.nn.Linear(n_classes, 1024),
+            torch.nn.Linear(f_cn, 1024),
             torch.nn.ReLU(True),
             torch.nn.Linear(1024, 1024),
             torch.nn.ReLU(True),
@@ -7350,7 +7350,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_vib_cwmaps(torch.nn.Module):
         )
 
         # ========vib============
-        self.vib_logits = VIB(K=VIB_dim, n_classes=n_classes)
+        self.vib_logits = VIB(f_cn = n_classes * num_maps, K=VIB_dim, n_classes=n_classes)
         xavier_init(self.vib_logits.modules())
 
         self.n_samples = n_samples
