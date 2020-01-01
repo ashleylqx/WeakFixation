@@ -7495,7 +7495,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_vib_m_cwmaps(torch.nn.Module):
         masked_cw_maps = masked_cw_maps + cw_maps  # TODO: comp_self_res
         # pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps)  ## 1
         # pdb.set_trace()
-        recon_logits, mu, logvar = self.vib_logits(masked_cw_maps, num_sample=self.n_samples)
+        # recon_logits, mu, logvar = self.vib_logits(masked_cw_maps, num_sample=self.n_samples)
+        recon_logits, mu, logvar = self.vib_logits(torch.sigmoid(masked_cw_maps), num_sample=self.n_samples)
 
         sal_map = self.to_attention_size(hard_sal_map)
         # sal_map = torch.sigmoid(sal_map)
