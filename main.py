@@ -595,7 +595,7 @@ def train_Wildcat_WK_hd_compf_map_cw_vib_logits(epoch, model, optimizer, logits_
         #                                                      min=0.0, max=1.0), rf_maps)
 
         # losses.backward(retain_graph=True)
-        total_vib_loss.backward(retain_graph=True)
+        vib_loss.backward(retain_graph=True)
         # losses.backward(retain_graph=True)
         h_losses.backward(retain_graph=True)
         rf_losses.backward()
