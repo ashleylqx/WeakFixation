@@ -4823,7 +4823,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
         self.to_output_size = torch.nn.Upsample(size=(output_h, output_w))
 
         # self.centerbias = CenterBias_A(n=n_gaussian, input_c=num_features) # gs_A_x
-        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
+        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps, in_h=28, in_w=28) #
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
