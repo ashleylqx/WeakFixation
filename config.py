@@ -4,8 +4,8 @@ base_path = '/home/hz1/QX/'
 # base_path = '/raid/QX/'
 
 
-input_h = 224 #224
-input_w = 224 #224
+input_h = 448 #224
+input_w = 448 #224
 img_area = input_h*input_w*1.0
 
 det_input_h = 800
