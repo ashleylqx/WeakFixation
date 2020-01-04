@@ -6133,8 +6133,8 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=36*torch.cuda.device_count(), #cw 72(26xxx) or larger #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
-                        type=int, # cw512 *80* ; cw1024 *64*; cw512 one5 *32*; cw512 one0 *32(15553),48*; CW512 448input *36*
+    parser.add_argument("--batch_size", default=24*torch.cuda.device_count(), #cw 72(26xxx) or larger #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
+                        type=int, # cw512 *80* ; cw1024 *64*; cw512 one5 *32*; cw512 one0 *32(15553),48*; CW512 448input *36(29000)*
                         help="""Set batch size""") # cw512 msl *64*
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
