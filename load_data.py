@@ -460,8 +460,8 @@ class MS_COCO_map_full_aug(Dataset):
         #                    #RandomShear(0.1)]
         #                   ) # _aug5
 
-        #self.seq = RandomHorizontalFlip() # _aug6
-        self.seq = RandomRotate(5) # _aug7
+        self.seq = RandomHorizontalFlip() # _aug6
+        # self.seq = RandomRotate(5) # _aug7 ## BEST
         # self.seq = RandomRotate(10) # _aug7_2
         # self.seq = RandomScale(0.1, diff=True) # _aug8
         # self.seq = RandomScale(0.01, diff=True) # _aug8_2

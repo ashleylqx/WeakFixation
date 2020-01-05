@@ -68,6 +68,7 @@ rf_weight = 1.0 #0.1 #0.1 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_vib_m_cwmaps_sig_N{}_B{}_D{}'.format(n_gaussian,
 #                                                                     MAX_BNUM, FEATURE_DIM,VIB_n_sample,VIB_beta,VIB_dim) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug6_a_A4_fdim{}_34_cw'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -107,8 +108,8 @@ rf_weight = 1.0 #0.1 #0.1 #
 #                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian,
 #                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34_cw_4'.format(n_gaussian,
-                        ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
+# run = 'hd_gs_A{}_M4_tgt{}_hth{}_rf{}_ils_eb_{}_aug7_a_A4_fdim{}_34_cw_4'.format(n_gaussian,
+#                         ilsvrc_num_tgt_classes, hth_weight, rf_weight, MAX_BNUM, FEATURE_DIM) # 1.0
 
 # run = 'hd_cbA{}_M2_hth{}_rf{}_ils_eb_pll'.format(n_gaussian, hth_weight, rf_weight)
 
@@ -2725,14 +2726,14 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_ils_tgt'
 
-    # phase = 'train_cw_aug'
+    phase = 'train_cw_aug'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
     # phase = 'train_alt_alpha'
     # phase = 'train_aug'
     # phase = 'train_ils_tgt_aug'
-    phase = 'train_cw_ils_tgt_aug'
+    # phase = 'train_cw_ils_tgt_aug'
 
     kmax = 1
     kmin = None
@@ -3303,9 +3304,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_try_g1g1_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        # previsou one5 is actually one2 ... sad ...
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_448'.format(
+        # revisit other augmentations
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug6_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # previsou one5 is actually one2 ... sad ...
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_boi{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,BOI_SIZE,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
