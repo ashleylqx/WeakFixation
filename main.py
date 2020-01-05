@@ -5743,7 +5743,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
     elif phase == 'test_cw':
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_try(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                             fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
 
         if args.use_gpu:
