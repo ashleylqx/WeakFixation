@@ -41,9 +41,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.1 #0.1 #1.0 #
+hth_weight = 1.0 #0.1 #0.1 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.1 #0.1 #1.0 #
+rf_weight = 1.0 # 0.1 #0.1 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_gbvs_rf{}_hth{}_a'.format(n_gaussian, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -2724,9 +2724,9 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
-    # phase = 'test_cw_ils_tgt'
+    phase = 'test_cw_ils_tgt'
 
-    phase = 'train_cw_aug'
+    # phase = 'train_cw_aug'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
@@ -6050,7 +6050,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        e_num = 2  # 1 2 3 5 6
+        e_num = 5  # 1 2 3 5 6
         # best_model_file = 'resnet50_wildcat_wk_epoch%02d'%e_num
         # best_model_file = 'resnet101_wildcat_wk_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_448_ms_epoch{:02d}'.format(
         #     kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
@@ -6063,7 +6063,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #     n_gaussian, normf, ilsvrc_num_tgt_classes, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate,
         #     e_num)  ####_all
 
-        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_aug7_compf_cls_att_gd_nf4_norm{}_hb_{}_tgt{}_rf{}_hth{}_ils4_fdim{}_34_cw_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+        best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_aug7_compf_cls_att_gd_nf4_norm{}_hb_{}_tgt{}_rf{}_hth{}_ils4_fdim{}_34_cw_3_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
             n_gaussian, normf, MAX_BNUM, ilsvrc_num_tgt_classes, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature,
             dilate, e_num)  ####_all
 
