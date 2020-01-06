@@ -68,7 +68,8 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_vib_m_cwmaps_sig_N{}_B{}_D{}'.format(n_gaussian,
 #                                                                     MAX_BNUM, FEATURE_DIM,VIB_n_sample,VIB_beta,VIB_dim) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug12_a_A4_fdim{}_34_cw'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_rng{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, RN_GROUP) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug9_3_a_A4_fdim{}_34_cw'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -2723,10 +2724,10 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'test_cw_multiscale'
     # phase = 'test'
-    phase = 'test_cw'
+    # phase = 'test_cw'
     # phase = 'test_cw_ils_tgt'
 
-    # phase = 'train_cw_aug'
+    phase = 'train_cw_aug'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
@@ -3305,9 +3306,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # revisit other augmentations
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug12_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug9_3_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
+
+        # previsou one5 is actually one2 ... sad ...
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,RN_GROUP,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # previsou one5 is actually one2 ... sad ...
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(

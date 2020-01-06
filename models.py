@@ -4815,7 +4815,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
         #         torch.nn.ReLU(inplace=True)
         #     )
 
-        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=1, group=1, cls_num=n_classes,
+        # self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=1, group=1, cls_num=n_classes,
+        #                                                        dim=[FEATURE_DIM]*3)
+        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
                                                                dim=[FEATURE_DIM]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
