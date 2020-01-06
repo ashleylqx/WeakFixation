@@ -467,15 +467,17 @@ class MS_COCO_map_full_aug(Dataset):
         # self.seq = RandomScale(0.01, diff=True) # _aug8_2
         # self.seq = RandomScale(0.05, diff=True) # _aug8_3
 
-        # self.seq = Sequence([ # RandomHSV(10, 10, 10),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     # RandomScale(0.1, diff=True),
-        #                     # RandomTranslate(0.1, diff=True),
-        #                     RandomRotate(5)]
-        #                     #RandomShear(0.1)]
-        #                     ) # _aug9
+        self.seq = Sequence([ # RandomHSV(10, 10, 10),
+                            RandomHorizontalFlip(), #p=0.5
+                            # RandomScale(0.1, diff=True),
+                            # RandomTranslate(0.1, diff=True),
+                            RandomRotate(5)]
+                            #RandomShear(0.1)]
+                            ) # _aug9
 
-        self.seq = RandomTranslate(0.1, diff=True) # _aug10
+        # self.seq = RandomTranslate(0.1, diff=True) # _aug10
+
+        # self.seq = RandomHSV(5, 5, 5) # _aug11
 
 
         # if mode=='train':
