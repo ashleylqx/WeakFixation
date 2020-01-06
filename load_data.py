@@ -477,7 +477,9 @@ class MS_COCO_map_full_aug(Dataset):
 
         # self.seq = RandomTranslate(0.1, diff=True) # _aug10
 
-        self.seq = RandomHSV(5, 5, 5) # _aug11
+        # self.seq = RandomHSV(5, 5, 5) # _aug11
+
+        self.seq = RandomShear(0.05) # _aug12
 
 
         # if mode=='train':
