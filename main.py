@@ -168,13 +168,13 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
         # if torch.isnan(pred_maps).any():
         #     pdb.set_trace()
 
-        # h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
-        h_losses = hth_weight * (0.9**epoch) * info_loss(pred_maps.squeeze(1))
+        h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
+        # h_losses = hth_weight * (0.9**epoch) * info_loss(pred_maps.squeeze(1))
         # print('pred_maps', pred_maps.size(), pred_maps.max(), pred_maps.min())
         # print('rf_maps', rf_maps.size(), rf_maps.max(), rf_maps.min())
 
-        # rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
-        rf_losses = rf_weight*(0.9**epoch)*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
+        rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
+        # rf_losses = rf_weight*(0.9**epoch)*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
         # rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(torch.nn.Upsample((rf_maps.size(-2), rf_maps.size(-1)))(pred_maps).squeeze(),
         #                                                      min=0.0, max=1.0), rf_maps)
 
