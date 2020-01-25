@@ -3315,7 +3315,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
 
         # previsou one5 is actually one2 ... sad ...
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_3_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,RN_GROUP,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # previsou one5 is actually one2 ... sad ...
@@ -6165,7 +6165,7 @@ def parse_arguments():
                         help="""Set batch size""") # cw512 msl *64*
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
-    parser.add_argument("--lr", type=float, default=1e-4, # 5e-3,
+    parser.add_argument("--lr", type=float, default=5e-3, # 1e-4, # 5e-3,
                         help="""Learning rate for training""")
     parser.add_argument("--patience", type=int, default=5,
                         help="""Patience for learning rate scheduler (default 3)""")
