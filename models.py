@@ -693,7 +693,7 @@ class attention_module_multi_head_RN_cls_sa(torch.nn.Module):
             linear_out = torch.mul(linear_out, linear_out_score_sft)
 
         linear_out = linear_out.squeeze(-1).squeeze(-1)
-        # linear_out = roi_feat + linear_out  # TODO: the article use residual to enhance the input feature.
+        linear_out = roi_feat + linear_out  # TODO: the article use residual to enhance the input feature.
 
         # return linear_out.squeeze(-1).squeeze(-1)
         # pdb.set_trace()
