@@ -683,19 +683,19 @@ class attention_module_multi_head_RN_cls_sa(torch.nn.Module):
         # linear_out, [num_rois, dim[2], 1, 1]
         linear_out = self.linear_out(output_t)
         # output [num_rois, dim[2]]
-        pdb.set_trace()
+        # pdb.set_trace()
         # self attention mechanism; competition
-        linear_out_score = self.self_attention(linear_out)
-        linear_out_score_sft = torch.softmax(linear_out_score, dim=0)
+        linear_out_score = self.self_attention(linear_out) # (N, 1, 1, 1)
+        linear_out_score_sft = torch.softmax(linear_out_score, dim=0) # (N, 1, 1, 1)
         if ATT_RES:
-            linear_out = torch.mul(linear_out, linear_out_score_sft.unsqueeze(2).unsqueeze(3)) + linear_out
+            linear_out = torch.mul(linear_out, linear_out_score_sft) + linear_out
         else:
-            linear_out = torch.mul(linear_out, linear_out_score_sft.unsqueeze(2).unsqueeze(3))
+            linear_out = torch.mul(linear_out, linear_out_score_sft)
 
         linear_out = linear_out.squeeze(-1).squeeze(-1)
         linear_out = roi_feat + linear_out  # TODO: the article use residual to enhance the input feature.
         # return linear_out.squeeze(-1).squeeze(-1)
-        pdb.set_trace()
+        # pdb.set_trace()
         # output = self.read_out(linear_out.mean(dim=0, keepdim=True)) # not good
         output = self.read_out(linear_out.sum(dim=0, keepdim=True)) # all the previous experiments
         # print('output', output.max(), output.min())
