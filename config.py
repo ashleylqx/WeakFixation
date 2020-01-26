@@ -99,3 +99,5 @@ RN_GROUP = 1 #2 #4 #16 #8
 VIB_n_sample = 6
 VIB_beta = 1e-3
 VIB_dim = 256
+
+ATT_RES = False
