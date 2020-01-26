@@ -3835,10 +3835,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         # logits_loss = torch.nn.BCELoss()
         h_loss = HLoss_th()
         # h_loss = HLoss()
-        # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
-        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
+        # optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
 
@@ -6774,7 +6774,7 @@ def parse_arguments():
                         help="""Set batch size""") # cw512 msl *64*
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
-    parser.add_argument("--lr", type=float, default=1e-2, # 1e-4, # 5e-3,
+    parser.add_argument("--lr", type=float, default=1e-4, # 1e-2, # 5e-3,
                         help="""Learning rate for training""")
     parser.add_argument("--patience", type=int, default=5,
                         help="""Patience for learning rate scheduler (default 3)""")
