@@ -702,7 +702,7 @@ class attention_module_multi_head_RN_cls_sa(torch.nn.Module):
 
         output = torch.sigmoid(output)  # output [b_s, num_rois, 1]
         # output = torch.softmax(output, 1)  # output [b_s, num_rois, 1]
-        pdb.set_trace()
+        # pdb.set_trace()
         return output, linear_out_score_sft.max(), linear_out_score_sft.min(),\
                 torch.argmax(linear_out_score_sft)
 
