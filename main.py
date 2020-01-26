@@ -5767,7 +5767,8 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = [11,12]
+        E_NUM = [3]
+        E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
         ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
@@ -5811,7 +5812,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
             #          n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, FEATURE_DIM, RN_GROUP, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num) ####_all
 
-            best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
+            best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_6_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224_epoch{:02d}'.format(
                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, RN_GROUP, kmax, kmin, alpha,
                 num_maps, fix_feature, dilate, e_num)  # _gcn_all
 
