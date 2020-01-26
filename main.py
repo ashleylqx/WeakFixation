@@ -71,11 +71,11 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_dcr'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_rng{}_sgd_8'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, RN_GROUP) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-if '_sa' in run and ATT_RES:
-    run = run + '_res'
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+# if '_sa' in run and ATT_RES:
+#     run = run + '_res'
 
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_nomlp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM)
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_nomlp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM)
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug9_3_a_A4_fdim{}_34_cw'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -3186,8 +3186,8 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_ils_tgt'
 
-    # phase = 'train_cw_aug'
-    phase = 'train_cw_aug_sa'
+    phase = 'train_cw_aug'
+    # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
