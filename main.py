@@ -69,7 +69,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 #                                                                     MAX_BNUM, FEATURE_DIM,VIB_n_sample,VIB_beta,VIB_dim) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_dcr'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_rng{}_sgd_6'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, RN_GROUP) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_rng{}_sgd_7'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, RN_GROUP) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug9_3_a_A4_fdim{}_34_cw'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt3_2_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_{}_gd_nf4_normT_eb_{}_aug7_a_A6_fdim{}'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -3315,7 +3315,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
 
         # previsou one5 is actually one2 ... sad ...
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_6_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_7_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,RN_GROUP,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # previsou one5 is actually one2 ... sad ...
@@ -3377,7 +3377,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
         print('relation lr factor: 1.0')
 
@@ -6166,7 +6166,7 @@ def parse_arguments():
                         help="""Set batch size""") # cw512 msl *64*
     parser.add_argument("--n_epochs", default=500, type=int,
                         help="""Set total number of epochs""")
-    parser.add_argument("--lr", type=float, default=1e-2, # 1e-4, # 5e-3,
+    parser.add_argument("--lr", type=float, default=5e-3, # 1e-4, # 5e-3,
                         help="""Learning rate for training""")
     parser.add_argument("--patience", type=int, default=5,
                         help="""Patience for learning rate scheduler (default 3)""")
