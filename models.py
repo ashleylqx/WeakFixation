@@ -5472,6 +5472,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nomlp(torch.nn.Module):
 
         processed_features = self.box_roi_pool(features, boxes_list, image_sizes)  # N, FEATURE_DIM, 7, 7
         processed_features = self.box_head(processed_features).squeeze(3).squeeze(2)  # N, FEATURE_DIM
+        processed_features = torch.sigmoid(processed_features)
+
         if self.normalize_feature == 'Ndiv':
             if processed_features.size(0) > 0:
                 box_f_max = torch.max(processed_features, dim=-1, keepdim=True).values
@@ -5516,6 +5518,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nomlp(torch.nn.Module):
                                              dim=1).permute(0, 2, 3, 1)
 
             box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
+            box_feature_grid = torch.sigmoid(box_feature_grid)
 
             if self.normalize_feature=='Ndiv':
                 grid_max = torch.max(box_feature_grid, dim=-1, keepdim=True).values
