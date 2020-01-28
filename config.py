@@ -101,3 +101,5 @@ VIB_beta = 1e-3
 VIB_dim = 256
 
 ATT_RES = True
+
+GBVS_R = 0.25
