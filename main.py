@@ -3962,9 +3962,18 @@ def main_Wildcat_WK_hd_compf_map(args):
         model.load_state_dict(new_params)
 
         # fix
+        # for param in model.parameters():
+        #     if 'self_attention' not in param.name:
+        #         param.requires_grad = False
         for param in model.parameters():
-            if 'self_attention' not in param.name:
-                param.requires_grad = False
+            param.requires_grad = False
+
+        if torch.cuda.device_count()>1:
+            model.module.relation_net.self_attention.weight.requires_grad = True
+            model.module.relation_net.self_attention.bias.requires_grad = True
+        else:
+            model.relation_net.self_attention.weight.requires_grad = True
+            model.relation_net.self_attention.bias.requires_grad = True
 
         if args.use_gpu:
             model.cuda()
