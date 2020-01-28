@@ -73,9 +73,9 @@ run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_2'.format(n_gaus
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_dcr'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_rng{}_sgd_8'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, RN_GROUP) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_fix'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-if '_sa' in run and ATT_RES:
-    run = run + '_rres'
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_fix'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+# if '_sa' in run and ATT_RES:
+#     run = run + '_rres'
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_nomlp_sigmoid'.format(n_gaussian, MAX_BNUM, FEATURE_DIM)
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_nomlp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM)
