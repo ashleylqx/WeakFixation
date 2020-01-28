@@ -100,4 +100,4 @@ VIB_n_sample = 6
 VIB_beta = 1e-3
 VIB_dim = 256
 
-ATT_RES = False
+ATT_RES = True
