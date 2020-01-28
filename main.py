@@ -165,7 +165,7 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
         rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
-        rf_maps = 0. * rf_maps # for gbvs
+        rf_maps = 0.1 * rf_maps # for gbvs
         # rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2)) # for gbvs_thm
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
