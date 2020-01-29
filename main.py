@@ -57,7 +57,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_hth_3'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_hth_3_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_try_g3g1'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_2_34_cw_try_GS{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM,GRID_SIZE) # 1.0
@@ -4059,7 +4059,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_2_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_rf{}_hth{}_3_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_rf{}_hth{}_3_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_try_ly34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
