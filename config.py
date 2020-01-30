@@ -118,6 +118,6 @@ VIB_n_sample = 6
 VIB_beta = 1e-3
 VIB_dim = 256
 
-ATT_RES = True
+ATT_RES = False
 
 GBVS_R = 0.25
