@@ -3346,11 +3346,12 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
+    phase = 'test_cw_sa'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'
     # phase = 'train_cw_aug_gbvs'
-    phase = 'train_cw_aug_sa_new'
+    # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
@@ -7138,6 +7139,51 @@ def main_Wildcat_WK_hd_compf_map(args):
             # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
             #                              shuffle=False, num_workers=2)
             test_Wildcat_WK_hd_compf_cw(model, folder_name, best_model_file, test_dataloader, args)
+
+
+            # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+            # ds_test = MIT1003_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
+            # args.batch_size = 1
+            # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+            #                              shuffle=False, num_workers=2)
+            # test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+
+    elif phase == 'test_cw_sa':
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                            fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        if args.use_gpu:
+            model.cuda()
+
+        folder_name = 'Preds/MIT1003'
+        # best_model_file = 'no_training'
+        E_NUM = [4]
+        # E_NUM.extend(list(range(5,16)))
+        prior = 'nips08'
+
+        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        args.batch_size = 1
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+                                     shuffle=False, num_workers=2)
+
+        for e_num in E_NUM:
+
+            if ATT_RES:
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                    fix_feature, dilate, e_num)  # _gcn_all
+
+            else:
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                    fix_feature, dilate, e_num)  # _gcn_all
+
+            print("Testing %s ..."%best_model_file)
+            # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  #N=4,
+            # args.batch_size = 1
+            # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+            #                              shuffle=False, num_workers=2)
+            test_Wildcat_WK_hd_compf_cw_sa(model, folder_name, best_model_file, test_dataloader, args)
 
 
             # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
