@@ -800,8 +800,8 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_rank(model, folder_name, best_model_f
     run_time = time.time()-start_time
     print('%.3f sec/image'%(run_time/len(dataloader)))
     inds = np.argsort(np.array(evals))
-     img_names = np.array(img_names)
-    img_names_sorted = img_names[inds] 
+    img_names = np.array(img_names)
+    img_names_sorted = img_names[inds]
     print(img_names_sorted[:100])
 
 
