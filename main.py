@@ -687,9 +687,9 @@ def test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, 
     N = len(dataloader) // args.batch_size
     for i, X in enumerate(dataloader):
         # MIT1003 image, boxes, sal_map, fix_map(, image_name) # PASCAL-S
-        # ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+        ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
         # MIT300 image, boxes(, image_name)
-        ori_inputs, ori_boxes, boxes_nums, img_name = X
+        # ori_inputs, ori_boxes, boxes_nums, img_name = X
         if args.use_gpu:
             ori_inputs = ori_inputs.cuda()
             ori_boxes = ori_boxes.cuda()
