@@ -21,7 +21,7 @@ from load_data import MS_COCO_full, SALICON_full, MIT300_full, MIT1003_full, MS_
     MS_COCO_map_full_aug, MS_COCO_map_full_aug_sf, ILSVRC_full, ILSVRC_map_full, ILSVRC_map_full_aug
 from load_data import collate_fn_coco_rn, collate_fn_salicon_rn, collate_fn_mit1003_rn, \
                         collate_fn_coco_map_rn, collate_fn_coco_map_rn_multiscale, \
-                        collate_fn_ilsvrc_rn, collate_fn_ilsvrc_map_rn
+                        collate_fn_ilsvrc_rn, collate_fn_ilsvrc_map_rn, collate_fn_mit300_rn
 
 from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_att_A_multiscale, \
                 Wildcat_WK_hd_gs_compf_cls_att_A_sm, Wildcat_WK_hd_gs_compf_cls_att_A2,\
@@ -686,8 +686,10 @@ def test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, 
 
     N = len(dataloader) // args.batch_size
     for i, X in enumerate(dataloader):
-        # MIT1003 image, boxes, sal_map, fix_map(, image_name)
-        ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+        # MIT1003 image, boxes, sal_map, fix_map(, image_name) # PASCAL-S
+        # ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+        # MIT300 image, boxes(, image_name)
+        ori_inputs, ori_boxes, img_name = X
         if args.use_gpu:
             ori_inputs = ori_inputs.cuda()
             ori_boxes = ori_boxes.cuda()
@@ -7313,7 +7315,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         ds_test = MIT300_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
         # ds_test = MIT1003_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
         args.batch_size = 1
-        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+        #                              shuffle=False, num_workers=2)
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
                                      shuffle=False, num_workers=2)
         test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
