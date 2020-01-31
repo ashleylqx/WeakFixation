@@ -374,6 +374,108 @@ class resnet50_dilate_one5(torch.nn.Module):
 
         return x
 
+# dilate layer3 (2)
+class resnet101_dilate_one3(torch.nn.Module):
+    def __init__(self):
+        super(resnet50_dilate_one3, self).__init__()
+
+        blocks = models.resnet101(pretrained=False)
+        self.conv1 = blocks.conv1
+        self.bn1 = blocks.bn1
+        self.relu = blocks.relu
+        self.maxpool = blocks.maxpool
+        self.layer1 = blocks.layer1
+        self.layer2 = blocks.layer2
+
+        # change to dilated non-downsampled version
+        downsample_ly3 = torch.nn.Sequential(
+            torch.nn.Conv2d(512, 1024, kernel_size=1, stride=1, bias=False),
+            torch.nn.BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+        self.layer3 = torch.nn.Sequential(
+            Bottleneck(inplanes=512, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=512, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=512, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=512, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None),
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
+                       base_width=64, dilation=2, norm_layer=None)
+        )
+
+        # downsample_ly4 = torch.nn.Sequential(
+        #     torch.nn.Conv2d(1024, 2048, kernel_size=1, stride=1, bias=False),
+        #     torch.nn.BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        # )
+        # self.layer4 = torch.nn.Sequential(
+        #     Bottleneck(inplanes=1024, planes=512, stride=1, downsample=downsample_ly4, groups=1,
+        #                base_width=64, dilation=4, norm_layer=None),
+        #     Bottleneck(inplanes=2048, planes=512, stride=1, downsample=None, groups=1,
+        #                base_width=64, dilation=4, norm_layer=None),
+        #     Bottleneck(inplanes=2048, planes=512, stride=1, downsample=None, groups=1,
+        #                base_width=64, dilation=4, norm_layer=None)
+        # )
+        self.layer4 = blocks.layer4
+
+        # keep original
+        self.avgpool = blocks.avgpool
+        self.fc = blocks.fc
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+
+        return x
+
 class attention_module_multi_head_RN_cls(torch.nn.Module):
     # fc_new_1 [num_rois, 1024]
     # attention, [num_rois, feat_dim]
@@ -5382,14 +5484,16 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
             # model = resnet50_dilate()
             # model = resnet50_dilate_one()
             # model = resnet50_dilate_one2()
-            model = resnet50_dilate_one3() ##
+            model = resnet101_dilate_one3() ##
+            # model = resnet50_dilate_one3() ##
             # model = resnet50_dilate_one4()
             # model = resnet50_dilate_one5() ##
 
         else:
             model = models.resnet50(pretrained=False)
 
-        ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet50.pth'
+        ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet101.pth'
+        # ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet50.pth'
         pretrained_dict = torch.load(ckpt_file)
         model.load_state_dict(pretrained_dict)
 
