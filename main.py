@@ -7278,7 +7278,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         if args.use_gpu:
             model.cuda()
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = 'Preds/MIT300'
         # best_model_file = 'no_training'
         e_num = 9 #1 2 3 5 6
         # best_model_file = 'resnet50_wildcat_wk_epoch%02d'%e_num
