@@ -377,7 +377,7 @@ class resnet50_dilate_one5(torch.nn.Module):
 # dilate layer3 (2)
 class resnet101_dilate_one3(torch.nn.Module):
     def __init__(self):
-        super(resnet50_dilate_one3, self).__init__()
+        super(resnet101_dilate_one3, self).__init__()
 
         blocks = models.resnet101(pretrained=False)
         self.conv1 = blocks.conv1
