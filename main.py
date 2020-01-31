@@ -762,6 +762,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_rank(model, folder_name, best_model_f
         if args.use_gpu:
             ori_inputs = ori_inputs.cuda()
             ori_boxes = ori_boxes.cuda()
+            sal_map = sal_map.cuda()
 
         # ori_img = scipy.misc.imread(
             # os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
