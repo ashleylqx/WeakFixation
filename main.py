@@ -764,9 +764,9 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_rank(model, folder_name, best_model_f
             ori_boxes = ori_boxes.cuda()
             sal_map = sal_map.cuda()
 
-        # ori_img = scipy.misc.imread(
-            # os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
-        ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        ori_img = scipy.misc.imread(
+            os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
         # ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
 
         img_names.append(img_name[0])
@@ -791,7 +791,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_rank(model, folder_name, best_model_f
         # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
         #                   postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
         #                                          size=[ori_img.shape[0], ori_img.shape[1]]))
-        rf_loss = torch.nn.BCELoss()(torch.clamp(pred_maps_all.squeeze(), min=0.0, max=1.0), sal_map)
+        rf_loss = torch.nn.BCELoss()(torch.clamp(pred_maps_all, min=0.0, max=1.0), sal_map)
         evals.append(rf_loss.item())
 
         # scipy.misc.imsave(os.path.join(out_folder, img_name+'_my.png'),
@@ -7360,7 +7360,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         if args.use_gpu:
             model.cuda()
 
-        folder_name = 'Preds/PASCAL-S'
+        folder_name = 'Preds/MIT1003'
+        # folder_name = 'Preds/PASCAL-S'
         # folder_name = 'Preds/MIT300'
         # best_model_file = 'no_training'
         e_num = 9 #1 2 3 5 6
@@ -7394,9 +7395,9 @@ def main_Wildcat_WK_hd_compf_map(args):
 
 
         tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
-        ds_test = PASCAL_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
+        # ds_test = PASCAL_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
+        ds_test = MIT1003_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
         # ds_test = MIT300_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
-        # ds_test = MIT1003_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
         args.batch_size = 1
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
