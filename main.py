@@ -503,7 +503,7 @@ def eval_Wildcat_WK_hd_compf_salicon_cw(epoch, model, logits_loss, info_loss, da
     print("Eval [{}]\tAverage cps_loss:{:.4f}\tAverage h_loss:{:.4f}\tAverage map_loss:{:.4f}".format(epoch,
               np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)), np.mean(np.array(total_map_loss))))
 
-    return np.mean(np.array(total_cps_loss))+np.mean(np.array(total_h_loss)) # , np.mean(np.array(total_map_loss)) # uncomment for hth_2_x
+    return np.mean(np.array(total_cps_loss))+np.mean(np.array(total_h_loss)) , np.mean(np.array(total_map_loss)) # uncomment for hth_2_x
 
 def eval_Wildcat_WK_hd_compf_cw(epoch, model, logits_loss, info_loss, dataloader, args):
     model.eval()
