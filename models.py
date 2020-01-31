@@ -405,7 +405,7 @@ class resnet101_dilate_one3(torch.nn.Module):
                        base_width=64, dilation=2, norm_layer=None),
             Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None),
-            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None), # 6
             Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None),
@@ -417,7 +417,7 @@ class resnet101_dilate_one3(torch.nn.Module):
                        base_width=64, dilation=2, norm_layer=None),
             Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None),
-            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None), # 12
             Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None),
@@ -429,7 +429,7 @@ class resnet101_dilate_one3(torch.nn.Module):
                        base_width=64, dilation=2, norm_layer=None),
             Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None),
-            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=downsample_ly3, groups=1,
+            Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None), # 18
             Bottleneck(inplanes=1024, planes=256, stride=1, downsample=None, groups=1,
                        base_width=64, dilation=2, norm_layer=None),
