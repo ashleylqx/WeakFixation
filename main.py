@@ -724,6 +724,87 @@ def test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, 
         #                                             shape_r=ori_img.shape[0],
         #                                             shape_c=ori_img.shape[1])) # the ratio is not right..
 
+def test_Wildcat_WK_hd_compf_multiscale_cw_rank(model, folder_name, best_model_file, dataloader, args, tgt_sizes):
+    if best_model_file != 'no_training':
+        checkpoint = torch.load(os.path.join(args.path_out, 'Models', best_model_file+'.pt'))  # checkpoint is a dict, containing much info
+        # model.load_state_dict(checkpoint['state_dict'])
+        saved_state_dict = checkpoint['state_dict']
+        new_params = model.state_dict().copy()
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            for k, y in saved_state_dict.items():
+                if k[7:] in new_params.keys():
+                    new_params[k[7:]] = y
+        else:
+            for k, y in saved_state_dict.items():
+                if k in new_params.keys():
+                    new_params[k] = y
+        model.load_state_dict(new_params)
+
+
+    if args.use_gpu:
+        model.cuda()
+    model.eval()
+
+    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_multiscale')
+
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
+
+    N = len(dataloader) // args.batch_size
+    evals = list()
+    img_names = list()
+    start_time = time.time()
+    for i, X in enumerate(dataloader):
+        # MIT1003 image, boxes, sal_map, fix_map(, image_name) # PASCAL-S
+        ori_inputs, ori_boxes, boxes_nums, sal_map, _, img_name = X
+        # MIT300 image, boxes(, image_name)
+        # ori_inputs, ori_boxes, boxes_nums, img_name = X
+        if args.use_gpu:
+            ori_inputs = ori_inputs.cuda()
+            ori_boxes = ori_boxes.cuda()
+
+        # ori_img = scipy.misc.imread(
+            # os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
+        ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
+
+        img_names.append(img_name[0])
+
+        ori_size = ori_inputs.size(-1)
+        pred_maps_all = torch.zeros(ori_inputs.size(0), 1, output_h, output_w).to(ori_inputs.device)
+        for tgt_s in tgt_sizes:
+            inputs = F.interpolate(ori_inputs, size=(tgt_s, tgt_s), mode='bilinear', align_corners=True)
+            boxes = torch.zeros_like(ori_boxes)
+            boxes[:, :, 0] = ori_boxes[:, :, 0] / ori_size*tgt_s
+            boxes[:, :, 2] = ori_boxes[:, :, 2] / ori_size*tgt_s
+            boxes[:, :, 1] = ori_boxes[:, :, 1] / ori_size*tgt_s
+            boxes[:, :, 3] = ori_boxes[:, :, 3] / ori_size*tgt_s
+
+            _, pred_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+            # pred_maps = torch.nn.Sigmoid()(pred_maps)
+            # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+            # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+            pred_maps_all += F.interpolate(pred_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
+
+        # print(pred_maps_all.squeeze().size())
+        # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
+        #                   postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
+        #                                          size=[ori_img.shape[0], ori_img.shape[1]]))
+        rf_loss = torch.nn.BCELoss()(torch.clamp(pred_maps_all.squeeze(), min=0.0, max=1.0), sal_map)
+        evals.append(rf_loss.item())
+
+        # scipy.misc.imsave(os.path.join(out_folder, img_name+'_my.png'),
+        #                   postprocess_prediction_my(pred_maps.detach().cpu().numpy(),
+        #                                             shape_r=ori_img.shape[0],
+        #                                             shape_c=ori_img.shape[1])) # the ratio is not right..
+    run_time = time.time()-start_time
+    print('%.3f sec/image'%(run_time/len(dataloader)))
+    inds = np.argsort(np.array(evals))
+     img_names = np.array(img_names)
+    img_names_sorted = img_names[inds] 
+    print(img_names_sorted[:100])
+
+
 # no logit loss; for monitoring box self attention scores
 def train_Wildcat_WK_hd_compf_map_cw_sa(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
     model.train()
@@ -7320,7 +7401,7 @@ def main_Wildcat_WK_hd_compf_map(args):
                                      shuffle=False, num_workers=2)
         # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
         #                              shuffle=False, num_workers=2)
-        test_Wildcat_WK_hd_compf_multiscale_cw(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+        test_Wildcat_WK_hd_compf_multiscale_cw_rank(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
     elif phase == 'test_ils_tgt':
         model = Wildcat_WK_hd_gs_compf_cls_att_A(n_classes=ilsvrc_num_tgt_classes, kmax=kmax, kmin=kmin, alpha=alpha,
