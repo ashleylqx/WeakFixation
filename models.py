@@ -7838,25 +7838,22 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
             scale = 2 ** torch.tensor(approx_scale).log2().round().item()
             possible_scales.append(scale)
         assert possible_scales[0] == possible_scales[1]
-
+        # resized_boxes = boxes * possible_scales[0]
         for b_i in range(img.size(0)):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
 
-
-
-                boxes = boxes * possible_scales[0]
-
+                resized_boxes = boxes_list[b_i] * possible_scales[0]
                 att_maps = torch.zeros(att_scores.size(0), x.size()[2], x.size()[3], device=att_scores.device)
                 for box_i in range(att_scores.size(0)):
-                    box = boxes_list[b_i][box_i].int()
+                    box = resized_boxes[box_i].int()
                     att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
 
-                inds = torch.sort(att_scores.squeeze(), descending=True) # att_scores [99, 1, 1, 1]
-                # total_att_maps[b_i, 0, :, :] = att_maps.sum(0)
+                inds = torch.argsort(att_scores.squeeze(), descending=True) # att_scores [99, 1, 1, 1]
+                total_att_maps[b_i, 0, :, :] = att_maps.sum(0)
                 # pdb.set_trace()
-                total_att_maps[b_i, 0, :, :] = att_maps[inds[0].item()]
+                # total_att_maps[b_i, 0, :, :] = att_maps[inds[0].item()]
                 # total_att_maps[b_i, 0, :, :] = att_maps[inds[1]]
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
