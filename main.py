@@ -1632,7 +1632,7 @@ def test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, datal
         #                   postprocess_prediction(pred_maps.squeeze().detach().cpu().numpy(),
         #                                          size=[ori_img.shape[0], ori_img.shape[1]]))
         scipy.misc.imsave(os.path.join(out_folder, img_name[0]+postfix+'.png'),
-                          postprocess_prediction_my(att_maps.squeeze(1).detach().cpu().numpy(),
+                          postprocess_prediction_my(att_maps.squeeze().detach().cpu().numpy(),
                                                     shape_r=ori_img.shape[0],
                                                     shape_c=ori_img.shape[1])) # the ratio is not right..
 
