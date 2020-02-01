@@ -1603,7 +1603,7 @@ def test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, datal
         model.cuda()
     model.eval()
 
-    postfix = '_att1'
+    postfix = '_att2'
     out_folder = os.path.join(args.path_out, folder_name, best_model_file+postfix)
 
     if not os.path.exists(out_folder):
