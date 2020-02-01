@@ -1619,8 +1619,8 @@ def test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, datal
 
             boxes = boxes.cuda()
 
-        ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0]+'.jpeg')) # height, width, channel
-        # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0]+'.jpeg')) # height, width, channel
+        ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
         _, pred_maps, att_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # pred_maps = torch.nn.Sigmoid()(pred_maps)
         print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
@@ -7771,13 +7771,15 @@ def main_Wildcat_WK_hd_compf_map(args):
         if args.use_gpu:
             model.cuda()
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = 'Preds/PASCAL-S'
+        # folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
         E_NUM = [4]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
-        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         args.batch_size = 1
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
