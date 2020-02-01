@@ -7855,6 +7855,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
 
                 inds = torch.sort(att_scores, descending=True)
                 # total_att_maps[b_i, 0, :, :] = att_maps.sum(0)
+                pdb.set_trace()
                 total_att_maps[b_i, 0, :, :] = att_maps[inds[0].item()]
                 # total_att_maps[b_i, 0, :, :] = att_maps[inds[1]]
 
