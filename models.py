@@ -20,6 +20,8 @@ from torchvision.ops.feature_pyramid_network import FeaturePyramidNetwork, LastL
 from torchvision.models.detection import _utils as det_utils
 from torchvision.models.detection.image_list import ImageList
 
+from torch.autograd.function import once_differentiable
+
 # import kornia
 # # gauss = kornia.filters.GaussianBlur2d((11, 11), (4.33, 4.33))
 # # gauss = kornia.filters.GaussianBlur2d((3, 3), (1., 1.))
@@ -7494,6 +7496,65 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_sp(torch.nn.Module):
     #             {'params': self.features.parameters(), 'lr': lr*lr_f}
     #             ]
 
+# generate attention map for one image at one time
+class GenAttentionMap(torch.autograd.Function):
+    """
+    handling one image at one time
+    att_scores: the soft attention score (box_num, 1)
+    boxes: tensor (box_num, 4)
+    input_size: tuple (w, h)
+    output_size: tuple (w, h)
+    """
+    @staticmethod
+    def forward(ctx, att_scores, boxes, input_size, output_size):
+        ctx.save_for_backward(att_scores, boxes)
+        ctx.input_size = input_size
+        ctx.output_size = output_size
+
+        possible_scales = []
+        for s1, s2 in zip(output_size, input_size):
+            approx_scale = float(s1) / s2
+            scale = 2 ** torch.tensor(approx_scale).log2().round().item()
+            possible_scales.append(scale)
+        assert possible_scales[0] == possible_scales[1]
+
+        boxes = boxes * possible_scales[0]
+
+        att_maps = torch.zeros(att_scores.size(0), output_size[0], output_size[1], device=att_scores.device)
+        for box_i in range(att_scores.size(0)):
+            box = boxes[box_i].int()
+
+            att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
+
+        final_map = att_maps.sum(0)
+        return final_map
+
+
+    @staticmethod
+    @once_differentiable
+    def backward(ctx, grad_output):
+        att_scores, boxes = ctx.saved_tensors
+        input_size = ctx.input_size
+        output_size = ctx.output_size
+
+        print(grad_output.size())
+
+        grad_att_scores = None
+        if ctx.needs_input_grad[0]:
+            possible_scales = []
+            for s1, s2 in zip(output_size, input_size):
+                approx_scale = float(s1) / s2
+                scale = 2 ** torch.tensor(approx_scale).log2().round().item()
+                possible_scales.append(scale)
+            assert possible_scales[0] == possible_scales[1]
+
+            boxes = boxes * possible_scales[0]
+
+
+        return grad_att_scores, None, None, None
+        # grad_input = grad_output_changed
+        # return grad_input
+
 class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
                  use_grid=False, normalize_feature= False):
@@ -7764,17 +7825,38 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
         # hard_sal_map = torch.zeros(img.size(0), 1, self.grid_N, self.grid_N)
         # hard_sal_map = hard_sal_map.to(img.device)
 
-        att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3))  # max & min & argmax
-        att_maps = att_maps.to(img.device)
+        total_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3), device=img.device)  # max & min & argmax
+        # att_maps = att_maps.to(img.device)
 
         # print('boxes_nums', boxes_nums)
         #if np.sum(np.array(boxes_nums))>0:
             # box_scores = torch.zeros(img.size(0), np.array(boxes_nums).max()).to(img.device)
 
+        possible_scales = []
+        for s1, s2 in zip(x.size()[-2:], img.size()[-2:]):
+            approx_scale = float(s1) / s2
+            scale = 2 ** torch.tensor(approx_scale).log2().round().item()
+            possible_scales.append(scale)
+        assert possible_scales[0] == possible_scales[1]
+
         for b_i in range(img.size(0)):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
+
+
+
+                boxes = boxes * possible_scales[0]
+
+                att_maps = torch.zeros(att_scores.size(0), x.size()[0], x.size()[1], device=att_scores.device)
+                for box_i in range(att_scores.size(0)):
+                    box = boxes[box_i].int()
+                    att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
+
+                inds = torch.sort(att_scores, descending=True)
+                total_att_maps[box_i, 0, :, :] = att_maps.sum(0)
+                # total_att_maps[box_i, 0, :, :] = att_maps[inds[0]]
+                # total_att_maps[box_i, 0, :, :] = att_maps[inds[1]]
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
@@ -7828,7 +7910,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
 
         # return pred_logits, F.softmax(ori_logits, -1), torch.sigmoid(sal_map)
         # return pred_logits, pred_comp_logits, torch.clamp(sal_map, min=0.0, max=1.0)
-        return pred_comp_logits, sal_map, att_scores #, gaussian, gs_map
+        return pred_comp_logits, sal_map, total_att_maps #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, sal_map #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, torch.sigmoid(sal_map)
 
