@@ -7850,7 +7850,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
 
                 att_maps = torch.zeros(att_scores.size(0), x.size()[0], x.size()[1], device=att_scores.device)
                 for box_i in range(att_scores.size(0)):
-                    box = boxes[box_i].int()
+                    box = boxes_list[b_i][box_i].int()
                     att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
 
                 inds = torch.sort(att_scores, descending=True)
