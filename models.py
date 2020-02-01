@@ -7853,8 +7853,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
                 inds = torch.argsort(att_scores.squeeze(), descending=True) # att_scores [99, 1, 1, 1]
                 # total_att_maps[b_i, 0, :, :] = att_maps.sum(0)
                 # pdb.set_trace()
-                # total_att_maps[b_i, 0, :, :] = att_maps[inds[0]]
-                total_att_maps[b_i, 0, :, :] = att_maps[inds[1]]
+                total_att_maps[b_i, 0, :, :] = att_maps[inds[0]]
+                # total_att_maps[b_i, 0, :, :] = att_maps[inds[1]]
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
