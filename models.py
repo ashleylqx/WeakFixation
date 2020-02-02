@@ -7886,7 +7886,7 @@ class GenAttentionMapFunction(torch.autograd.Function):
 
         resized_boxes = boxes * possible_scales[0]
 
-        att_maps = torch.zeros(att_scores.size(0), output_size.int()[0], output_size.int()[1],
+        att_maps = torch.zeros(att_scores.size(0), output_size[0], output_size[1],
                                dtype=att_scores.dtype, device=att_scores.device)
         for box_i in range(att_scores.size(0)):
             box = resized_boxes[box_i].int()
