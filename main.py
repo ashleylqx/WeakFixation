@@ -34,7 +34,8 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_multiscale, Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw_multiscale,\
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_vib_cwmaps, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_vib_m_cwmaps, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nomlp, \
-    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new, \
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_vis
 
 from custom_loss import HLoss_th, loss_HM, HLoss_th_3, HLoss_th_2
 from config import *
@@ -81,7 +82,8 @@ rf_weight = 0.1 #0.1 #1.0 #
 # if '_sa' in run and ATT_RES:
 #     run = run + '_rres'
 
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_self_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_fixf'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -5273,6 +5275,239 @@ def main_Wildcat_WK_hd_compf_map(args):
         else:
             model.relation_net.self_attention.weight.requires_grad = True
             model.relation_net.self_attention.bias.requires_grad = True
+
+        # -------------------------------------------------
+
+        if args.use_gpu:
+            model.cuda()
+        if torch.cuda.device_count()>1:
+            model = torch.nn.DataParallel(model)
+        #folder_name = 'Preds/MIT1003'
+        #rf_folder = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch00' # T:0, F:3
+        ##rf_folder = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normFalse_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03' # T:0, F:3
+        #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
+
+        # assert os.path.exists(rf_path)
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
+        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+
+        # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
+        ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w)
+
+        # train_dataloader = DataLoader(ds_train, batch_size=args.batch_size, collate_fn=collate_fn_coco_map_rn_multiscale,
+        #                               shuffle=True, num_workers=2)
+
+        train_dataloader = DataLoader(ds_train, batch_size=args.batch_size, collate_fn=collate_fn_coco_map_rn,
+                                      shuffle=True, num_workers=2)
+
+        eval_dataloader = DataLoader(ds_validate, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
+                                     shuffle=False, num_workers=2)
+
+        # eval_map_dataloader = DataLoader(ds_validate_map, batch_size=args.batch_size, collate_fn=collate_fn_salicon,
+        #                              shuffle=False, num_workers=2)
+
+
+        # logits_loss = torch.nn.CrossEntropyLoss()
+        logits_loss = torch.nn.BCEWithLogitsLoss()
+        # logits_loss = torch.nn.BCELoss()
+        # h_loss = HLoss_th()
+        h_loss = HLoss_th_2()
+        # h_loss = HLoss()
+        # optimizer = torch.optim.Adam(model.parameters(), lr=1e-6) ###for finetuning, best 1e-6
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
+        # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
+
+        # optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
+        # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
+        # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
+
+        # print('real learning rate 1e-6.')
+
+        if args.use_gpu:
+            logits_loss = logits_loss.cuda()
+            h_loss = h_loss.cuda()
+            # optimizer = optimizer.cuda()
+
+        eval_loss = np.inf
+        # eval_salicon_loss = np.inf
+        cnt = 0
+        # args.n_epochs = 5
+        for i_epoch in range(args.n_epochs):
+            train_Wildcat_WK_hd_compf_map_cw_sa(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+
+            # tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon_cw_sa(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
+            tmp_eval_loss, map_loss = eval_Wildcat_WK_hd_compf_salicon_cw_sa(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
+            # tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss, eval_map_dataloader, args)
+
+            # scheduler.step()
+
+            if tmp_eval_loss < eval_loss:
+                cnt = 0
+                eval_loss = tmp_eval_loss
+                print('Saving model ...')
+                save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
+            elif tmp_eval_loss < 0.940 and map_loss<0.1670:
+                cnt = 0
+                print('Saving model ...')
+                save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
+            else:
+                cnt += 1
+
+
+            if cnt >= args.patience:
+                break
+
+    elif phase == 'train_cw_aug_sa_art':
+        print('lr %.4f'%args.lr)
+
+
+        prior='nips08'
+        # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                    fix_feature=fix_feature, dilate=dilate)
+
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                         fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
+
+
+        # if ATT_RES:
+        #     model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_fixf_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        #
+        # else:
+        #     model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        if ATT_RES:
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        else:
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # # previsou one5 is actually one2 ... sad ...
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_rng{}_sgd_8_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,RN_GROUP,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # previsou one5 is actually one2 ... sad ...
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_dcr_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_boi{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,BOI_SIZE,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms6_fdim{}_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # prior = 'nips08'
+        #model = Wildcat_WK_hd_gs_compf_cls_att_A_sm(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
+
+        #model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_sm_aug2_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
+        #                               n_gaussian, normf, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        print(model_name)
+
+        # # finetuen init =====================================
+        # if ATT_RES:
+        #     checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+        #                                      '_hth0.1_ms4_fdim512_34_cw_sa_new_fix_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+        #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        # else:
+        #     checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                          'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+        #                                          '_hth0.1_ms4_fdim512_34_cw_sa_new_fix_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+        #                             map_location='cuda:0')  # checkpoint is a dict, containing much info
+        #
+        # saved_state_dict = checkpoint['state_dict']
+        # new_params = model.state_dict().copy()
+        #
+        # if list(saved_state_dict.keys())[0][:7] == 'module.':
+        #     for k, y in saved_state_dict.items():
+        #         new_params[k[7:]] = y
+        #
+        # else:
+        #     for k, y in saved_state_dict.items():
+        #         new_params[k] = y
+        #
+        # model.load_state_dict(new_params)
+
+        # # init ---------------------------------------------
+        # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08'+
+        #                                      '_rf0.1_hth0.1_ms4_fdim512_34_cw_3_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch06.pt'),
+        #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        # saved_state_dict = checkpoint['state_dict']
+        # new_params = model.state_dict().copy()
+        #
+        # if list(saved_state_dict.keys())[0][:7] == 'module.':
+        #     for k, y in saved_state_dict.items():
+        #         new_params[k[7:]] = y
+        #
+        # else:
+        #     for k, y in saved_state_dict.items():
+        #         new_params[k] = y
+        #
+        # model.load_state_dict(new_params)
+
+
+        # # fine tune final model ====================================
+        # if ATT_RES:
+        #     checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+        #                                      '_hth0.1_ms4_fdim512_34_cw_sa_new_fixf_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+        #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        # saved_state_dict = checkpoint['state_dict']
+        # new_params = model.state_dict().copy()
+        #
+        # if list(saved_state_dict.keys())[0][:7] == 'module.':
+        #     for k, y in saved_state_dict.items():
+        #         if 'feature_refine' not in k:
+        #             new_params[k[7:]] = y
+        #
+        # else:
+        #     for k, y in saved_state_dict.items():
+        #         if 'feature_refine' not in k:
+        #             new_params[k] = y
+        #
+        # model.load_state_dict(new_params)
+
+
+        # # init with final model ===========================================
+        # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_alt2_2_0.95_compf_cls_att_gd_nf4_normTrue_hb_50_aug7' +
+        #                                      '_nips08_rf0.1_hth0.1_ms4_fdim512_34_lstm_cw_1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch09.pt'),
+        #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        # saved_state_dict = checkpoint['state_dict']
+        # new_params = model.state_dict().copy()
+        #
+        # if list(saved_state_dict.keys())[0][:7] == 'module.':
+        #     for k, y in saved_state_dict.items():
+        #         if 'feature_refine' not in k:
+        #             new_params[k[7:]] = y
+        #
+        # else:
+        #     for k, y in saved_state_dict.items():
+        #         if 'feature_refine' not in k:
+        #             new_params[k] = y
+        #
+        # model.load_state_dict(new_params)
+        #
+        # # fix ============================================
+        # # for param in model.parameters():
+        # #     if 'self_attention' not in param.name:
+        # #         param.requires_grad = False
+        # for param in model.parameters():
+        #     param.requires_grad = False
+        #
+        # if torch.cuda.device_count()>1:
+        #     model.module.relation_net.self_attention.weight.requires_grad = True
+        #     model.module.relation_net.self_attention.bias.requires_grad = True
+        # else:
+        #     model.relation_net.self_attention.weight.requires_grad = True
+        #     model.relation_net.self_attention.bias.requires_grad = True
 
         # -------------------------------------------------
 
