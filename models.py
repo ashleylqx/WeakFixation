@@ -7906,16 +7906,16 @@ class GenAttentionMapFunction(torch.autograd.Function):
         input_size = ctx.input_size
         output_size = ctx.output_size
 
-        print('att_scores', att_scores.size())
-        print('grad_output',grad_output.size())
+        # print('att_scores', att_scores.size())
+        # print('grad_output',grad_output.size())
 
         grad_att_scores = None
         if ctx.needs_input_grad[0]:
             possible_scales = []
             for s1, s2 in zip(output_size, input_size):
                 approx_scale = float(s1) / s2
-                # scale = 2 ** torch.tensor(approx_scale, dtype=torch.double, device=grad_output.device).log2().round().item()
-                scale = 2 ** approx_scale.clone().detach().log2().round().item()
+                scale = 2 ** torch.tensor(approx_scale, dtype=grad_output.dtype, device=grad_output.device).log2().round().item()
+                # scale = 2 ** approx_scale.clone().detach().log2().round().item()
                 possible_scales.append(scale)
             assert possible_scales[0] == possible_scales[1]
 
