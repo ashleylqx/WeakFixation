@@ -81,9 +81,10 @@ rf_weight = 0.1 #0.1 #1.0 #
 # if '_sa' in run and ATT_RES:
 #     run = run + '_rres'
 
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-run = 'hd_gs_A{}_alt_self_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_fixf'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0 
+# run = 'hd_gs_A{}_alt_self_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_fixf'.format(n_gaussian, ALPHA, MAX_BNUM, FEATURE_DIM) # 1.0 
 if '_sa' in run and ATT_RES:
     run = run + '_rres'
 
@@ -1466,6 +1467,7 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
     total_h_loss = list()
     total_cps_loss = list()
     total_map_loss = list()
+    # total_obj_map_loss = list()
     for i, X in enumerate(dataloader):
         optimizer.zero_grad()
 
@@ -1481,7 +1483,8 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
             boxes = boxes.cuda()
             rf_maps = rf_maps.cuda()
 
-        cps_logits, pred_maps, att_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
+        # cps_logits, pred_maps, obj_att_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
+        cps_logits, pred_maps, _ = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
         if torch.isnan(pred_maps).any():
             print('pred_maps contains nan')
 
@@ -1508,6 +1511,8 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
         # rf_losses = rf_weight*(0.9**epoch)*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
         # rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(torch.nn.Upsample((rf_maps.size(-2), rf_maps.size(-1)))(pred_maps).squeeze(),
         #                                                      min=0.0, max=1.0), rf_maps)
+
+        # rf_obj_losses =
 
         # losses.backward(retain_graph=True)
         cps_losses.backward(retain_graph=True)
@@ -1624,6 +1629,7 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
     total_cps_loss = list()
     total_h_loss = list()
     total_map_loss = list()
+    total_obj_map_loss = list()
     for i, X in enumerate(dataloader):
         # SALICON images_batch, labels_batch, boxes_batch, boxes_nums, sal_maps_batch, fix_maps_batch, image_names_
         inputs, gt_labels, boxes, boxes_nums, sal_maps, _ = X
@@ -1635,7 +1641,7 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
             boxes = boxes.cuda()
             sal_maps = sal_maps.cuda()
 
-        cps_logits, pred_maps, att_maps = model(img=inputs,
+        cps_logits, pred_maps, obj_att_maps = model(img=inputs,
                                                    boxes=boxes, boxes_nums=boxes_nums)
 
         # losses = logits_loss(pred_logits, ori_logits)
@@ -1657,18 +1663,23 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
         #                                             min=0.0, max=1.0), sal_maps)
         # map_losses = torch.nn.BCELoss()(pred_maps.squeeze(), sal_maps)
 
+        obj_map_losses = torch.nn.BCELoss()(torch.clamp(obj_att_maps.squeeze(), min=0.0, max=1.0), sal_maps)
+
         # total_loss.append(losses.item())
         total_cps_loss.append(cps_losses.item())
         total_h_loss.append(h_losses.item())
         total_map_loss.append(map_losses.item())
+        total_obj_map_loss.append(obj_map_losses.item())
 
         if i%train_log_interval == 0:
             print("Eval [{}][{}/{}]"
-                  "\tcps_loss:{:.4f}({:.4f})\th_loss:{:.4f}({:.4f})\tmap_loss:{:.4f}({:.4f})".format(
+                  "\tcps_loss:{:.4f}({:.4f})\th_loss:{:.4f}({:.4f})"
+                  "\tmap_loss:{:.4f}({:.4f})\tobj_map_loss:{:.4f}({:.4f})".format(
                 epoch, i, int(N),
                 cps_losses.item(), np.mean(np.array(total_cps_loss)),
                 h_losses.item(), np.mean(np.array(total_h_loss)),
                 map_losses.item(), np.mean(np.array(total_map_loss)),
+                obj_map_losses.item(), np.mean(np.array(total_obj_map_loss)),
                 ))
 
         if i%tb_log_interval == 0:
@@ -1676,8 +1687,10 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
             writer.add_scalar('Eval_hd/Cps_loss', cps_losses.item(), niter)
             writer.add_scalar('Eval_hd/Map_loss', map_losses.item(), niter)
 
-    print("Eval [{}]\tAverage cps_loss:{:.4f}\tAverage h_loss:{:.4f}\tAverage map_loss:{:.4f}".format(epoch,
-              np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)), np.mean(np.array(total_map_loss))))
+    print("Eval [{}]\tAverage cps_loss:{:.4f}\tAverage h_loss:{:.4f}"
+          "\tAverage map_loss:{:.4f}\tAverage obj_map_loss:{:.4f}".format(epoch,
+              np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)),
+            np.mean(np.array(total_map_loss)), np.mean(np.array(total_obj_map_loss))))
 
     return np.mean(np.array(total_cps_loss))+np.mean(np.array(total_h_loss)), np.mean(np.array(total_map_loss))
 
@@ -5650,37 +5663,37 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         print(model_name)
 
-        # init
-        checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08'+
-                                             '_rf0.1_hth0.1_ms4_fdim512_34_cw_3_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch06.pt'),
-                                map_location='cuda:0')  # checkpoint is a dict, containing much info
-        saved_state_dict = checkpoint['state_dict']
-        new_params = model.state_dict().copy()
-
-        if list(saved_state_dict.keys())[0][:7] == 'module.':
-            for k, y in saved_state_dict.items():
-                new_params[k[7:]] = y
-
-        else:
-            for k, y in saved_state_dict.items():
-                new_params[k] = y
-
-        model.load_state_dict(new_params)
-
-        # fix
+        # # init
+        # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08'+
+        #                                      '_rf0.1_hth0.1_ms4_fdim512_34_cw_3_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one5_224_epoch06.pt'),
+        #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        # saved_state_dict = checkpoint['state_dict']
+        # new_params = model.state_dict().copy()
+        #
+        # if list(saved_state_dict.keys())[0][:7] == 'module.':
+        #     for k, y in saved_state_dict.items():
+        #         new_params[k[7:]] = y
+        #
+        # else:
+        #     for k, y in saved_state_dict.items():
+        #         new_params[k] = y
+        #
+        # model.load_state_dict(new_params)
+        #
+        # # fix
+        # # for param in model.parameters():
+        # #     if 'self_attention' not in param.name:
+        # #         param.requires_grad = False
         # for param in model.parameters():
-        #     if 'self_attention' not in param.name:
-        #         param.requires_grad = False
-        for param in model.parameters():
-            param.requires_grad = False
-
-        if torch.cuda.device_count()>1:
-            model.module.relation_net.self_attention.weight.requires_grad = True
-            model.module.relation_net.self_attention.bias.requires_grad = True
-        else:
-            model.relation_net.self_attention.weight.requires_grad = True
-            model.relation_net.self_attention.bias.requires_grad = True
+        #     param.requires_grad = False
+        #
+        # if torch.cuda.device_count()>1:
+        #     model.module.relation_net.self_attention.weight.requires_grad = True
+        #     model.module.relation_net.self_attention.bias.requires_grad = True
+        # else:
+        #     model.relation_net.self_attention.weight.requires_grad = True
+        #     model.relation_net.self_attention.bias.requires_grad = True
 
         if args.use_gpu:
             model.cuda()
@@ -5736,9 +5749,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
         # args.n_epochs = 5
         for i_epoch in range(args.n_epochs):
-            train_Wildcat_WK_hd_compf_map_cw_sa(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            # train_Wildcat_WK_hd_compf_map_cw_sa_sp(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
 
-            tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon_cw_sa(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
+            tmp_eval_loss, map_loss = eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             # tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss, eval_map_dataloader, args)
 
             # scheduler.step()
@@ -5746,6 +5759,10 @@ def main_Wildcat_WK_hd_compf_map(args):
             if tmp_eval_loss < eval_loss:
                 cnt = 0
                 eval_loss = tmp_eval_loss
+                print('Saving model ...')
+                save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
+            elif tmp_eval_loss < 0.930 and map_loss < 0.1670:
+                cnt = 0
                 print('Saving model ...')
                 save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
             else:

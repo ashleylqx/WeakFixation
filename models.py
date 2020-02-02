@@ -7767,7 +7767,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_vis(torch.nn.Module):
         # hard_sal_map = torch.zeros(img.size(0), 1, self.grid_N, self.grid_N)
         # hard_sal_map = hard_sal_map.to(img.device)
 
-        total_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3), device=img.device)  # max & min & argmax
+        obj_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3), device=img.device)  # max & min & argmax
         # att_maps = att_maps.to(img.device)
 
         # print('boxes_nums', boxes_nums)
@@ -7793,10 +7793,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_vis(torch.nn.Module):
                     att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
 
                 inds = torch.argsort(att_scores.squeeze(), descending=True) # att_scores [99, 1, 1, 1]
-                total_att_maps[b_i, 0, :, :] = att_maps.sum(0)
+                obj_att_maps[b_i, 0, :, :] = att_maps.sum(0)
                 # pdb.set_trace()
-                # total_att_maps[b_i, 0, :, :] = att_maps[inds[0]]
-                # total_att_maps[b_i, 0, :, :] = att_maps[inds[1]]
+                # obj_att_maps[b_i, 0, :, :] = att_maps[inds[0]]
+                # obj_att_maps[b_i, 0, :, :] = att_maps[inds[1]]
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
@@ -7850,7 +7850,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_vis(torch.nn.Module):
 
         # return pred_logits, F.softmax(ori_logits, -1), torch.sigmoid(sal_map)
         # return pred_logits, pred_comp_logits, torch.clamp(sal_map, min=0.0, max=1.0)
-        return pred_comp_logits, sal_map, total_att_maps #, gaussian, gs_map
+        return pred_comp_logits, sal_map, obj_att_maps #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, sal_map #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, torch.sigmoid(sal_map)
 
@@ -7886,13 +7886,16 @@ class GenAttentionMapFunction(torch.autograd.Function):
 
         resized_boxes = boxes * possible_scales[0]
 
-        att_maps = torch.zeros(att_scores.size(0), output_size.int()[0], output_size.int()[1], device=att_scores.device)
+        att_maps = torch.zeros(att_scores.size(0), output_size.int()[0], output_size.int()[1],
+                               dtype=att_scores.dtype, device=att_scores.device)
         for box_i in range(att_scores.size(0)):
             box = resized_boxes[box_i].int()
 
             att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
 
-        final_map = att_maps.sum(0)
+        # final_map = att_maps.sum(0)
+        final_map = att_maps # I think this is more reasonable for calculating the att_scores' grads
+        # print('final_map', final_map.size())
         return final_map
 
 
@@ -7911,21 +7914,27 @@ class GenAttentionMapFunction(torch.autograd.Function):
             possible_scales = []
             for s1, s2 in zip(output_size, input_size):
                 approx_scale = float(s1) / s2
-                scale = 2 ** torch.tensor(approx_scale).log2().round().item()
+                # scale = 2 ** torch.tensor(approx_scale, dtype=torch.double, device=grad_output.device).log2().round().item()
+                scale = 2 ** approx_scale.clone().detach().log2().round().item()
                 possible_scales.append(scale)
             assert possible_scales[0] == possible_scales[1]
 
             resized_boxes = boxes * possible_scales[0]
+            att_maps = torch.zeros_like(grad_output)
+            for box_i in range(att_scores.size(0)):
+                box = resized_boxes[box_i].int()
+                att_maps[box_i, box[1]:box[3], box[0]:box[2]] = 1.0
 
-            grad_att_scores = grad_output.clone()
-
+            grad_att_scores = torch.mul(att_maps, grad_output)
+            grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
 
         return grad_att_scores, None, None, None
         # grad_input = grad_output_changed
         # return grad_input
 
 def gen_attention_map(att_scores, boxes, input_size, output_size):
-    return GenAttentionMapFunction()(att_scores, boxes, input_size, output_size)
+    # return GenAttentionMapFunction()(att_scores, boxes, input_size, output_size)
+    return GenAttentionMapFunction.apply(att_scores, boxes, input_size, output_size)
 
 class GenAttentionMap(torch.nn.Module):
     def __init__(self, input_size, output_size):
@@ -8173,7 +8182,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
         # hard_sal_map = torch.zeros(img.size(0), 1, self.grid_N, self.grid_N)
         # hard_sal_map = hard_sal_map.to(img.device)
 
-        total_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3), device=img.device)  # max & min & argmax
+        obj_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3), device=img.device)  # max & min & argmax
         # att_maps = att_maps.to(img.device)
 
         # print('boxes_nums', boxes_nums)
@@ -8191,8 +8200,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
-
-                total_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
@@ -8220,6 +8229,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
                         torch.sigmoid(cw_maps)).sum(1, keepdim=True) ## 1
         hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
 
+        hard_sal_map = torch.mul(hard_sal_map, obj_att_maps)
+
         # hard_sal_map = self.to_cw_feature_size(hard_sal_map)
         # gs_map = torch.mul(hard_scores[:, -n_gaussian:].unsqueeze(-1).unsqueeze(-1).expand_as(gaussian),  # TODO change map to hd_map
         #                 gaussian).sum(1, keepdim=True)
@@ -8241,12 +8252,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
         masked_cw_maps = masked_cw_maps + cw_maps  # TODO: comp_self_res
         pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps) ## 1
 
-        sal_map = self.to_attention_size(hard_sal_map)
+        sal_map = self.to_attention_size(hard_sal_map) # hard_sal_map is already the multiplication of the two
         # sal_map = torch.sigmoid(sal_map)
 
         # return pred_logits, F.softmax(ori_logits, -1), torch.sigmoid(sal_map)
         # return pred_logits, pred_comp_logits, torch.clamp(sal_map, min=0.0, max=1.0)
-        return pred_comp_logits, sal_map, total_att_maps #, gaussian, gs_map
+        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps) #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, sal_map #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, torch.sigmoid(sal_map)
 
@@ -10958,7 +10969,56 @@ if __name__ == '__main__':
     input_size = torch.tensor([224,224], dtype=torch.double, requires_grad=False)
     output_size = torch.tensor([14,14], dtype=torch.double, requires_grad=False)
     input = (att_scores, boxes, input_size, output_size)
-    test = gradcheck(GenAttentionMapFunction.apply, input, eps=1e-6, atol=1e-4)
+    # test = gradcheck(GenAttentionMapFunction.apply, input, eps=1e-6, atol=1e-4)
+    test = gradcheck(gen_attention_map, input, eps=1e-6, atol=1e-4)
     print(test)  # True
 
-    
+
+    # # Inherit from Function
+    # class LinearFunction(torch.autograd.Function):
+    #     # Note that both forward and backward are @staticmethods
+    #     @staticmethod
+    #     # bias is an optional argument
+    #     def forward(ctx, input, weight, bias=None):
+    #         ctx.save_for_backward(input, weight, bias)
+    #         output = input.mm(weight.t())
+    #         if bias is not None:
+    #             output += bias.unsqueeze(0).expand_as(output)
+    #         return output
+    #
+    #     # This function has only a single output, so it gets only one gradient
+    #     @staticmethod
+    #     def backward(ctx, grad_output):
+    #         # This is a pattern that is very convenient - at the top of backward
+    #         # unpack saved_tensors and initialize all gradients w.r.t. inputs to
+    #         # None. Thanks to the fact that additional trailing Nones are
+    #         # ignored, the return statement is simple even when the function has
+    #         # optional inputs.
+    #         input, weight, bias = ctx.saved_tensors
+    #         grad_input = grad_weight = grad_bias = None
+    #         print('grad_output', grad_output.size())
+    #         # These needs_input_grad checks are optional and there only to
+    #         # improve efficiency. If you want to make your code simpler, you can
+    #         # skip them. Returning gradients for inputs that don't require it is
+    #         # not an error.
+    #         if ctx.needs_input_grad[0]:
+    #             grad_input = grad_output.mm(weight)
+    #             print('grad_input', grad_input.size())
+    #
+    #         if ctx.needs_input_grad[1]:
+    #             grad_weight = grad_output.t().mm(input)
+    #             print('grad_weight', grad_weight.size())
+    #
+    #         if bias is not None and ctx.needs_input_grad[2]:
+    #             grad_bias = grad_output.sum(0)
+    #             print('grad_bias', grad_bias.size())
+    #
+    #         return grad_input, grad_weight, grad_bias
+    #
+    # linear = LinearFunction.apply
+    # input = (torch.randn(20, 20, dtype=torch.double, requires_grad=True),
+    #          torch.randn(30, 20, dtype=torch.double, requires_grad=True))
+    # print('input', input[0].size())
+    # print('weight', input[1].size())
+    # test = gradcheck(linear, input, eps=1e-6, atol=1e-4)
+    # print(test)
