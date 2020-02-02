@@ -5487,8 +5487,10 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         if args.use_gpu:
             model.cuda()
+            model_aux.cuda()
         if torch.cuda.device_count()>1:
             model = torch.nn.DataParallel(model)
+            model_aux = torch.nn.DataParallel(model)
         #folder_name = 'Preds/MIT1003'
         #rf_folder = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch00' # T:0, F:3
         ##rf_folder = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normFalse_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03' # T:0, F:3
