@@ -4098,9 +4098,9 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'train_cw_aug'
     # phase = 'train_cw_aug_gbvs'
-    phase = 'train_cw_aug_sa_new'
+    # phase = 'train_cw_aug_sa_new'
     # phase = 'train_alt_alpha_sa_new'
-    # phase = 'train_cw_aug_sa_sp'
+    phase = 'train_cw_aug_sa_sp' # sa_new_sp
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
@@ -5749,7 +5749,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
         # args.n_epochs = 5
         for i_epoch in range(args.n_epochs):
-            train_Wildcat_WK_hd_compf_map_cw_sa_sp(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            # train_Wildcat_WK_hd_compf_map_cw_sa_sp(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
 
             tmp_eval_loss, map_loss = eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             # tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss, eval_map_dataloader, args)
