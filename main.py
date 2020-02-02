@@ -3877,13 +3877,13 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
-    # phase = 'test_cw_sa'
+    phase = 'test_cw_sa'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'
     # phase = 'train_cw_aug_gbvs'
-    phase = 'train_cw_aug_sa_new'
+    # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_sp'
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_vib_aug'
@@ -7728,7 +7728,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = [4]
+        E_NUM = list(range(7))
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
@@ -7740,12 +7740,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         for e_num in E_NUM:
 
             if ATT_RES:
-                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_ft_2_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
                     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
                     fix_feature, dilate, e_num)  # _gcn_all
 
             else:
-                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_ft_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
                     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
                     fix_feature, dilate, e_num)  # _gcn_all
 
