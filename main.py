@@ -4101,8 +4101,9 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_cw_aug'
     # phase = 'train_cw_aug_gbvs'
     # phase = 'train_cw_aug_sa_new'
+    phase = 'train_cw_aug_sa_art'
     # phase = 'train_alt_alpha_sa_new'
-    phase = 'train_cw_aug_sa_sp' # sa_new_sp
+    # phase = 'train_cw_aug_sa_sp' # sa_new_sp
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
