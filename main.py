@@ -6035,6 +6035,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #
         # # -----------------------------------------
 
+
         if args.use_gpu:
             model.cuda()
         if torch.cuda.device_count()>1:
