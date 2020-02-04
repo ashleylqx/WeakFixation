@@ -8286,7 +8286,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_vis(torch.nn.Module):
 
         # return pred_logits, F.softmax(ori_logits, -1), torch.sigmoid(sal_map)
         # return pred_logits, pred_comp_logits, torch.clamp(sal_map, min=0.0, max=1.0)
-        return pred_comp_logits, sal_map, obj_att_maps #, gaussian, gs_map
+        return pred_comp_logits, sal_map, obj_att_maps, att_scores #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, sal_map #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, torch.sigmoid(sal_map)
 

@@ -1537,7 +1537,7 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
                 cps_losses.item(), np.mean(np.array(total_cps_loss)),
                 h_losses.item(), np.mean(np.array(total_h_loss)),
                 rf_losses.item(), np.mean(np.array(total_map_loss)),
-                att_scores[:,0].mean().item(), att_scores[:,1].mean().item(), att_scores[:,2].mean().item()
+                att_scores.max().item(), att_scores.min().item(), torch.argmax(att_scores, dim=0).item()
                 ))
 
         if i%tb_log_interval == 0:
@@ -1686,7 +1686,7 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
                 h_losses.item(), np.mean(np.array(total_h_loss)),
                 map_losses.item(), np.mean(np.array(total_map_loss)),
                 obj_map_losses.item(), np.mean(np.array(total_obj_map_loss)),
-                att_scores[:,0].mean().item(), att_scores[:,1].mean().item(), att_scores[:,2].mean().item()
+                att_scores.max().item(), att_scores.min().item(), torch.argmax(att_scores, dim=0).item()
                 ))
 
         if i%tb_log_interval == 0:
