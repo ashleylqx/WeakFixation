@@ -9638,7 +9638,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
 
         # hard_sal_map = torch.mul(hard_sal_map, obj_att_maps)
-        hard_sal_map = 0.5 * (hard_sal_map+obj_att_maps) # _avg
+        tmp_sal_map = torch.mul(hard_sal_map, obj_att_maps) # _mres
+        hard_sal_map = hard_sal_map + tmp_sal_map # _mres
+        # hard_sal_map = 0.5 * (hard_sal_map+obj_att_maps) # _avg
 
         # hard_sal_map = self.to_cw_feature_size(hard_sal_map)
         # gs_map = torch.mul(hard_scores[:, -n_gaussian:].unsqueeze(-1).unsqueeze(-1).expand_as(gaussian),  # TODO change map to hd_map
