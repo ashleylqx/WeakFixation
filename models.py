@@ -8341,7 +8341,6 @@ class GenAttentionMapFunction(torch.autograd.Function):
         att_scores, boxes = ctx.saved_tensors
         input_size = ctx.input_size
         output_size = ctx.output_size
-
         # print('att_scores', att_scores.size())
         # print('grad_output',grad_output.size())
 
