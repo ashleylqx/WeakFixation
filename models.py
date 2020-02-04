@@ -8347,23 +8347,23 @@ class GenAttentionMapFunction(torch.autograd.Function):
 
         grad_att_scores = None
         # comment below block for _nob (no gradient backpropagation)
-        if ctx.needs_input_grad[0]:
-            possible_scales = []
-            for s1, s2 in zip(output_size, input_size):
-                approx_scale = float(s1) / s2
-                scale = 2 ** torch.tensor(approx_scale, dtype=grad_output.dtype, device=grad_output.device).log2().round().item()
-                # scale = 2 ** approx_scale.clone().detach().log2().round().item()
-                possible_scales.append(scale)
-            assert possible_scales[0] == possible_scales[1]
-
-            resized_boxes = boxes * possible_scales[0]
-            att_maps = torch.zeros_like(grad_output)
-            for box_i in range(att_scores.size(0)):
-                box = resized_boxes[box_i].int()
-                att_maps[box_i, box[1]:box[3], box[0]:box[2]] = 1.0
-
-            grad_att_scores = torch.mul(att_maps, grad_output)
-            grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
+        # if ctx.needs_input_grad[0]:
+        #     possible_scales = []
+        #     for s1, s2 in zip(output_size, input_size):
+        #         approx_scale = float(s1) / s2
+        #         scale = 2 ** torch.tensor(approx_scale, dtype=grad_output.dtype, device=grad_output.device).log2().round().item()
+        #         # scale = 2 ** approx_scale.clone().detach().log2().round().item()
+        #         possible_scales.append(scale)
+        #     assert possible_scales[0] == possible_scales[1]
+        #
+        #     resized_boxes = boxes * possible_scales[0]
+        #     att_maps = torch.zeros_like(grad_output)
+        #     for box_i in range(att_scores.size(0)):
+        #         box = resized_boxes[box_i].int()
+        #         att_maps[box_i, box[1]:box[3], box[0]:box[2]] = 1.0
+        #
+        #     grad_att_scores = torch.mul(att_maps, grad_output)
+        #     grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
 
         return grad_att_scores, None, None, None
 
