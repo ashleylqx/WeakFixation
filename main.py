@@ -83,7 +83,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # if '_sa' in run and ATT_RES:
 #     run = run + '_rres'
 
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_fixfx_nob_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_fixf_nob_avg_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -1487,7 +1487,7 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
             rf_maps = rf_maps.cuda()
 
         # cps_logits, pred_maps, obj_att_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
-        cps_logits, pred_maps, _ = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
+        cps_logits, pred_maps, _, att_scores = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
         if torch.isnan(pred_maps).any():
             print('pred_maps contains nan')
 
@@ -1531,11 +1531,13 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
 
         if i%train_log_interval == 0:
             print("Train [{}][{}/{}]\tcps_loss:{:.4f}({:.4f})"
-                  "\th_loss:{:.4f}({:.4f})\trf_loss:{:.4f}({:.4f})".format(
+                  "\th_loss:{:.4f}({:.4f})\trf_loss:{:.4f}({:.4f})"
+                  "\tatt_scores:{:.4f}/{:.4f}/{:.4f}".format(
                 epoch, i, int(N),
                 cps_losses.item(), np.mean(np.array(total_cps_loss)),
                 h_losses.item(), np.mean(np.array(total_h_loss)),
                 rf_losses.item(), np.mean(np.array(total_map_loss)),
+                att_scores[:,0].mean().item(), att_scores[:,1].mean().item(), att_scores[:,2].mean().item()
                 ))
 
         if i%tb_log_interval == 0:
@@ -1644,7 +1646,7 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
             boxes = boxes.cuda()
             sal_maps = sal_maps.cuda()
 
-        cps_logits, pred_maps, obj_att_maps = model(img=inputs,
+        cps_logits, pred_maps, obj_att_maps, att_scores = model(img=inputs,
                                                    boxes=boxes, boxes_nums=boxes_nums)
 
         # losses = logits_loss(pred_logits, ori_logits)
@@ -1677,12 +1679,14 @@ def eval_Wildcat_WK_hd_compf_salicon_cw_sa_sp(epoch, model, logits_loss, info_lo
         if i%train_log_interval == 0:
             print("Eval [{}][{}/{}]"
                   "\tcps_loss:{:.4f}({:.4f})\th_loss:{:.4f}({:.4f})"
-                  "\tmap_loss:{:.4f}({:.4f})\tobj_map_loss:{:.4f}({:.4f})".format(
+                  "\tmap_loss:{:.4f}({:.4f})\tobj_map_loss:{:.4f}({:.4f})"
+                  "\tatt_scores:{:.4f}/{:.4f}/{:.4f}".format(
                 epoch, i, int(N),
                 cps_losses.item(), np.mean(np.array(total_cps_loss)),
                 h_losses.item(), np.mean(np.array(total_h_loss)),
                 map_losses.item(), np.mean(np.array(total_map_loss)),
                 obj_map_losses.item(), np.mean(np.array(total_obj_map_loss)),
+                att_scores[:,0].mean().item(), att_scores[:,1].mean().item(), att_scores[:,2].mean().item()
                 ))
 
         if i%tb_log_interval == 0:
@@ -1716,7 +1720,7 @@ def eval_Wildcat_WK_hd_compf_cw_sa_sp(epoch, model, logits_loss, info_loss, data
             boxes = boxes.cuda()
             # sal_maps = sal_maps.cuda()
 
-        cps_logits, pred_maps, att_maps = model(img=inputs,
+        cps_logits, pred_maps, att_maps, att_scores = model(img=inputs,
                                                    boxes=boxes, boxes_nums=boxes_nums)
         # print('pred_maps', pred_maps.size(), pred_maps.max(), pred_maps.min())
         # losses = logits_loss(pred_logits, ori_logits)
@@ -1769,7 +1773,7 @@ def eval_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, logits_loss, info_loss, 
             boxes = boxes.cuda()
             sal_maps = sal_maps.cuda()
 
-        cps_logits, pred_maps, att_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+        cps_logits, pred_maps, att_maps, att_scores = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
 
         # losses = logits_loss(pred_logits, ori_logits)
         # losses = logits_loss(pred_logits, torch.argmax(ori_logits, 1))
@@ -1839,7 +1843,7 @@ def test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, datal
 
         # ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0]+'.jpeg')) # height, width, channel
         ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
-        _, pred_maps, att_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+        _, pred_maps, att_maps, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # pred_maps = torch.nn.Sigmoid()(pred_maps)
         print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
 
@@ -1902,7 +1906,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
             boxes[:, :, 1] = ori_boxes[:, :, 1] / ori_size*tgt_s
             boxes[:, :, 3] = ori_boxes[:, :, 3] / ori_size*tgt_s
 
-            _, pred_maps, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+            _, pred_maps, _, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
             # pred_maps = torch.nn.Sigmoid()(pred_maps)
             # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
             # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
@@ -4095,7 +4099,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
-    phase = 'test_cw_sa'
+    # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
@@ -4104,7 +4108,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art'
     # phase = 'train_alt_alpha_sa_new'
-    # phase = 'train_cw_aug_sa_sp' # sa_new_sp, sa_art_sp
+    phase = 'train_cw_aug_sa_sp' # sa_new_sp, sa_art_sp
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
@@ -5874,11 +5878,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug9_3_{}_rf{}_hth{}_ms4_fdim{}_34_cw_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
         if ATT_RES:
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixfx_nob_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_nob_avg_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         else:
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixfx_nob_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_nob_avg_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # if ATT_RES:
@@ -5951,39 +5955,19 @@ def main_Wildcat_WK_hd_compf_map(args):
         #
         # model.load_state_dict(new_params)
 
-        # init with sa_art_fixf models ====================================
-        if ATT_RES:
-            checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
-                                             '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),
-                                map_location='cuda:0')  # checkpoint is a dict, containing much info
-
-        else:
-            checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
-                                             '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),
-                                map_location='cuda:0')  # checkpoint is a dict, containing much info
-
-        saved_state_dict = checkpoint['state_dict']
-        new_params = model.state_dict().copy()
-
-        if list(saved_state_dict.keys())[0][:7] == 'module.':
-            for k, y in saved_state_dict.items():
-                if 'feature_refine' not in k:
-                    new_params[k[7:]] = y
-
-        else:
-            for k, y in saved_state_dict.items():
-                if 'feature_refine' not in k:
-                    new_params[k] = y
-
-        model.load_state_dict(new_params)
-
-        # # init with final model ===========================================
-        # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-        #                                      'resnet50_wildcat_wk_hd_cbA16_alt2_2_0.95_compf_cls_att_gd_nf4_normTrue_hb_50_aug7' +
-        #                                      '_nips08_rf0.1_hth0.1_ms4_fdim512_34_lstm_cw_1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch09.pt'),
+        # # init with sa_art_fixf models ====================================
+        # if ATT_RES:
+        #     checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+        #                                      '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),
         #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        #
+        # else:
+        #     checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+        #                                      '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),
+        #                         map_location='cuda:0')  # checkpoint is a dict, containing much info
+        #
         # saved_state_dict = checkpoint['state_dict']
         # new_params = model.state_dict().copy()
         #
@@ -5998,6 +5982,26 @@ def main_Wildcat_WK_hd_compf_map(args):
         #             new_params[k] = y
         #
         # model.load_state_dict(new_params)
+
+        # init with final model ===========================================
+        checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+                                             'resnet50_wildcat_wk_hd_cbA16_alt2_2_0.95_compf_cls_att_gd_nf4_normTrue_hb_50_aug7' +
+                                             '_nips08_rf0.1_hth0.1_ms4_fdim512_34_lstm_cw_1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch09.pt'),
+                                map_location='cuda:0')  # checkpoint is a dict, containing much info
+        saved_state_dict = checkpoint['state_dict']
+        new_params = model.state_dict().copy()
+
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            for k, y in saved_state_dict.items():
+                if 'feature_refine' not in k:
+                    new_params[k[7:]] = y
+
+        else:
+            for k, y in saved_state_dict.items():
+                if 'feature_refine' not in k:
+                    new_params[k] = y
+
+        model.load_state_dict(new_params)
         #
         # fix ============================================
         # for param in model.parameters():

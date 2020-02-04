@@ -9637,7 +9637,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
                         torch.sigmoid(cw_maps)).sum(1, keepdim=True) ## 1
         hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
 
-        hard_sal_map = torch.mul(hard_sal_map, obj_att_maps)
+        # hard_sal_map = torch.mul(hard_sal_map, obj_att_maps)
+        hard_sal_map = 0.5 * (hard_sal_map+obj_att_maps) # _avg
 
         # hard_sal_map = self.to_cw_feature_size(hard_sal_map)
         # gs_map = torch.mul(hard_scores[:, -n_gaussian:].unsqueeze(-1).unsqueeze(-1).expand_as(gaussian),  # TODO change map to hd_map
@@ -9665,7 +9666,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
 
         # return pred_logits, F.softmax(ori_logits, -1), torch.sigmoid(sal_map)
         # return pred_logits, pred_comp_logits, torch.clamp(sal_map, min=0.0, max=1.0)
-        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps) #, gaussian, gs_map
+        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, sal_map #, gaussian, gs_map
         # return pred_logits, pred_comp_logits, torch.sigmoid(sal_map)
 
