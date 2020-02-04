@@ -6034,11 +6034,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         #     model.relation_net.self_attention.bias.requires_grad = True
         #
         # # -----------------------------------------
-        #
-        # if args.use_gpu:
-        #     model.cuda()
-        # if torch.cuda.device_count()>1:
-        #     model = torch.nn.DataParallel(model)
+
+        if args.use_gpu:
+            model.cuda()
+        if torch.cuda.device_count()>1:
+            model = torch.nn.DataParallel(model)
 
         #folder_name = 'Preds/MIT1003'
         #rf_folder = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch00' # T:0, F:3
