@@ -1019,7 +1019,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa(epoch, model, model_aux, optimize
 
         cps_logits, pred_maps, att_scores = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # if epoch > 0:
-        _, _, aux_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+        _, aux_maps, _ = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
         # aux_maps = aux_maps * 1.1
@@ -1671,7 +1671,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
 
         cps_logits, pred_maps, _, att_scores = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # if epoch > 0:
-        _, _, aux_maps = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+        _, aux_maps, _, _ = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
         # aux_maps = aux_maps * 1.1
