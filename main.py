@@ -8739,7 +8739,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                              shuffle=False, num_workers=2)
             # test_Wildcat_WK_hd_compf_cw_sa(model, folder_name, best_model_file, test_dataloader, args)
             # test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
-                        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+            tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
             test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
 
