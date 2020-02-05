@@ -8643,7 +8643,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # folder_name = 'Preds/PASCAL-S'
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = [5]
+        E_NUM = [2,3,4]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
@@ -8678,7 +8678,8 @@ def main_Wildcat_WK_hd_compf_map(args):
             # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
             #                              shuffle=False, num_workers=2)
             # test_Wildcat_WK_hd_compf_cw_sa(model, folder_name, best_model_file, test_dataloader, args)
-            test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
+            # test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
+            test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
 
 
             # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
