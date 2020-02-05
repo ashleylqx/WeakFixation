@@ -8647,8 +8647,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
-        ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         args.batch_size = 1
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
