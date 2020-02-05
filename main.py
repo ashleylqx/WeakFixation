@@ -8643,7 +8643,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         folder_name = 'Preds/PASCAL-S'
         # folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = list(range(13))
+        E_NUM = list(range(6, 13))
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
