@@ -1715,7 +1715,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
                 cps_losses.item(), np.mean(np.array(total_cps_loss)),
                 h_losses.item(), np.mean(np.array(total_h_loss)),
                 rf_losses.item(), np.mean(np.array(total_map_loss)),
-                att_scores[:,0].mean().item(), att_scores[:,1].mean().item(), att_scores[:,2].mean().item()))
+                att_scores.max().item(), att_scores.min().item(), torch.argmax(att_scores, dim=0).item()))
 
         if i % tb_log_interval == 0:
             niter = epoch * len(dataloader) + i
