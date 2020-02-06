@@ -83,7 +83,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # if '_sa' in run and ATT_RES:
 #     run = run + '_rres'
 
-run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -1823,7 +1823,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
 
 
     print("Train [{}]\tAverage loss:{:.4f}\tAverage cps_loss:{:.4f}"
-          "\tAverage h_loss:{:.4f}\tAverage rf_loss:{:.4f}".format(epoch, np.mean(np.array(total_loss)),
+          "\tAverage h_loss:{:.4f}\tAverage rf_loss:{:.4f}".format(epoch, np.mean(np.array(total_cps_loss)),
                                                  np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)),
                                                                    np.mean(np.array(total_map_loss))))
 
@@ -6364,11 +6364,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         if ATT_RES:
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         else:
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # if ATT_RES:
@@ -6578,7 +6578,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         h_loss = HLoss_th_2()
         # h_loss = HLoss_th()
         # h_loss = HLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-6) ######################
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-5) ######################
         # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
@@ -6586,7 +6586,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
 
-        print('finetune lr rate: 1e-6')
+        print('finetune lr rate: 1e-5')
         # print('relation lr factor: 1.0')
 
         if args.use_gpu:
@@ -6612,10 +6612,10 @@ def main_Wildcat_WK_hd_compf_map(args):
                 eval_loss = tmp_eval_loss
                 print('Saving model ...')
                 save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
-            elif tmp_eval_loss < 0.930 and map_loss < 0.1670:
-                cnt = 0
-                print('Saving model ...')
-                save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
+            # elif tmp_eval_loss < 0.930 and map_loss < 0.1670:
+            #     cnt = 0
+            #     print('Saving model ...')
+            #     save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
             else:
                 cnt += 1
 
@@ -9566,7 +9566,7 @@ def parse_arguments():
     parser.add_argument("--path_out", default=base_path + 'WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch_size", default=72*torch.cuda.device_count(),  #cw 72(26xxx) or larger #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
+    parser.add_argument("--batch_size", default=80*torch.cuda.device_count(),  #cw 72(26xxx) or larger #56(512) can be larger #52 (1024) # 16 5000M, can up to 32 or 64 for larger dataset
                         type=int, # cw512 *80* ; cw1024 *64*; cw512 one5 *32*; cw512 one0 *32(15553),48*; CW512 448input *24*; cw512_101 *42*
                         help="""Set batch size""") # cw512 msl *64*
     parser.add_argument("--n_epochs", default=500, type=int,
