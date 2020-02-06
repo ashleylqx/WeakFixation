@@ -6413,7 +6413,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_sm_aug2_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                               n_gaussian, normf, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        print(model_name)
+        print(model_name) 
 
         # # init
         # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
