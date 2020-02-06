@@ -83,7 +83,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # if '_sa' in run and ATT_RES:
 #     run = run + '_rres'
 
-run = 'hd_gs_A{}_sup_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_alt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_new_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -1638,23 +1638,23 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
     total_map_loss = list()
 
     # comment for sup mode
-    # if os.path.exists(os.path.join(args.path_out,'{}_epoch{:02d}.pt'.format(name_model, epoch-1))):
-    #    checkpoint = torch.load(os.path.join(args.path_out,'{}_epoch{:02d}.pt'.format(name_model, epoch-1))) # checkpoint is a dict, containing much info
-    #    # model_aux.load_state_dict(checkpoint['state_dict'])
-    #    saved_state_dict = checkpoint['state_dict']
-    #    new_params = model_aux.state_dict().copy()
-    #
-    #    if list(saved_state_dict.keys())[0][:7] == 'module.':
-    #        for k, y in saved_state_dict.items():
-    #            if 'self_attention' not in k:
-    #                new_params[k[7:]] = y
-    #
-    #    else:
-    #        for k, y in saved_state_dict.items():
-    #            if 'self_attention' not in k:
-    #                new_params[k] = y
-    #
-    #    model_aux.load_state_dict(new_params)
+    if os.path.exists(os.path.join(args.path_out,'{}_epoch{:02d}.pt'.format(name_model, epoch-1))):
+       checkpoint = torch.load(os.path.join(args.path_out,'{}_epoch{:02d}.pt'.format(name_model, epoch-1))) # checkpoint is a dict, containing much info
+       # model_aux.load_state_dict(checkpoint['state_dict'])
+       saved_state_dict = checkpoint['state_dict']
+       new_params = model_aux.state_dict().copy()
+
+       if list(saved_state_dict.keys())[0][:7] == 'module.':
+           for k, y in saved_state_dict.items():
+               if 'self_attention' not in k:
+                   new_params[k[7:]] = y
+
+       else:
+           for k, y in saved_state_dict.items():
+               if 'self_attention' not in k:
+                   new_params[k] = y
+
+       model_aux.load_state_dict(new_params)
 
     for i, X in enumerate(dataloader):
         optimizer.zero_grad()
@@ -4304,14 +4304,14 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_sp_multiscale'
-    phase = 'test_cw_sa_sp'
+    # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'
     # phase = 'train_cw_aug_gbvs'
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art'
-    # phase = 'train_cw_aug_alt_alpha_sa_sp'
+    phase = 'train_cw_aug_alt_alpha_sa_sp'
     # phase = 'train_alt_alpha_sa_new'
     # phase = 'train_cw_aug_sa_sp' # sa_new_sp, sa_art_sp
     # phase = 'train_cw_aug_sa'
@@ -6367,13 +6367,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         if ATT_RES:
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_sup_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_3_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         else:
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_sup_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_3_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             #
         # if ATT_RES:
@@ -6583,7 +6583,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         h_loss = HLoss_th_2()
         # h_loss = HLoss_th()
         # h_loss = HLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-6) ######################
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-5) ######################
         # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
@@ -6591,7 +6591,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
 
-        print('finetune lr rate: 1e-6')
+        print('finetune lr rate: 1e-5')
         # print('relation lr factor: 1.0')
 
         if args.use_gpu:
@@ -6600,7 +6600,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             # optimizer = optimizer.cuda()
 
         eval_loss = np.inf
-        # eval_salicon_loss = np.inf
+        eval_map_loss = np.inf
         cnt = 0
         # args.n_epochs = 5
         for i_epoch in range(args.n_epochs):
@@ -6617,10 +6617,11 @@ def main_Wildcat_WK_hd_compf_map(args):
                 eval_loss = tmp_eval_loss
                 print('Saving model ...')
                 save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
-            # elif tmp_eval_loss < 0.930 and map_loss < 0.1670:
-            #     cnt = 0
-            #     print('Saving model ...')
-            #     save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
+            elif map_loss < eval_map_loss:
+                cnt = 0
+                eval_map_loss =  map_loss
+                print('Saving model ...')
+                save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
             else:
                 cnt += 1
 
