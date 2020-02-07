@@ -9455,6 +9455,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
             extra_blocks=LastLevelMaxPool(),
         )
 
+        self.fuse_map = torch.nn.Conv2d(2, 1, kernel_size=1)
+
         # if self.normalize_feature==True:
         #     self.embed_grid_feature = torch.nn.Sequential(
         #         torch.nn.Linear(out_channels * resolution ** 2, FEATURE_DIM, bias=True),
@@ -9638,8 +9640,13 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         hard_sal_map = torch.div(hard_sal_map, hard_scores.sum(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)+1e-8)
 
         # hard_sal_map = torch.mul(hard_sal_map, obj_att_maps)
-        tmp_sal_map = torch.mul(hard_sal_map, obj_att_maps) # _mres
-        hard_sal_map = hard_sal_map + tmp_sal_map # _mres
+        
+        tmp_sal_map = torch.cat([hard_sal_map, obj_att_maps], dim=1) # _cat
+        hard_sal_map = torch.sigmoid(self.fuse_map(tmp_sal_map)) # _cat
+
+        # tmp_sal_map = torch.mul(hard_sal_map, obj_att_maps) # _mres
+        # hard_sal_map = hard_sal_map + tmp_sal_map # _mres
+
         # hard_sal_map = 0.5 * (hard_sal_map+obj_att_maps) # _avg
 
         # hard_sal_map = self.to_cw_feature_size(hard_sal_map)
