@@ -6170,12 +6170,12 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         if list(saved_state_dict.keys())[0][:7] == 'module.':
             for k, y in saved_state_dict.items():
-                if 'feature_refine' not in k or 'gen_g_feature' not in k:
+                if 'feature_refine' not in k and 'gen_g_feature' not in k:
                     new_params[k[7:]] = y
 
         else:
             for k, y in saved_state_dict.items():
-                if 'feature_refine' not in k or 'gen_g_feature' not in k:
+                if 'feature_refine' not in k and 'gen_g_feature' not in k:
                     new_params[k] = y
 
         model.load_state_dict(new_params)
