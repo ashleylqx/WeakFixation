@@ -6171,17 +6171,17 @@ def main_Wildcat_WK_hd_compf_map(args):
         if list(saved_state_dict.keys())[0][:7] == 'module.':
             for k, y in saved_state_dict.items():
                 if 'feature_refine' not in k:
-                    if 'gen_g_feature' in k:
+                    if 'gen_g_feature.weight' in k:
                         pdb.set_trace()
-                        new_params[k[7:]] = torch.cat([y, y[:,-1:,:,:]], dim=1)
+                        new_params[k[7:]] = torch.cat([y, torch.zeros_like(y[:,-1:,:,:])], dim=1)
                     else:
                         new_params[k[7:]] = y
         else:
             for k, y in saved_state_dict.items():
                 if 'feature_refine' not in k:
-                    if 'gen_g_feature' in k:
+                    if 'gen_g_feature.weight' in k:
                         pdb.set_trace()
-                        new_params[k] = torch.cat([y, y[:,-1:,:,:]], dim=1)
+                        new_params[k] = torch.cat([y, torch.zeros_like(y[:,-1:,:,:])], dim=1)
                     else:
                         new_params[k] = y
 
