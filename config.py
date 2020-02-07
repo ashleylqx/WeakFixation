@@ -122,4 +122,4 @@ ATT_RES = False
 
 GBVS_R = 0.25
 
-ALT_RATIO = 1.15
+ALT_RATIO = 1.02
