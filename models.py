@@ -9353,10 +9353,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_vis(torch.nn.Module):
     #             ]
 
 
-class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX(torch.nn.Module):
+class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
                  use_grid=False, normalize_feature= False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX, self).__init__()
+        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         self.normalize_feature = normalize_feature
@@ -9691,10 +9691,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX(torch.nn.Module):
     #             ]
 
 
-class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
+class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_prev(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False, dilate=False,
                  use_grid=False, normalize_feature= False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, self).__init__()
+        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_prev, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         self.normalize_feature = normalize_feature
