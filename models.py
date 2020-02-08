@@ -9615,7 +9615,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX(torch.nn.Module):
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
                 obj_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:],
-                                                               cw_maps.size()[-2:])
+                                                               x.size()[-2:])
                 # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
                 # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
 
