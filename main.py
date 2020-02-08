@@ -36,7 +36,7 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nomlp, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_vis, \
-    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_multiscale,
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_multiscale, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX
 
 from custom_loss import HLoss_th, loss_HM, HLoss_th_3, HLoss_th_2
