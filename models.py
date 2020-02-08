@@ -8329,8 +8329,8 @@ class GenAttentionMapFunction(torch.autograd.Function):
 
             att_maps[box_i, box[1]:box[3], box[0]:box[2]] = att_scores[box_i]
 
-        # final_map = att_maps.sum(0)
-        final_map = att_maps # I think this is more reasonable for calculating the att_scores' grads
+        final_map = att_maps.sum(0)
+        # final_map = att_maps # I think this is more reasonable for calculating the att_scores' grads
         # print('final_map', final_map.size())
         return final_map
 
@@ -8360,8 +8360,8 @@ class GenAttentionMapFunction(torch.autograd.Function):
             for box_i in range(att_scores.size(0)):
                 box = resized_boxes[box_i].int()
                 att_maps[box_i, box[1]:box[3], box[0]:box[2]] = 1.0
-            pdb.set_trace()
-            grad_att_scores = torch.mul(att_maps, grad_output)
+            # pdb.set_trace()
+            grad_att_scores = torch.mul(att_maps, grad_output.unsqueeze(0).expand_as(att_maps))
             grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
 
         return grad_att_scores, None, None, None
@@ -8635,8 +8635,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(torch.nn.Module):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
-                tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
-                obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
+                obj_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:],
+                                                               cw_maps.size()[-2:])
+                # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
@@ -9610,8 +9612,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX(torch.nn.Module):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
-                tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], x.size()[-2:])
-                obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
+                obj_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:],
+                                                               cw_maps.size()[-2:])
+                # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
 
         x = self.gen_g_feature(torch.cat([x, gaussian, obj_att_maps], dim=1)) # _catX
         cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
@@ -9948,8 +9952,9 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
-                tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
-                obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
+                obj_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
@@ -10281,8 +10286,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_multiscale(torch.nn.Module)
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
-                tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
-                obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
+                obj_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:],
+                                                               cw_maps.size()[-2:])
+                # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
+                # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
