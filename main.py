@@ -59,7 +59,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_hth_3_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -90,7 +90,7 @@ run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_{}'.format(n_gaussia
 # run = 'hd_gs_A{}_aalt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_alt_3_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_6_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_4_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-# run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_catX_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_catX_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -1835,7 +1835,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         _, aux_maps, _, _ = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
-        # aux_maps = aux_maps * ALT_RATIO # comment this for ftf_2_mres training from fixf
+        aux_maps = aux_maps * ALT_RATIO # comment this for ftf_2_mres training from fixf
         # aux_maps = aux_maps * alt_ratio_current
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
         rf_maps = ALPHA*aux_maps.detach().squeeze() + (1-ALPHA)*prior_maps
@@ -4468,14 +4468,14 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'    ### base model
-    phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
+    # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
     # phase = 'train_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
     # phase = 'train_alt_alpha_sa_new'
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
-    # phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
+    phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_msl_alpha'
@@ -6551,10 +6551,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         else:
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_4_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_4_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_6_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_aaalt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_aalt_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
@@ -6629,10 +6629,10 @@ def main_Wildcat_WK_hd_compf_map(args):
                                              '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_nob_mres_sp_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch01.pt'),
                                 map_location='cuda:0')  # checkpoint is a dict, containing much info
         else:
-            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-            #                                  'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
-            #                                  '_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
-            #                     map_location='cuda:0')  # checkpoint is a dict, containing much info
+            checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+                                             '_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+                                map_location='cuda:0')  # checkpoint is a dict, containing much info
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                                  'resnet50_wildcat_wk_hd_cbA16_aalt_2_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
             #                                  '_hth0.1_ms4_fdim512_34_cw_sa_art_alt_3_nob_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),
@@ -6645,10 +6645,10 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                                  'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
             #                                  '_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_nob_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),
             #                     map_location='cuda:0')  # checkpoint is a dict, containing much info
-            checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
-                                             '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_nob_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),
-                                map_location='cuda:0')  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+            #                                  'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+            #                                  '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_nob_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),
+            #                     map_location='cuda:0')  # checkpoint is a dict, containing much info
             #
 
 
