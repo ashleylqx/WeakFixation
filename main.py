@@ -59,6 +59,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normF_eb_{}_aug5_0.2_2_a'.format(n_gaussian, MAX_BNUM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normFF_eb_{}_aug7_a_A5_fdim{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_one5'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_{}_hth_3_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_lstm_x'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
@@ -89,7 +90,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_aalt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_alt_3_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_6_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+# run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_catX_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_catX_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -339,6 +340,155 @@ def train_Wildcat_WK_hd_compf_map_cw_gbvs(epoch, model, optimizer, logits_loss, 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
         rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
         rf_maps = GBVS_R * rf_maps # for gbvs
+        # rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2)) # for gbvs_thm
+
+        # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
+        # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
+        # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
+        # cps_losses = cps_weight*loss_HM(cps_logits, gt_labels)
+        cps_losses = logits_loss(cps_logits, gt_labels)
+        # losses = logits_loss(torch.sigmoid(pred_logits), gt_labels) # use bce loss with sigmoid
+        # cps_losses = cps_weight*logits_loss(torch.sigmoid(cps_logits), gt_labels)
+
+        # if torch.isnan(pred_maps).any():
+        #     pdb.set_trace()
+
+        h_losses = hth_weight * info_loss(pred_maps.squeeze(1))
+        # h_losses = hth_weight * (0.9**epoch) * info_loss(pred_maps.squeeze(1))
+        # print('pred_maps', pred_maps.size(), pred_maps.max(), pred_maps.min())
+        # print('rf_maps', rf_maps.size(), rf_maps.max(), rf_maps.min())
+
+        rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
+        # rf_losses = rf_weight*(0.9**epoch)*torch.nn.BCELoss()(torch.clamp(pred_maps.squeeze(), min=0.0, max=1.0), rf_maps)
+        # rf_losses = rf_weight*torch.nn.BCELoss()(torch.clamp(torch.nn.Upsample((rf_maps.size(-2), rf_maps.size(-1)))(pred_maps).squeeze(),
+        #                                                      min=0.0, max=1.0), rf_maps)
+
+        # losses.backward(retain_graph=True)
+        cps_losses.backward(retain_graph=True)
+        # losses.backward(retain_graph=True)
+        h_losses.backward(retain_graph=True)
+        rf_losses.backward()
+
+        optimizer.step()
+        # total_loss.append(losses.item())
+        total_h_loss.append(h_losses.item())
+        total_cps_loss.append(cps_losses.item())
+        total_map_loss.append(rf_losses.item())
+
+        if i%train_log_interval == 0:
+            print("Train [{}][{}/{}]\tcps_loss:{:.4f}({:.4f})"
+                  "\th_loss:{:.4f}({:.4f})\trf_loss:{:.4f}({:.4f})".format(
+                epoch, i, int(N),
+                cps_losses.item(), np.mean(np.array(total_cps_loss)),
+                h_losses.item(), np.mean(np.array(total_h_loss)),
+                rf_losses.item(), np.mean(np.array(total_map_loss))))
+
+        if i%tb_log_interval == 0:
+            niter = epoch * len(dataloader) + i
+            # writer.add_scalar('Train_hd/Loss', losses.item(), niter)
+            writer.add_scalar('Train_hd/Cps_loss', cps_losses.item(), niter)
+            writer.add_scalar('Train_hd/Rf_loss', rf_losses.item(), niter)
+
+            if torch.cuda.device_count() < 2:
+            # if True:
+                if model.features[0].weight.grad is not None:
+                    writer.add_scalar('Grad_hd/features0', model.features[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/f_layer4[-1]', model.features[-1][-1].conv3.weight.grad.abs().mean().item(), niter)
+                writer.add_scalar('Grad_hd/classifier0', model.classifier[0].weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin1', model.relation_net.lin1.weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin3', model.relation_net.lin3.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model, 'relation_net'):
+                    writer.add_scalar('Grad_hd/pair_pos_fc1', model.relation_net.pair_pos_fc1.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/linear_out', model.relation_net.linear_out.weight.grad.abs().mean().item(), niter)
+
+                    # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
+
+                if hasattr(model.centerbias, 'fc1'):
+                    if model.centerbias.fc1.weight.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_fc1', model.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                        writer.add_scalar('Grad_hd/gs_fc2', model.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature',
+                        #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                else:
+                    if model.centerbias.params.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_params', model.centerbias.params.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                        #                   niter)
+
+                if hasattr(model, 'box_head'):
+                    if hasattr(model.box_head, 'fc6'):
+                        writer.add_scalar('Grad_hd/box_head_fc6', model.box_head.fc6.weight.grad.abs().mean().item(), niter)
+                        writer.add_scalar('Grad_hd/box_head_fc7', model.box_head.fc7.weight.grad.abs().mean().item(), niter)
+
+            else:
+                if model.module.features[0].weight.grad is not None:
+                    writer.add_scalar('Grad_hd/features0', model.module.features[0].weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/f_layer4[-1]', model.module.features[-1][-1].conv3.weight.grad.abs().mean().item(), niter)
+                writer.add_scalar('Grad_hd/classifier0', model.module.classifier[0].weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin1', model.relation_net.lin1.weight.grad.abs().mean().item(), niter)
+                # writer.add_scalar('Grad_hd/rn_lin3', model.relation_net.lin3.weight.grad.abs().mean().item(), niter)
+
+                if hasattr(model.module, 'relation_net'):
+                    writer.add_scalar('Grad_hd/pair_pos_fc1', model.module.relation_net.pair_pos_fc1.weight.grad.abs().mean().item(), niter)
+                    writer.add_scalar('Grad_hd/linear_out', model.module.relation_net.linear_out.weight.grad.abs().mean().item(), niter)
+
+                    # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
+
+                if hasattr(model.module.centerbias, 'fc1'):
+                    if model.module.centerbias.fc1.weight.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_fc1', model.module.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                        writer.add_scalar('Grad_hd/gs_fc2', model.module.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature',
+                        #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                else:
+                    if model.module.centerbias.params.grad is not None:
+                        writer.add_scalar('Grad_hd/gs_params', model.module.centerbias.params.grad.abs().mean().item(), niter)
+                        # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                        #                   niter)
+
+                if hasattr(model.module, 'box_head'):
+                    if hasattr(model.module.box_head, 'fc6'):
+                        writer.add_scalar('Grad_hd/box_head_fc6', model.module.box_head.fc6.weight.grad.abs().mean().item(), niter)
+                        writer.add_scalar('Grad_hd/box_head_fc7', model.module.box_head.fc7.weight.grad.abs().mean().item(), niter)
+
+
+
+    print("Train [{}]\tAverage cps_loss:{:.4f}"
+          "\tAverage h_loss:{:.4f}\tAverage rf_loss:{:.4f}".format(epoch,
+                                                 np.mean(np.array(total_cps_loss)), np.mean(np.array(total_h_loss)),
+                                                                   np.mean(np.array(total_map_loss))))
+
+def train_Wildcat_WK_hd_compf_map_cw_bms(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
+    model.train()
+
+    N = len(dataloader)
+    # total_loss = list()
+    total_h_loss = list()
+    total_cps_loss = list()
+    total_map_loss = list()
+    for i, X in enumerate(dataloader):
+        optimizer.zero_grad()
+
+        # COCO image, label, boxes(, image_name)
+        # ILSVRC  image, label, boxes(, image_name)
+        inputs, gt_labels, boxes, boxes_nums, rf_maps = X
+
+
+        if args.use_gpu:
+            inputs = inputs.cuda()
+            gt_labels = gt_labels.cuda()
+
+            boxes = boxes.cuda()
+            rf_maps = rf_maps.cuda()
+
+        cps_logits, pred_maps = model(img=inputs,boxes=boxes, boxes_nums=boxes_nums)
+        if torch.isnan(pred_maps).any():
+            print('pred_maps contains nan')
+
+        # rf_maps = rf_maps - rf_maps.min() # do not have this previously
+        rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
+        rf_maps = BMS_R * rf_maps # for gbvs
         # rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2)) # for gbvs_thm
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -5031,7 +5181,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('lr %.4f'%args.lr)
 
 
-        prior='gbvs'
+        # prior='gbvs'
+        prior='bms'
         # prior='nips08'
 
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
@@ -5044,11 +5195,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
 
         # # #
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                                        n_gaussian, normf, MAX_BNUM, prior, BMS_R, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_2_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_rf{}_hth{}_3_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_rf{}_hth{}_3_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_try_ly34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
@@ -5127,7 +5279,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         # logits_loss = torch.nn.CrossEntropyLoss()
         logits_loss = torch.nn.BCEWithLogitsLoss()
         # logits_loss = torch.nn.BCELoss()
-        h_loss = HLoss_th_3()
+        # h_loss = HLoss_th_3()
+        h_loss = HLoss_th_2() # final loss in the article
         # h_loss = HLoss_th()
         # h_loss = HLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
@@ -5149,7 +5302,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         cnt = 0
         # args.n_epochs = 5
         for i_epoch in range(args.n_epochs):
-            train_Wildcat_WK_hd_compf_map_cw_gbvs(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            # train_Wildcat_WK_hd_compf_map_cw_gbvs(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            train_Wildcat_WK_hd_compf_map_cw_bms(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
 
             tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon_cw(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             # tmp_eval_salicon_loss = eval_Wildcat_WK_hd_compf_map(i_epoch, model, logits_loss, h_loss, eval_map_dataloader, args)
