@@ -121,6 +121,6 @@ VIB_dim = 256
 ATT_RES = False
 
 GBVS_R = 0.25
-BMS_R = 0.75
+BMS_R = 0.15
 
 ALT_RATIO = 1.05
