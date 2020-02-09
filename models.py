@@ -8358,11 +8358,16 @@ class GenAttentionMapFunction(torch.autograd.Function):
             resized_boxes = boxes * possible_scales[0]
             # att_maps = torch.zeros_like(grad_output)
             grad_att_scores = torch.zeros_like(att_scores)
+            grad_output_2 = grad_output.clone()
             for box_i in range(att_scores.size(0)):
-                att_maps = torch.zeros_like(grad_output)
+                # att_maps = torch.zeros_like(grad_output)
+                # box = resized_boxes[box_i].int()
+                # att_maps[box[1]:box[3], box[0]:box[2]] = 1.0
+                # grad_att_scores[box_i] = torch.mul(att_maps, grad_output).sum()
                 box = resized_boxes[box_i].int()
-                att_maps[box[1]:box[3], box[0]:box[2]] = 1.0
-                grad_att_scores[box_i] = torch.mul(att_maps, grad_output).sum()
+                tmp = grad_output_2[box[1]:box[3], box[0]:box[2]]
+                grad_att_scores[box_i] = tmp.sum()
+
             # pdb.set_trace()
             # grad_att_scores = torch.mul(att_maps, grad_output.unsqueeze(0).expand_as(att_maps))
             # grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
