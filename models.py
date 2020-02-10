@@ -6185,17 +6185,17 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
             # model = resnet50_dilate()
             # model = resnet50_dilate_one()
             # model = resnet50_dilate_one2()
-            model = resnet101_dilate_one2() ##
+            # model = resnet101_dilate_one2() ##
             # model = resnet101_dilate_one3() ##
-            # model = resnet50_dilate_one3() ##
+            model = resnet50_dilate_one3() ##
             # model = resnet50_dilate_one4()
             # model = resnet50_dilate_one5() ##
 
         else:
             model = models.resnet50(pretrained=False)
 
-        ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet101.pth'
-        # ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet50.pth'
+        # ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet101.pth'
+        ckpt_file = base_path + 'DataSets/GazeFollow/checkpoints/resnet50.pth'
         pretrained_dict = torch.load(ckpt_file)
         model.load_state_dict(pretrained_dict)
 
