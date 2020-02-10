@@ -4463,12 +4463,12 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
-    phase = 'test_cw_sa_sp_multiscale'
+    # phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'    ### base model
-    # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
+    phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
     # phase = 'train_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
