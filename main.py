@@ -46,11 +46,11 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.0 #0.1 #1.0 #
+hth_weight = 0.1 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.1 #0.1 #1.0 #
+rf_weight = 0.0 #0.1 #1.0 #
 
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_fdim{}_2_a'.format(n_gaussian, FEATURE_DIM) # 1.0
@@ -4609,7 +4609,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test_cw_multiscale'
+    # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
@@ -4617,7 +4617,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
-    # phase = 'train_cw_aug'    ### base model
+    phase = 'train_cw_aug'    ### base model
     # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
     # phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
@@ -4630,7 +4630,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_alpha' ### obtain f
     # phase = 'train_alt_msl_alpha'
-    # phase = 'train_aug'
+    # phase = 'train_aug' # for rf==0, because it is hard to train w/o pre_cls_loss
     # phase = 'train_ils_tgt_aug'
     # phase = 'train_cw_ils_tgt_aug'
 
@@ -5066,14 +5066,19 @@ def main_Wildcat_WK_hd_compf_map(args):
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
-        # # #
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_lstm_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
+        # # # #
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_snd_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_snd_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_lstm_cw_1_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
@@ -5147,7 +5152,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # logits_loss = torch.nn.CrossEntropyLoss()
         logits_loss = torch.nn.BCEWithLogitsLoss()
         # logits_loss = torch.nn.BCELoss()
-        h_loss = HLoss_th()
+        h_loss = HLoss_th_2()
         # h_loss = HLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################3
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
@@ -5200,7 +5205,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_0.1_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
         #
         # # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_try_ly34_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one5_224'.format(
