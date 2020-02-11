@@ -648,12 +648,12 @@ def train_Wildcat_WK_hd_compf_map_cw_alt_alpha(epoch, model, model_aux, optimize
 
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
+        prior_maps = prior_maps - torch.min(torch.min(prior_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
+        # prior_maps = GBVS_R * prior_maps # for gbvs
+        prior_maps = torch.relu(prior_maps - torch.mean(prior_maps.view(prior_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
+
         rf_maps = ALPHA * aux_maps + (1 - ALPHA) * (prior_maps.unsqueeze(1))
         # rf_maps = rf_maps - rf_maps.min()
-        # rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
-        # rf_maps = GBVS_R * rf_maps # for gbvs
-        # rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
-
         # losses = 0*logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
         # cps_losses = cps_weight*logits_loss(cps_logits, (torch.sigmoid(pred_logits)>0.5).float())
         cps_losses = cps_weight*logits_loss(cps_logits, gt_labels)
@@ -4617,7 +4617,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test_cw_multiscale'
+    # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
@@ -4627,7 +4627,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'train_cw_aug'    ### base model
     # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
-    # phase = 'train_cw_alt_alpha' ### obtain f
+    phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
     # phase = 'train_alt_alpha_sa_new'
@@ -7707,7 +7707,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         for param in model_aux.parameters():
             param.requires_grad = False
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_gbvs_0.25_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
