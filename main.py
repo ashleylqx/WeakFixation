@@ -2404,15 +2404,18 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
 
     N = len(dataloader) // args.batch_size
     for i, X in enumerate(dataloader):
-        # MIT1003 image, boxes, sal_map, fix_map(, image_name)
+        # MIT1003 & PASCAL-S image, boxes, sal_map, fix_map(, image_name)
         ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+        # MIT300 image, boxes(, image_name)
+        # ori_inputs, ori_boxes, boxes_nums, img_name = X
+
         if args.use_gpu:
             ori_inputs = ori_inputs.cuda()
             ori_boxes = ori_boxes.cuda()
 
-        ori_img = scipy.misc.imread(
-            os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
-        # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
+        ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
 
         ori_size = ori_inputs.size(-1)
         pred_maps_all = torch.zeros(ori_inputs.size(0), 1, output_h, output_w).to(ori_inputs.device)
@@ -4618,12 +4621,12 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
-    # phase = 'test_cw_sa_sp_multiscale'
+    phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'    ### base model
-    phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
+    # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
     # phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
@@ -7710,6 +7713,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_gbvs_0.25_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #     n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # others
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_twocls_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # rf0.1, hth0.0
+
         print(model_name)
 
         if args.use_gpu:
@@ -9718,8 +9726,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
-        # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         args.batch_size = 1
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
