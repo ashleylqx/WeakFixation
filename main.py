@@ -37,7 +37,8 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_vis, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_multiscale, \
-    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs, \
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs
 
 from custom_loss import HLoss_th, loss_HM, HLoss_th_3, HLoss_th_2
 from config import *
@@ -51,7 +52,8 @@ hdsup_weight = 0.1  # 0.1, 0.1
 rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_G{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_nobs_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+# run = 'hd_gs_G{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
@@ -5207,7 +5209,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # global center bias
+
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # global center bias
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nomlp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
