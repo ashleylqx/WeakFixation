@@ -2414,8 +2414,8 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
             ori_boxes = ori_boxes.cuda()
 
         # ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
-        ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
-        # ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+        ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
 
         ori_size = ori_inputs.size(-1)
         pred_maps_all = torch.zeros(ori_inputs.size(0), 1, output_h, output_w).to(ori_inputs.device)
@@ -9719,24 +9719,24 @@ def main_Wildcat_WK_hd_compf_map(args):
         if args.use_gpu:
             model.cuda()
 
-        folder_name = 'Preds/PASCAL-S'
+        # folder_name = 'Preds/PASCAL-S'
         # folder_name = 'Preds/MIT1003'
-        # folder_name = 'Preds/MIT300'
+        folder_name = 'Preds/MIT300'
         # best_model_file = 'no_training'
         E_NUM = [0]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
         args.batch_size = 1
 
-        # ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
-        #                              shuffle=False, num_workers=2)
-
-        ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        # # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-
-        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+        ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
                                      shuffle=False, num_workers=2)
+
+        # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # # # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        #
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+        #                              shuffle=False, num_workers=2)
 
         for e_num in E_NUM:
 
