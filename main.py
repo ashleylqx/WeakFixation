@@ -52,7 +52,7 @@ hdsup_weight = 0.1  # 0.1, 0.1
 rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_nobs_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_nobs_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_G{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
@@ -265,17 +265,18 @@ def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_
 
                     # writer.add_histogram('Hist_hd/linear_out', model.relation_net.linear_out.weight.detach().cpu().numpy(), niter)
 
-                if hasattr(model.centerbias, 'fc1'):
-                    if model.centerbias.fc1.weight.grad is not None:
-                        writer.add_scalar('Grad_hd/gs_fc1', model.centerbias.fc1.weight.grad.abs().mean().item(), niter)
-                        writer.add_scalar('Grad_hd/gs_fc2', model.centerbias.fc2.weight.grad.abs().mean().item(), niter)
-                        # writer.add_scalar('Grad_hd/gen_g_feature',
-                        #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
-                else:
-                    if model.centerbias.params.grad is not None:
-                        writer.add_scalar('Grad_hd/gs_params', model.centerbias.params.grad.abs().mean().item(), niter)
-                        # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
-                        #                   niter)
+                if hasattr(model, 'centerbias'):
+                    if hasattr(model.centerbias, 'fc1'):
+                        if model.centerbias.fc1.weight.grad is not None:
+                            writer.add_scalar('Grad_hd/gs_fc1', model.centerbias.fc1.weight.grad.abs().mean().item(), niter)
+                            writer.add_scalar('Grad_hd/gs_fc2', model.centerbias.fc2.weight.grad.abs().mean().item(), niter)
+                            # writer.add_scalar('Grad_hd/gen_g_feature',
+                            #                   model.gen_g_feature.weight.grad.abs().mean().item(), niter)
+                    else:
+                        if model.centerbias.params.grad is not None:
+                            writer.add_scalar('Grad_hd/gs_params', model.centerbias.params.grad.abs().mean().item(), niter)
+                            # writer.add_scalar('Grad_hd/gen_g_feature', model.gen_g_feature.weight.grad.abs().mean().item(),
+                            #                   niter)
 
                 if hasattr(model, 'box_head'):
                     if hasattr(model.box_head, 'fc6'):
