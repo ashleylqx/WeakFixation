@@ -9939,7 +9939,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
 
-        E_NUM = [2] # _rf0.0_hth0.1_twocls
+        E_NUM = [1] # _rf0.0_hth0.1_twocls
         # E_NUM = [1,2,8] # _gbs
         # E_NUM = [1,2,3,4,5,7] # _nobs
         for e_num in E_NUM:
