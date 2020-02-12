@@ -6898,12 +6898,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_noobj(torch.nn.Module):
         # ----------------------------------------
         self.to_img_size = torch.nn.Upsample(size=(input_h, input_w))
         self.to_attention_size = torch.nn.Upsample(size=(output_h, output_w))
-        self.to_grid_size = torch.nn.Upsample(size=(7, 7))
-        self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
-        self.grid_N = self.boxes_grid.size(1)
-
-        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
-                                                               dim=[FEATURE_DIM]*3)
+        # self.to_grid_size = torch.nn.Upsample(size=(7, 7))
+        # self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
+        # self.grid_N = self.boxes_grid.size(1)
+        #
+        # self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
+        #                                                        dim=[FEATURE_DIM]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         # self.to_cw_feature_size = torch.nn.Upsample(size=(14, 14))
