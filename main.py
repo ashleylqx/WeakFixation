@@ -51,13 +51,13 @@ hth_weight = 0.1 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
 rf_weight = 0.0 #0.1 #1.0 #
 
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_nobs_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_G{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
-# run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+run = 'hd_gs_A{}_alt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 
 
@@ -4631,7 +4631,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     # phase = 'train_cw_aug'    ### base model
     # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
-    # phase = 'train_cw_alt_alpha' ### obtain f
+    phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
     # phase = 'train_alt_alpha_sa_new'
@@ -4642,7 +4642,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_alpha' ### obtain f
     # phase = 'train_alt_msl_alpha'
-    phase = 'train_aug' # for rf==0, because it is hard to train w/o pre_cls_loss
+    # phase = 'train_aug' # for rf==0, because it is hard to train w/o pre_cls_loss
     # phase = 'train_ils_tgt_aug'
     # phase = 'train_cw_ils_tgt_aug'
 
@@ -7718,12 +7718,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         else:
             new_params = saved_state_dict.copy()
         model_aux.load_state_dict(new_params)
-        model.load_state_dict(new_params) # this might be faster? change lr from 1e-4 to 1e-5 then
+        # model.load_state_dict(new_params) # this might be faster? change lr from 1e-4 to 1e-5 then
 
         for param in model_aux.parameters():
             param.requires_grad = False
 
-        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_3_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_gbvs_0.25_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
@@ -7769,12 +7769,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         h_loss = HLoss_th_2()
         # h_loss = HLoss()
 
-        # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ############################
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)  ############################
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ############################
+        # optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)  ############################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
-        # print('relation lr factor: 1.0')
-        print('alt learning rate: 1e-5')
+        print('relation lr factor: 1.0')
+        # print('alt learning rate: 1e-5')
 
         if args.use_gpu:
             logits_loss = logits_loss.cuda()
