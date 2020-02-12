@@ -6737,8 +6737,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs(torch.nn.Module):
         gaussian = self.centerbias(x) #previous n_gaussian=8 use this settings; as all other n_gaussians
         if gaussian.size(0) != x.size(0):
             gaussian = gaussian.repeat(x.size(0), 1, 1, 1)
-        # if gaussian.size(2) != x.size(2):
-        #     gaussian = F.interpolate(gaussian, size=(x.size(2), x.size(3)))
+        if gaussian.size(2) != x.size(2):
+            gaussian = F.interpolate(gaussian, size=(x.size(2), x.size(3)))
 
         x = self.gen_g_feature(torch.cat([x, gaussian], dim=1))
         cw_maps = self.spatial_pooling.class_wise(x)  # (N, 1000, 7, 7)
