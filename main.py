@@ -5211,7 +5211,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # #                    fix_feature=fix_feature, dilate=dilate)
 
         model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                         fix_feature=fix_feature, dilate=dilate, use_grid=False, normalize_feature=normf) #################
+                         fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
