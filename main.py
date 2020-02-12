@@ -7733,8 +7733,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                         'rf0.1_hth0.1_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'))
 
         # gbvs prior
-        checkpoint = torch.load(os.path.join(path_models,'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_thm_0.5_'+
-                                'rf0.1_hth0.1_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'))
+        checkpoint = torch.load(os.path.join(path_models,'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_'+
+                                'rf0.1_hth0.1_2_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'))
 
         # no prior loss
         # checkpoint = torch.load(os.path.join(path_models, 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_'+
@@ -7761,8 +7761,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet50_wildcat_wk_hd_cbG{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-            n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
+        # model_name = 'resnet50_wildcat_wk_hd_cbG{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
+
+        model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_nobs_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #     normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
