@@ -38,7 +38,7 @@ from models import Wildcat_WK_hd_gs_compf_cls_att_A, Wildcat_WK_hd_gs_compf_cls_
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_vis, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_multiscale, \
     Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_catX, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs, \
-    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs
+    Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal
 
 from custom_loss import HLoss_th, loss_HM, HLoss_th_3, HLoss_th_2
 from config import *
@@ -55,7 +55,8 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_nobs_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_G{}_alt_3_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noGrid_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noGrid_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_nopsal_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
@@ -5209,8 +5210,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=False, normalize_feature=normf) #################
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # global center bias
@@ -5225,8 +5229,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_0.1_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one2_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_nopsal_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+        # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_2_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
