@@ -49,7 +49,7 @@ from tensorboardX import SummaryWriter
 cps_weight = 1.0
 hth_weight = 0.1 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.0 #0.1 #1.0 #
+rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_nobs_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(MAX_BNUM, rf_weight, hth_weight) # 1.0
@@ -57,7 +57,7 @@ rf_weight = 0.0 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
-run = 'hd_gs_A{}_alt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 
 
@@ -7675,7 +7675,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
     elif phase == 'train_cw_alt_alpha':
         print('lr %.4f' % args.lr)
-
+        prior = 'bms'
         #########################################
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_G(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
@@ -7696,6 +7696,22 @@ def main_Wildcat_WK_hd_compf_map(args):
                                                      num_maps=num_maps,
                                                      fix_feature=fix_feature, dilate=dilate, use_grid=True,
                                                      normalize_feature=normf)
+        
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        #                                          num_maps=num_maps,
+        #                                          fix_feature=fix_feature, dilate=dilate, use_grid=True,
+        #                                          normalize_feature=normf)
+        #
+        # model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+        #                                              num_maps=num_maps,
+        #                                              fix_feature=fix_feature, dilate=dilate, use_grid=True,
+        #                                              normalize_feature=normf)
+
+
+
+        # no center bias
+        # checkpoint = torch.load(os.path.join(path_models,'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_'+
+        #                                                  'rf0.1_hth0.1_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'))
 
         # bms prior
         checkpoint = torch.load(os.path.join(path_models,'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_bms_thm_'+
@@ -7718,7 +7734,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         else:
             new_params = saved_state_dict.copy()
         model_aux.load_state_dict(new_params)
-        # model.load_state_dict(new_params) # this might be faster? change lr from 1e-4 to 1e-5 then
+        model.load_state_dict(new_params) # this might be faster? change lr from 1e-4 to 1e-5 then
 
         for param in model_aux.parameters():
             param.requires_grad = False
@@ -7746,7 +7762,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
 
         # ds_train = MS_COCO_map_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior = prior)
         # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
 
@@ -7769,12 +7785,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         h_loss = HLoss_th_2()
         # h_loss = HLoss()
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ############################
-        # optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)  ############################
+        # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ############################
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)  ############################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
-        print('relation lr factor: 1.0')
-        # print('alt learning rate: 1e-5')
+        # print('relation lr factor: 1.0')
+        print('alt learning rate: 1e-5')
 
         if args.use_gpu:
             logits_loss = logits_loss.cuda()
