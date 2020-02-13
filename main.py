@@ -17,7 +17,7 @@ import torch.nn.functional as F
 
 # import horovod.torch as hvd
 
-from load_data import MS_COCO_full, SALICON_full, MIT300_full, MIT1003_full, MS_COCO_map_full, PASCAL_full,\
+from load_data import MS_COCO_full, SALICON_full, MIT300_full, MIT1003_full, MS_COCO_map_full, PASCAL_full, SALICON_test,\
     MS_COCO_map_full_aug, MS_COCO_map_full_aug_sf, ILSVRC_full, ILSVRC_map_full, ILSVRC_map_full_aug
 from load_data import collate_fn_coco_rn, collate_fn_salicon_rn, collate_fn_mit1003_rn, \
                         collate_fn_coco_map_rn, collate_fn_coco_map_rn_multiscale, \
@@ -59,13 +59,13 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noGrid_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_nopsal_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-# run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noobj_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noobj_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -2424,10 +2424,10 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
         # ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
 
         # SALICON image, label, boxes, sal_map, fix_map(, image_name)
-        ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
+        # ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
 
-        # MIT300 image, boxes(, image_name)
-        # ori_inputs, ori_boxes, boxes_nums, img_name = X
+        # MIT300 & SALICON test image, boxes(, image_name)
+        ori_inputs, ori_boxes, boxes_nums, img_name = X
 
         if args.use_gpu:
             ori_inputs = ori_inputs.cuda()
@@ -4644,13 +4644,13 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
-    phase = 'test_cw_sa_sp_multiscale'
+    # phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'    ### base model
     # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
-    # phase = 'train_cw_alt_alpha' ### obtain f
+    phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
     # phase = 'train_alt_alpha_sa_new'
@@ -7851,7 +7851,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         else:
             new_params = saved_state_dict.copy()
         model_aux.load_state_dict(new_params)
-        model.load_state_dict(new_params) # this might be faster? change lr from 1e-4 to 1e-5 then
+        # model.load_state_dict(new_params) # this might be faster? change lr from 1e-4 to 1e-5 then
 
         for param in model_aux.parameters():
             param.requires_grad = False
@@ -7862,7 +7862,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model_name = 'resnet101_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_2_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
         #                                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-        model_name = 'resnet101_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noobj_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+        model_name = 'resnet101_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noobj_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbG{}_alt_5_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
@@ -7917,12 +7917,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         h_loss = HLoss_th_2()
         # h_loss = HLoss()
 
-        # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ############################
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)  ############################
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)  ############################
+        # optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)  ############################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
-        # print('relation lr factor: 1.0')
-        print('alt learning rate: 1e-5')
+        print('relation lr factor: 1.0')
+        # print('alt learning rate: 1e-5')
 
         if args.use_gpu:
             logits_loss = logits_loss.cuda()
@@ -9943,9 +9943,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         args.batch_size = 1
 
         # ds_test = SALICON_full(return_path=True, img_h=input_h, img_w=input_w, mode='val')  # N=4,
-        ds_test = SALICON_full(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
-        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
-                                     shuffle=False, num_workers=2)
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
+        #                          shuffle=False, num_workers=2)
+        ds_test = SALICON_test(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, shuffle=False, num_workers=2)
 
         # ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,

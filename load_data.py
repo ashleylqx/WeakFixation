@@ -213,6 +213,107 @@ class SALICON_full(Dataset):
         else:
             return img_processed, label, boxes, sal_processed, fix_processed
 
+class SALICON_test(Dataset):
+    def __init__(self, mode='test', return_path=False, N=None,
+                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
+
+        self.path_dataset = PATH_SALICON
+        self.path_images = os.path.join(self.path_dataset, 'images', mode)
+        # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
+        # self.path_features = os.path.join(self.path_dataset, 'features', mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', mode)
+        # self.path_saliency = os.path.join(self.path_dataset, 'maps', mode)
+        # self.path_fixation = os.path.join(self.path_dataset, 'fixations', mode)
+        self.return_path = return_path
+
+        self.img_h = img_h
+        self.img_w = img_w
+
+        # self.normalize_feature = normalize_feature
+
+        # get list images
+        list_names = os.listdir(self.path_images)
+        list_names = np.array([n.split('.')[0] for n in list_names])
+        self.list_names = list_names
+        # list_names = np.array(['COCO_val2014_000000030785',
+        #                        'COCO_val2014_000000061507',
+        #                        'COCO_val2014_000000091883',
+        #                        'COCO_val2014_000000123480',
+        #                        'COCO_val2014_000000031519',
+        #                        'COCO_val2014_000000061520',
+        #                        'COCO_val2014_000000091909',
+        #                        'COCO_val2014_000000123580'])
+        # self.list_names = list_names
+
+        if N is not None:
+            self.list_names = list_names[:N]
+
+
+        # self.coco = COCO(os.path.join(PATH_COCO, 'annotations', 'instances_%s2014.json'%mode))
+        # self.imgNsToCat = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_{}.p'.format(mode)), "rb"))
+
+        # if mode=='train':
+        #     random.shuffle(self.list_names)
+
+        # embed()
+        print("Init SALICON full dataset in mode {}".format(mode))
+        print("\t total of {} images.".format(self.list_names.shape[0]))
+
+    def __len__(self):
+        return self.list_names.shape[0]
+
+    def __getitem__(self, index):
+
+        # Image and saliency map paths
+        rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
+        # sal_path = os.path.join(self.path_saliency, self.list_names[index]+'.png')
+        # fix_path = os.path.join(self.path_fixation, self.list_names[index]+'.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index]+'_bboxes.mat')
+
+        image = scipy.misc.imread(rgb_ima, mode='RGB')
+        # image = cv2.imread(rgb_ima)
+        # saliency = cv2.imread(sal_path, 0)
+        # fixation = scipy.io.loadmat(fix_path)
+        # fix_processed = fixationProcessing_mat(fixation)
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+
+        # if os.path.exists(sal_path):
+        #     saliency = cv2.imread(sal_path, 0)
+        # else:
+        #     saliency = gaussian_filter(fix_processed, sigma=5)
+
+        image = cv2.resize(image, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA).astype(np.float32)
+        img_processed = transform(image/255.)
+        # img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
+        # img_processed, sal_processed, ori_img = imageProcessing_img(image, saliency, h=self.img_h, w=self.img_w)
+
+        # # get coco label
+        # label_indices = self.imgNsToCat[self.list_names[index]]
+        # # label_indices = self.coco.imgNsToCat[self.list_names[index]]
+        # label = torch.zeros(coco_num_classes)
+        # if len(label_indices)>0:
+        #     label[label_indices] = 1
+        # else:
+        #     label[0] = 1
+
+        # -------------------------------
+        # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
+        # if self.normalize_feature:
+        #     # box_features = box_features / (np.max(box_features, axis=-1, keepdims=True)+1e-8)
+        #     box_f_max = np.max(box_features, axis=-1, keepdims=True)
+        #     box_f_max[box_f_max==0.] = 1e-8
+        #     box_features = box_features / box_f_max
+        # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
+
+        if self.return_path:
+            return img_processed, boxes, self.list_names[index]
+        else:
+            return img_processed, boxes
+
 class MS_COCO_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None,
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
