@@ -48,9 +48,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.1 #0.1 #1.0 #
+hth_weight = 0.0 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.0 #0.1 #1.0 #
+rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_nobs_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(MAX_BNUM, rf_weight, hth_weight) # 1.0
@@ -6065,9 +6065,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
         #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.0_hth0.0'+
         #                                      '_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch04.pt'), map_location='cuda:0')
+        # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.0_hth0.1'+
+        #                                      '_twocls_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'), map_location='cuda:0')
         checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.0_hth0.1'+
-                                             '_twocls_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'), map_location='cuda:0')
+                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1_hth0.0'+
+                                             '_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'), map_location='cuda:0')
 
         
 
