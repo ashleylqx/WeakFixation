@@ -48,14 +48,15 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.1 #0.1 #1.0 #
+hth_weight = 0.0 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.1 #0.1 #1.0 #
+rf_weight = 0.0 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_nobs_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_G{}_alt_5_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noGrid_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_nopsal_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noobj_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
@@ -64,7 +65,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -1171,8 +1172,8 @@ def train_Wildcat_WK_hd_compf_map_cw_sa(epoch, model, optimizer, logits_loss, in
 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
         rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
-        rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
-        rf_maps = GBVS_R * rf_maps # for gbvs
+        # rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
+        # rf_maps = GBVS_R * rf_maps # for gbvs
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -5957,9 +5958,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('lr %.4f'%args.lr)
 
 
-        # prior='nips08'
+        prior='nips08'
         # prior='bms'
-        prior='gbvs'
+        # prior='gbvs'
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
@@ -5984,15 +5985,21 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #                             n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+
+            model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_2_rf{}_hth{}_ms4_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
+            # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_2_rf{}_hth{}_ms4_sa_art_ftf_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
 
 
         # # previsou one5 is actually one2 ... sad ...
@@ -6057,9 +6064,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
         #                                      'resnet50_wildcat_wk_hd_cbA16_alt_3_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_bms_thm_rf0.1' +
         #                                      '_hth0.1_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'), map_location='cuda:0')
+        # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+        #                                      'resnet50_wildcat_wk_hd_cbA16_alt_2_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_rf0.1'+
+        #                                      '_hth0.1_2_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch11.pt'), map_location='cuda:0')
         checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_alt_2_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_rf0.1'+
-                                             '_hth0.1_2_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch11.pt'), map_location='cuda:0')
+                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.0_hth0.0'+
+                                             '_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch04.pt'), map_location='cuda:0')
+
         
 
         saved_state_dict = checkpoint['state_dict']
