@@ -48,7 +48,7 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.0 #0.1 #1.0 #
+hth_weight = 0.1 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
 rf_weight = 0.0 #0.1 #1.0 #
 
@@ -9826,7 +9826,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = [0,1,5]
+        E_NUM = [0,1,4]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
