@@ -50,9 +50,9 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.0 #0.1 #1.0 #
+hth_weight = 0.1 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.0 #0.1 #1.0 #
+rf_weight = 0.1 #0.1 #1.0 #
 
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
@@ -4663,7 +4663,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
-    # phase = 'test_cw_sa_sp_multiscale'
+    phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
@@ -4671,7 +4671,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
     # phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
-    phase = 'train_cw_aug_sa_art' ### obtain fixf
+    # phase = 'train_cw_aug_sa_art' ### obtain fixf
     # phase = 'train_alt_alpha_sa_new'
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_aug_sa_sp_fixf' ### sa_new_sp, sa_art_sp, obtain fixf_sp
@@ -10340,7 +10340,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # folder_name = 'Preds/SALICON' #validation set
         folder_name = 'Preds/SALICON_test'
         # best_model_file = 'no_training'
-        E_NUM = [3]
+        E_NUM = [0]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
         args.batch_size = 1
@@ -10349,11 +10349,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
         #                          shuffle=False, num_workers=2)
         ds_test = SALICON_test(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
-        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, shuffle=False, num_workers=2)
-
         # ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
-        #                              shuffle=False, num_workers=2)
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
+                                     shuffle=False, num_workers=2)
 
         # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
@@ -10364,12 +10362,12 @@ def main_Wildcat_WK_hd_compf_map(args):
         for e_num in E_NUM:
 
             if ATT_RES:
-                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
-                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
-                    fix_feature, dilate, e_num)  # _gcn_all
-                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
                 #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
                 #     fix_feature, dilate, e_num)  # _gcn_all
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                    fix_feature, dilate, e_num)  # _gcn_all
                 #
 
             else: #resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03_multiscale
