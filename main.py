@@ -57,12 +57,12 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_G{}_alt_5_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noGrid_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+# run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noGrid_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_nopsal_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_noobj_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
@@ -4643,14 +4643,14 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
-    # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
+    phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
     # phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
     # phase = 'train_cw_aug'    ### base model
     # phase = 'train_cw_aug_gbvs' ### base model with gbvs and bms, other priors
-    phase = 'train_cw_alt_alpha' ### obtain f
+    # phase = 'train_cw_alt_alpha' ### obtain f
     # phase = 'train_cw_aug_sa_new'
     # phase = 'train_cw_aug_sa_art' ### obtain fixf
     # phase = 'train_alt_alpha_sa_new'
@@ -9826,7 +9826,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = list(range(9))
+        E_NUM = [0,2,6,7,9,12]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
@@ -9843,9 +9843,17 @@ def main_Wildcat_WK_hd_compf_map(args):
                     fix_feature, dilate, e_num)  # _gcn_all
 
             else:
-                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_ftf_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
-                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
-                    fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_ftf_2_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                             n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_gbvs_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #              n_gaussian, normf, MAX_BNUM, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_nips08_rf{}_hth{}_ms4_sa_art_fixf_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
 
             print("Testing %s ..."%best_model_file)
             # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  #N=4,
