@@ -268,7 +268,7 @@ class SALICON_test(Dataset):
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         # sal_path = os.path.join(self.path_saliency, self.list_names[index]+'.png')
         # fix_path = os.path.join(self.path_fixation, self.list_names[index]+'.mat')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index]+'_bboxes.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index]+'.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
         # image = cv2.imread(rgb_ima)
