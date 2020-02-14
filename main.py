@@ -9835,6 +9835,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
 
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
         for e_num in E_NUM:
 
             if ATT_RES:
@@ -9860,7 +9861,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             # args.batch_size = 1
             # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
             #                              shuffle=False, num_workers=2)
-            test_Wildcat_WK_hd_compf_multiscale_cw_sa(model, folder_name, best_model_file, test_dataloader, args)
+            test_Wildcat_WK_hd_compf_multiscale_cw_sa(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
 
             # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
@@ -9964,6 +9965,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
         #                              shuffle=False, num_workers=2)
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
 
         for e_num in E_NUM:
 
@@ -10000,7 +10002,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                              shuffle=False, num_workers=2)
             # test_Wildcat_WK_hd_compf_cw_sa(model, folder_name, best_model_file, test_dataloader, args)
             # test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
-            tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+
             test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
 
