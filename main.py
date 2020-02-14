@@ -70,9 +70,10 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -1831,8 +1832,8 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
         rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
-        rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
-        # rf_maps = GBVS_R * rf_maps # for gbvs
+        rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm, gbvs_thm
+        rf_maps = GBVS_R * rf_maps # for gbvs
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -6536,7 +6537,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('lr %.4f'%args.lr)
 
 
-        prior='bms'
+        # prior='bms'
+        prior='gbvs'
         # prior='nips08'
 
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
@@ -6579,11 +6581,11 @@ def main_Wildcat_WK_hd_compf_map(args):
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-            #                             n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                                        n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
             # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
@@ -6699,9 +6701,12 @@ def main_Wildcat_WK_hd_compf_map(args):
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                         'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
             #                         '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch02.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+            #                         'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_bms_thm_rf0.1'+
+            #                         '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch06.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
             checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                    'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_bms_thm_rf0.1'+
-                                    '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch06.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
+                                    'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_rf0.1_hth0.1'+
+                                    '_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
 
 
 
