@@ -799,7 +799,7 @@ class MS_COCO_ALL_map_full_aug(Dataset):
         list_names_val = os.listdir(self.path_images_val)
         list_names_val_salicon = os.listdir(self.path_images_val_salicon)
         list_names_val_final = np.array([n.split('.')[0] for n in list_names_val if n not in list_names_val_salicon])
-        self.list_names = list_names_train + list_names_val_final
+        self.list_names = np.concatenate((list_names_train, list_names_val_final), axis=0)
 
         if N is not None:
             self.list_names = self.list_names[:N]
