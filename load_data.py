@@ -406,6 +406,108 @@ class MS_COCO_full(Dataset):
         else:
             return img_processed, label, boxes
 
+class MS_COCO_ALL_full(Dataset):
+    def __init__(self, mode=None, return_path=False, N=None,
+                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
+
+        self.path_dataset = PATH_COCO
+        self.path_images_train = os.path.join(self.path_dataset, 'train2014')
+        self.path_images_val = os.path.join(self.path_dataset, 'val2014')
+        # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
+        # self.path_features = os.path.join(self.path_dataset, 'features', mode)
+        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_eb500')
+        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_eb500')
+        self.return_path = return_path
+
+        self.img_h = img_h
+        self.img_w = img_w
+
+        # self.normalize_feature = normalize_feature
+
+        # get list images
+        list_names_train = os.listdir(self.path_images_train)
+        list_names_train = np.array([n.split('.')[0] for n in list_names_train])
+        list_names_val = os.listdir(self.path_images_val)
+        list_names_val = np.array([n.split('.')[0] for n in list_names_val])
+        self.list_names = np.concatenate((list_names_train, list_names_val), axis=0)
+
+        # if mode=='train':
+        #     list_names = np.array(['COCO_train2014_000000001108',
+        #                            'COCO_train2014_000000002148',
+        #                            'COCO_train2014_000000003348',
+        #                            'COCO_train2014_000000004575'])
+        # elif mode=='val':
+        #     list_names = np.array(['COCO_val2014_000000005586',
+        #                            'COCO_val2014_000000011122',
+        #                            'COCO_val2014_000000016733',
+        #                            'COCO_val2014_000000022199'])
+        #
+        # self.list_names = list_names
+
+        if N is not None:
+            self.list_names = self.list_names[:N]
+
+
+        # self.coco = COCO(os.path.join(PATH_COCO, 'annotations', 'instances_%s2014.json'%mode))
+        imgNsToCat_train = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_train.p'), "rb"))
+        imgNsToCat_val = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_val.p'), "rb"))
+        self.imgNsToCat = {**imgNsToCat_train, **imgNsToCat_val}
+
+        # if mode=='train':
+        #     random.shuffle(self.list_names)
+
+        # embed()
+        print("Init MS_COCO full dataset in mode {}".format(mode))
+        print("\t total of {} images.".format(self.list_names.shape[0]))
+
+    def __len__(self):
+        return self.list_names.shape[0]
+
+    def __getitem__(self, index):
+
+        # Image and saliency map paths
+        if 'val' in self.list_names[index]:
+            rgb_ima = os.path.join(self.path_images_val, self.list_names[index]+'.jpg')
+            box_path = os.path.join(self.edge_boxes_val, self.list_names[index] + '_bboxes.mat')
+
+        else:
+            rgb_ima = os.path.join(self.path_images_train, self.list_names[index]+'.jpg')
+            box_path = os.path.join(self.edge_boxes_train, self.list_names[index] + '_bboxes.mat')
+
+
+        image = scipy.misc.imread(rgb_ima, mode='RGB')
+        image = cv2.resize(image, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA).astype(np.float32)
+        img_processed = transform(image/255.)
+
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+
+        # get coco label
+        label_indices = self.imgNsToCat[self.list_names[index]]
+        # label_indices = self.coco.imgNsToCat[self.list_names[index]]
+        label = torch.zeros(coco_num_classes)
+        if len(label_indices)>0:
+            label[label_indices] = 1
+        else:
+            label[0] = 1
+
+        # -------------------------------
+        # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
+        # if self.normalize_feature:
+        #     # box_features = box_features / (np.max(box_features, axis=-1, keepdims=True)+1e-8)
+        #     box_f_max = np.max(box_features, axis=-1, keepdims=True)
+        #     box_f_max[box_f_max == 0.] = 1e-8
+        #     box_features = box_features / box_f_max
+        # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
+
+        if self.return_path:
+            return img_processed, label, boxes, self.list_names[index]
+        else:
+            return img_processed, label, boxes
+
 class MS_COCO_map_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None, prior = 'nips08',
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -599,6 +701,198 @@ class MS_COCO_map_full_aug(Dataset):
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index] + '.png')
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
+
+        image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
+        saliency = cv2.imread(sal_path, 0)
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+
+        if boxes.shape[0]==0:
+            img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
+            boxes_ = np.zeros_like(boxes)
+            boxes_[:, 0] = boxes[:, 0] * self.img_w
+            boxes_[:, 2] = boxes[:, 2] * self.img_w
+            boxes_[:, 1] = boxes[:, 1] * self.img_h
+            boxes_[:, 3] = boxes[:, 3] * self.img_h
+        else:
+            boxes[:, 0] = boxes[:, 0] * image.shape[1]
+            boxes[:, 2] = boxes[:, 2] * image.shape[1]
+            boxes[:, 1] = boxes[:, 1] * image.shape[0]
+            boxes[:, 3] = boxes[:, 3] * image.shape[0]
+
+            image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
+
+            img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
+
+            # if boxes_.min()<0:
+            #     pdb.set_trace()
+
+            #np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            #np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            #np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
+            #np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
+
+            #boxes_[boxes_[:, 0] < 0., 0] = 0.
+            #boxes_[boxes_[:, 0] > image.shape[1], 0] = image.shape[1]
+            #boxes_[boxes_[:, 2] < boxes_[:, 0], 2] = boxes_[:, 0]
+            #boxes_[boxes_[:, 2] > image.shape[1], 2] = image.shape[1]
+
+            #boxes_[boxes_[:, 1] < 0., 1] = 0.
+            #boxes_[boxes_[:, 1] > image.shape[0], 1] = image.shape[0]
+            #boxes_[boxes_[:, 3] < boxes_[:, 1], 3] = boxes_[:, 1]
+            #boxes_[boxes_[:, 3] > image.shape[0], 3] = image.shape[0]
+
+            np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
+            np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
+            boxes_[:, 1] = np.minimum(np.maximum(boxes_[:, 0], boxes_[:, 1]), image.shape[0])
+            boxes_[:, 3] = np.minimum(np.maximum(boxes_[:, 2], boxes_[:, 3]), image.shape[0])
+
+            boxes_[:, 0] = boxes_[:, 0] / image.shape[1] * self.img_w
+            boxes_[:, 2] = boxes_[:, 2] / image.shape[1] * self.img_w
+            boxes_[:, 1] = boxes_[:, 1] / image.shape[0] * self.img_h
+            boxes_[:, 3] = boxes_[:, 3] / image.shape[0] * self.img_h
+
+        # get coco label
+        label_indices = self.imgNsToCat[self.list_names[index]]
+        # label_indices = self.coco.imgNsToCat[self.list_names[index]]
+        label = torch.zeros(coco_num_classes)
+        if len(label_indices)>0:
+            label[label_indices] = 1
+        else:
+            label[0] = 1
+
+
+        if self.return_path:
+            return img_processed, label, boxes_, sal_processed, self.list_names[index]
+        else:
+            return img_processed, label, boxes_, sal_processed
+
+class MS_COCO_ALL_map_full_aug(Dataset):
+    def __init__(self, mode=None, return_path=False, N=None, prior = 'nips08',
+                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
+
+        self.path_dataset = PATH_COCO
+        self.path_images_train = os.path.join(self.path_dataset, 'train2014')
+        self.path_images_val = os.path.join(self.path_dataset, 'val2014')
+        self.path_images_val_salicon = os.path.join(PATH_SALICON, 'images', 'val')
+        # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
+        # self.path_features = os.path.join(self.path_dataset, 'features', mode)
+        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_eb500')
+        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_eb500')
+
+        self.path_saliency_train = os.path.join(self.path_dataset, 'train2014_%s'%prior)
+        self.path_saliency_val = os.path.join(self.path_dataset, 'val2014_%s'%prior)
+        self.return_path = return_path
+
+        self.img_h = img_h
+        self.img_w = img_w
+
+        # self.normalize_feature = normalize_feature
+
+        # get list images
+        # list_names_train = os.listdir(self.path_images_train)
+        # list_names_train = np.array([n.split('.')[0] for n in list_names_train])
+        # list_names_val = os.listdir(self.path_images_val)
+        # list_names_val = np.array([n.split('.')[0] for n in list_names_val])
+        # self.list_names = np.concatenate((list_names_train, list_names_val), axis=0)
+        list_names_train = os.listdir(self.path_images_train)
+        list_names_train = np.array([n.split('.')[0] for n in list_names_train])
+        list_names_val = os.listdir(self.path_images_val)
+        list_names_val_salicon = os.listdir(self.path_images_val_salicon)
+        list_names_val_final = np.array([n.split('.')[0] for n in list_names_val if n not in list_names_val_salicon])
+        self.list_names = list_names_train + list_names_val_final
+
+        if N is not None:
+            self.list_names = self.list_names[:N]
+
+
+        # self.coco = COCO(os.path.join(PATH_COCO, 'annotations', 'instances_%s2014.json'%mode))
+        imgNsToCat_train = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_train.p'), "rb"))
+        imgNsToCat_val = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_val.p'), "rb"))
+        self.imgNsToCat = {**imgNsToCat_train, **imgNsToCat_val}
+
+        #self.seq = Sequence([RandomHSV(40, 40, 40),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.2, diff=True),
+        #                     RandomTranslate(0.2, diff=True),
+        #                     RandomRotate(10),
+        #                     RandomShear(0.2)]
+        #                    ) # 1st attempt _aug
+
+        # self.seq = Sequence([RandomHSV(20, 20, 20),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.1, diff=True),
+        #                     RandomTranslate(0.1, diff=True),
+        #                     RandomRotate(10),
+        #                     RandomShear(0.1)]
+        #                    ) # 2nd attempt _aug2
+
+        #self.seq = Sequence([RandomHSV(10, 10, 10),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.05, diff=True),
+        #                     RandomTranslate(0.05, diff=True),
+        #                     RandomRotate(5),
+        #                     RandomShear(0.05)]
+        #                    ) # _aug3
+
+        #self.seq = Sequence([#RandomHSV(10, 10, 10),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     RandomScale(0.1, diff=True),
+        #                     RandomTranslate(0.1, diff=True),
+        #                     RandomRotate(5)], [0.2,0.2,0.2,0.2]
+        #                     #RandomShear(0.1)]
+        #                    ) # _aug4
+
+        #self.seq = Sequence([RandomHSV(5, 5, 5),
+        #                    RandomHorizontalFlip(), #p=0.5
+        #                    RandomScale(0.1, diff=True),
+        #                    RandomTranslate(0.1, diff=True),
+        #                    RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
+        #                    #RandomShear(0.1)]
+        #                   ) # _aug5
+
+        # self.seq = RandomHorizontalFlip() # _aug6
+        self.seq = RandomRotate(5) # _aug7 ## BEST
+        # self.seq = RandomRotate(10) # _aug7_2
+        # self.seq = RandomScale(0.1, diff=True) # _aug8
+        # self.seq = RandomScale(0.01, diff=True) # _aug8_2
+        # self.seq = RandomScale(0.05, diff=True) # _aug8_3
+
+        # self.seq = Sequence([ # RandomHSV(10, 10, 10),
+        #                     RandomHorizontalFlip(), #p=0.5
+        #                     # RandomScale(0.1, diff=True),
+        #                     # RandomTranslate(0.1, diff=True),
+        #                     RandomRotate(5)]
+        #                     #RandomShear(0.1)]
+        #                     ) # _aug9
+
+        # self.seq = RandomTranslate(0.1, diff=True) # _aug10
+
+        # self.seq = RandomHSV(5, 5, 5) # _aug11
+
+        # self.seq = RandomShear(0.05) # _aug12
+
+
+        # if mode=='train':
+        #     random.shuffle(self.list_names)
+
+        # embed()
+        print("Init MS_COCO full dataset in mode {}".format(mode))
+        print("\t total of {} images.".format(self.list_names.shape[0]))
+
+    def __len__(self):
+        return self.list_names.shape[0]
+
+    def __getitem__(self, index):
+
+        # Image and saliency map paths
+        if 'val' in self.list_names[index]:
+            rgb_ima = os.path.join(self.path_images_val, self.list_names[index]+'.jpg')
+            sal_path = os.path.join(self.path_saliency_val, self.list_names[index] + '.png')
+            box_path = os.path.join(self.edge_boxes_val, self.list_names[index] + '_bboxes.mat')
+        else:
+            rgb_ima = os.path.join(self.path_images_train, self.list_names[index]+'.jpg')
+            sal_path = os.path.join(self.path_saliency_train, self.list_names[index] + '.png')
+            box_path = os.path.join(self.edge_boxes_train, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
         saliency = cv2.imread(sal_path, 0)
