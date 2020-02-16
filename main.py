@@ -2453,10 +2453,10 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
         # ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
 
         # SALICON image, label, boxes, sal_map, fix_map(, image_name)
-        ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
+        # ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
 
         # MIT300 & SALICON test image, boxes(, image_name)
-        # ori_inputs, ori_boxes, boxes_nums, img_name = X
+        ori_inputs, ori_boxes, boxes_nums, img_name = X
 
         if args.use_gpu:
             ori_inputs = ori_inputs.cuda()
@@ -2465,8 +2465,8 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
         # ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
         # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
         # ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
-        ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'val', img_name[0]+'.jpg')) # height, width, channel
-        # ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'test', img_name[0]+'.jpg')) # height, width, channel
+        # ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'val', img_name[0]+'.jpg')) # height, width, channel
+        ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'test', img_name[0]+'.jpg')) # height, width, channel
 
         ori_size = ori_inputs.size(-1)
         pred_maps_all = torch.zeros(ori_inputs.size(0), 1, output_h, output_w).to(ori_inputs.device)
@@ -4610,7 +4610,7 @@ def test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, dat
 
         # print(pred_maps_all.squeeze().size())
         scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
-                          postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
+                          postprocess_prediction_thm((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
                                                  size=[ori_img.shape[0], ori_img.shape[1]]))
         # scipy.misc.imsave(os.path.join(out_folder, img_name+'_my.png'),
         #                   postprocess_prediction_my(pred_maps.detach().cpu().numpy(),
@@ -10771,21 +10771,21 @@ def main_Wildcat_WK_hd_compf_map(args):
         # folder_name = 'Preds/PASCAL-S'
         # folder_name = 'Preds/MIT1003'
         # folder_name = 'Preds/MIT300'
-        folder_name = 'Preds/SALICON' #validation set
-        # folder_name = 'Preds/SALICON_test'
+        # folder_name = 'Preds/SALICON' #validation set
+        folder_name = 'Preds/SALICON_test'
         # best_model_file = 'no_training'
         E_NUM = [0]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
         args.batch_size = 1
 
-        ds_test = SALICON_full(return_path=True, img_h=input_h, img_w=input_w, mode='val')  # N=4,
-        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
-                                 shuffle=False, num_workers=2)
-        # ds_test = SALICON_test(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
+        # ds_test = SALICON_full(return_path=True, img_h=input_h, img_w=input_w, mode='val')  # N=4,
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
+        #                          shuffle=False, num_workers=2)
+        ds_test = SALICON_test(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
         # # ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
-        #                              shuffle=False, num_workers=2)
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
+                                     shuffle=False, num_workers=2)
 
         # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,

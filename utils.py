@@ -26,6 +26,45 @@ def postprocess_prediction(prediction, size=None):
     returns:
         numpy array with saliency map normalized 0-255 (int8)
     """
+    prediction = prediction - np.min(prediction)
+
+    # prediction = prediction - np.mean(prediction)
+    # prediction[prediction<0] = 0
+
+    print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
+    if np.max(prediction) != 0:
+        saliency_map = (prediction/np.max(prediction) * 255).astype(np.uint8)
+    else:
+        saliency_map = prediction.astype(np.uint8)
+
+    if size is None:
+        size = SALGAN_RESIZE
+
+    # resize back to original size
+    saliency_map = cv2.GaussianBlur(saliency_map, (7, 7), 0)
+    saliency_map = cv2.resize(saliency_map, (size[1], size[0]), interpolation=cv2.INTER_CUBIC)
+
+    # saliency_map = cv2.resize(saliency_map, (size[1], size[0]), interpolation=cv2.INTER_CUBIC)
+    # saliency_map = cv2.GaussianBlur(saliency_map, (7, 7), 0)
+
+    # clip again
+    # saliency_map = np.clip(saliency_map, 0, 255)
+    if np.max(saliency_map)!=0:
+        saliency_map = saliency_map.astype('float') / np.max(saliency_map) * 255.
+    else:
+        print('Zero saliency map.')
+
+    return saliency_map
+
+def postprocess_prediction_thm(prediction, size=None):
+    """
+    Postprocess saliency maps by resizing and applying gaussian blurringself.
+    args:
+        prediction: numpy array with saliency postprocess_prediction
+        size: original (H,W) of the image
+    returns:
+        numpy array with saliency map normalized 0-255 (int8)
+    """
     # prediction = prediction - np.min(prediction)
 
     prediction = prediction - np.mean(prediction)
