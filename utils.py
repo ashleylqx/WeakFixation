@@ -26,7 +26,11 @@ def postprocess_prediction(prediction, size=None):
     returns:
         numpy array with saliency map normalized 0-255 (int8)
     """
-    prediction = prediction - np.min(prediction)
+    # prediction = prediction - np.min(prediction)
+
+    prediction = prediction - np.mean(prediction)
+    prediction[prediction<0] = 0
+
     print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
     if np.max(prediction) != 0:
         saliency_map = (prediction/np.max(prediction) * 255).astype(np.uint8)
