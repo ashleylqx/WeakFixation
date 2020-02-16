@@ -2448,10 +2448,10 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
     N = len(dataloader) // args.batch_size
     for i, X in enumerate(dataloader):
         # MIT1003 & PASCAL-S image, boxes, sal_map, fix_map(, image_name)
-        # ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+        ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
 
         # SALICON image, label, boxes, sal_map, fix_map(, image_name)
-        ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
+        # ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
 
         # MIT300 & SALICON test image, boxes(, image_name)
         # ori_inputs, ori_boxes, boxes_nums, img_name = X
