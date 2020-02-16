@@ -14520,8 +14520,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal_sa_art_sp(torch.nn.Module):
         # hard_sal_map = torch.zeros(img.size(0), 1, self.grid_N, self.grid_N)
         # hard_sal_map = hard_sal_map.to(img.device)
 
-        obj_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3),
-                                   device=img.device)  # max & min & argmax
+        obj_att_maps = torch.zeros(img.size(0), 1, cw_maps.size(2), cw_maps.size(3), device=img.device)  # max & min & argmax
         # att_maps = att_maps.to(img.device)
 
         # print('boxes_nums', boxes_nums)
