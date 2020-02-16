@@ -6197,11 +6197,20 @@ def main_Wildcat_WK_hd_compf_map(args):
             param.requires_grad = False
 
         if torch.cuda.device_count()>1:
-            model.module.relation_net.self_attention.weight.requires_grad = True
-            model.module.relation_net.self_attention.bias.requires_grad = True
+            if hasattr(model.module, 'relation_net'):
+                model.module.relation_net.self_attention.weight.requires_grad = True
+                model.module.relation_net.self_attention.bias.requires_grad = True
+            else:
+                model.module.self_attention.weight.requires_grad = True
+                model.module.self_attention.bias.requires_grad = True
+
         else:
-            model.relation_net.self_attention.weight.requires_grad = True
-            model.relation_net.self_attention.bias.requires_grad = True
+            if hasattr(model, 'relation_net'):
+                model.relation_net.self_attention.weight.requires_grad = True
+                model.relation_net.self_attention.bias.requires_grad = True
+            else:
+                model.self_attention.weight.requires_grad = True
+                model.self_attention.bias.requires_grad = True
 
         # ----- for norn --------------
         # if torch.cuda.device_count()>1:
