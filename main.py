@@ -7494,8 +7494,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
         # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
         # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
         # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
