@@ -2442,7 +2442,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
         model.cuda()
     model.eval()
 
-    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_multiscale_thm')
+    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_multiscale')
 
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
@@ -2486,7 +2486,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
 
         # print(pred_maps_all.squeeze().size())
         scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
-                          postprocess_prediction_thm((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
+                          postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
                                                  size=[ori_img.shape[0], ori_img.shape[1]]))
         # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
         #                   postprocess_prediction_salgan((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
@@ -10643,7 +10643,7 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         folder_name = 'Preds/MIT1003'
         # best_model_file = 'no_training'
-        E_NUM = [0]
+        E_NUM = [3,4]
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
 
