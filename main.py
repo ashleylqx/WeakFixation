@@ -2594,10 +2594,10 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_m
                                                  size=[ori_img.shape[0], ori_img.shape[1]]))
         scipy.misc.imsave(os.path.join(out_folder_om, img_name[0]+'.png'),
                           postprocess_prediction(obj_masks.squeeze().detach().cpu().numpy(), size=[ori_img.shape[0], ori_img.shape[1]]))
-        np.imsave(os.path.join(out_folder_gs, img_name[0]+'.npy'), gaussians.squeeze().detach().cpu().numpy())
-        np.imsave(os.path.join(out_folder_pd, img_name[0]+'.npy'), pred_logits.squeeze().detach().cpu().numpy())
-        np.imsave(os.path.join(out_folder_pd, img_name[0]+'_label.npy'), label.squeeze().detach().cpu().numpy())
-        np.imsave(os.path.join(out_folder_sc, img_name[0]+'.npy'), att_scores.squeeze().detach().cpu().numpy())
+        np.save(os.path.join(out_folder_gs, img_name[0]+'.npy'), gaussians.squeeze().detach().cpu().numpy())
+        np.save(os.path.join(out_folder_pd, img_name[0]+'.npy'), pred_logits.squeeze().detach().cpu().numpy())
+        np.save(os.path.join(out_folder_pd, img_name[0]+'_label.npy'), label.squeeze().detach().cpu().numpy())
+        np.save(os.path.join(out_folder_sc, img_name[0]+'.npy'), att_scores.squeeze().detach().cpu().numpy())
         # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
         #                   postprocess_prediction_salgan((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
         #                                             size=[ori_img.shape[0], ori_img.shape[1]])) # the ratio is not right..
