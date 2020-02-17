@@ -6753,8 +6753,8 @@ def main_Wildcat_WK_hd_compf_map(args):
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                                        n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #                             n_gaussian, normf, MAX_BNUM, prior, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
@@ -6763,8 +6763,8 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
             # model_name = 'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
-            # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-            #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
+            model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
             # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
             # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_nopsal_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
@@ -6878,9 +6878,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                         'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_rf0.1_hth0.1'+
             #                         '_ms4_fdim512_34_cw_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
-            checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                    'resnet50_wildcat_wk_hd_cbA16_alt_2_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_rf0.1'+
-                                             '_hth0.1_2_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch11.pt'), map_location='cuda:0')  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+            #                         'resnet50_wildcat_wk_hd_cbA16_alt_2_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_gbvs_0.5_thm_rf0.1'+
+            #                                  '_hth0.1_2_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch11.pt'), map_location='cuda:0')  # checkpoint is a dict, containing much info
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                         'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1_hth0.0'+
             #                         '_ms4_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
@@ -6893,9 +6893,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                         'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_nopsal_rf0.1_hth0.1'+
             #                         '_ms4_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
-            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-            #                         'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_noGrid_rf0.1_hth0.1'+
-            #                         '_ms4_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
+            checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+                                    'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_noGrid_rf0.1_hth0.1'+
+                                    '_ms4_sa_art_fixf_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),map_location='cuda:0')  # checkpoint is a dict, containing much info
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                                      'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_norn_2_rf0.1_hth0.1'+
             #                                      '_ms4_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch04.pt'), map_location='cuda:0')
