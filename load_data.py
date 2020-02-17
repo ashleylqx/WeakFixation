@@ -122,7 +122,11 @@ class SALICON_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', mode)
+        if mode=='val':
+            self.edge_boxes = os.path.join(self.path_dataset, 'eb500', mode)
+        else:
+            self.edge_boxes = os.path.join(PATH_COCO, 'train2014_eb500')
+
         self.path_saliency = os.path.join(self.path_dataset, 'maps', mode)
         self.path_fixation = os.path.join(self.path_dataset, 'fixations', mode)
         self.return_path = return_path
