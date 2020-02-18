@@ -69,7 +69,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_ftf_2_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_gbvs_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
+# run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
 
 # run = 'hd_gs_G{}_alt_5_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_G{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf_3'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
@@ -98,6 +98,7 @@ run = 'hd_gs_A{}_alt_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}'.forma
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_a_fixf_2'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_a_fixf_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_a_ftf_2_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 
 
@@ -4788,7 +4789,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
-    phase = 'test_cw_sa_sp_multiscale'
+    # phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
@@ -4800,7 +4801,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_alt_alpha_sa_new'
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_aug_sa_sp_fixf' ### sa_new_sp, sa_art_sp, obtain fixf_sp
-    # phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
+    phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
     # phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
     # phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
     # phase = 'train_cw_vib_aug'
@@ -7068,7 +7069,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
+
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_norn_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
                          fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
@@ -7113,10 +7117,10 @@ def main_Wildcat_WK_hd_compf_map(args):
 
             # model_name = 'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
-            model_name = 'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
-            # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-            #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
+            # model_name = 'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #     normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)
+            model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
             # model_name = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_nopsal_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
@@ -7209,13 +7213,14 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                                  'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_nopsal_rf0.1_hth0.1'+
             #                                  '_ms4_sa_art_fixf_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),
             #                     map_location='cuda:0')  # checkpoint is a dict, containing much info
+            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+            #                                  'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1_hth0.1'+
+            #                                  '_ms4_sa_art_fixf_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+            #                     map_location='cuda:0')  # checkpoint is a dict, containing much info
             checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1_hth0.1'+
-                                             '_ms4_sa_art_fixf_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
-                                map_location='cuda:0')  # checkpoint is a dict, containing much info
-
-
-
+                                     'resnet101_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_norn_rf0.1_hth0.1' +
+                                     '_ms4_sa_art_fixf_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch00.pt'),
+                        map_location='cuda:0')  # checkpoint is a dict, containing much info
 
         saved_state_dict = checkpoint['state_dict']
         new_params = model.state_dict().copy()
@@ -7376,7 +7381,7 @@ def main_Wildcat_WK_hd_compf_map(args):
                 eval_loss = tmp_eval_loss
                 print('Saving model ...')
                 save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
-            elif tmp_eval_loss < 0.930 and map_loss < 0.1670:
+            elif tmp_eval_loss < 0.830 and map_loss < 0.1630:
                 cnt = 0
                 print('Saving model ...')
                 save_model(model, optimizer, i_epoch, path_models, eval_loss, name_model=model_name)
