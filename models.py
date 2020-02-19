@@ -13197,8 +13197,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
                 hard_scores[b_i, :], att_scores = self.relation_net(boxes_list[b_i], box_feature[b_i])
-                att_scores = torch.ones_like(att_scores) # for no competition, set att_scores to be equal for each object
-                att_scores = torch.div(att_scores, att_scores.size(0))
+                # att_scores = torch.ones_like(att_scores) # for no competition, set att_scores to be equal for each object
+                # att_scores = torch.div(att_scores, att_scores.size(0))
 
                 obj_att_maps[b_i, 0, :, :] = gen_attention_map(att_scores.squeeze(-1).squeeze(-1).squeeze(-1), boxes_list[b_i],
                                                                 img.size()[-2:], cw_maps.size()[-2:])
