@@ -2033,6 +2033,9 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         # inputs, gt_labels, boxes, boxes_nums, _ = X
         inputs, gt_labels, boxes, boxes_nums, prior_maps = X
 
+        prior_maps = torch.relu(prior_maps - torch.mean(prior_maps.view(prior_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
+        prior_maps = GBVS_R * prior_maps # for gbvs
+
         if args.use_gpu:
             inputs = inputs.cuda()
             gt_labels = gt_labels.cuda()
@@ -2044,8 +2047,6 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         _, aux_maps, _, _ = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
-        aux_maps = torch.relu(aux_maps - torch.mean(aux_maps.view(aux_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm, gbvs_thm
-        aux_maps = GBVS_R * aux_maps # for gbvs
         # aux_maps = aux_maps * ALT_RATIO # comment this for ftf_2_mres training from fixf
         # aux_maps = aux_maps * alt_ratio_current
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
