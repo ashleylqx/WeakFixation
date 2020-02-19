@@ -53,15 +53,16 @@ from utils import *
 from tensorboardX import SummaryWriter
 
 cps_weight = 1.0
-hth_weight = 0.0 #0.1 #1.0 #
+hth_weight = 0.1 #0.1 #1.0 #
 hdsup_weight = 0.1  # 0.1, 0.1
-rf_weight = 0.0 #0.1 #1.0 #
+rf_weight = 0.1 #0.1 #1.0 #
 
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_ftf_2_3_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_ftf_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_gbvs_thm_{}_fixf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, GBVS_R) # 1.0
@@ -84,7 +85,7 @@ rf_weight = 0.0 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_sft_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_ftf_2_2_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_ftf_2_2_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf_3'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 
@@ -2043,6 +2044,8 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         _, aux_maps, _, _ = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
+        aux_maps = torch.relu(aux_maps - torch.mean(aux_maps.view(aux_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm, gbvs_thm
+        aux_maps = GBVS_R * aux_maps # for gbvs
         # aux_maps = aux_maps * ALT_RATIO # comment this for ftf_2_mres training from fixf
         # aux_maps = aux_maps * alt_ratio_current
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
@@ -4802,9 +4805,9 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_alt_alpha_sa_new'
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_aug_sa_sp_fixf' ### sa_new_sp, sa_art_sp, obtain fixf_sp
-    phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
+    # phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
     # phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
-    # phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
+    phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_alpha' ### obtain f
@@ -7742,7 +7745,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('lr %.4f'%args.lr)
 
 
-        prior='nips08'
+        # prior='nips08'
+        prior='bms'
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
@@ -7793,9 +7797,12 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_5_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_4_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            ## model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_4_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            ##                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_6_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+
+        # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_6_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_aaalt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_aalt_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
@@ -7869,9 +7876,13 @@ def main_Wildcat_WK_hd_compf_map(args):
                                              '_hth0.1_ms4_fdim512_34_cw_sa_art_fixf_nob_mres_sp_rres_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch01.pt'),
                                 map_location='cuda:0')  # checkpoint is a dict, containing much info
         else:
+            # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
+            #                                  'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
+            #                                  '_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+            #                     map_location='cuda:0')  # checkpoint is a dict, containing much info
             checkpoint = torch.load(os.path.join(args.path_out, 'Models',
-                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
-                                             '_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03.pt'),
+                                             'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_bms_thm_rf0.1_hth0.1'+
+                                             '_ms4_fdim512_34_cw_sa_art_ftf_2_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch04.pt'),
                                 map_location='cuda:0')  # checkpoint is a dict, containing much info
             # checkpoint = torch.load(os.path.join(args.path_out, 'Models',
             #                                  'resnet50_wildcat_wk_hd_cbA16_aalt_2_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1'+
