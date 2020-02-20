@@ -10284,9 +10284,9 @@ class GenAttentionMapFunction(torch.autograd.Function):
         grad_att_scores = None
         # comment below block for _nob (no gradient backpropagation)
         if ctx.needs_input_grad[0]:
-            grad_att_scores = grad_output.sum()
-            grad_att_scores = grad_att_scores.expand_as(att_scores) # same grad
-            # grad_att_scores = grad_output.sum() * att_scores
+            # grad_att_scores = grad_output.sum()
+            # grad_att_scores = grad_att_scores.expand_as(att_scores) # same grad
+            grad_att_scores = grad_output.sum() * att_scores
 
             # possible_scales = []
             # for s1, s2 in zip(output_size, input_size):
