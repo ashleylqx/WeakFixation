@@ -2708,11 +2708,11 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_gs(model, folder_name, best_mod
                 pred_maps_all += F.interpolate(pred_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
 
             # print(pred_maps_all.squeeze().size())
-            np.save(os.path.join(out_folder_gs, img_name[0]+'.npy'), gaussians.squeeze().detach().cpu().numpy())
-            gauss = gaussians.squeeze().detach().cpu().numpy()
-            for g in range(gauss.shape[0]):
-                scipy.misc.imsave(os.path.join(out_folder_gs, '%s_%02d.png' % (img_name[0], g)),
-                       scipy.misc.imresize(gauss[g, :, :], (56, 56)))
+            np.save(os.path.join(out_folder_gs, img_name[0]+'_params.npy'), gaussians.squeeze().detach().cpu().numpy())
+            # gauss = gaussians.squeeze().detach().cpu().numpy()
+            # for g in range(gauss.shape[0]):
+            #     scipy.misc.imsave(os.path.join(out_folder_gs, '%s_%02d.png' % (img_name[0], g)),
+            #            scipy.misc.imresize(gauss[g, :, :], (56, 56)))
 
             # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
             #                   postprocess_prediction_salgan((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),

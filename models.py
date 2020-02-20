@@ -160,6 +160,62 @@ class CenterBias_A(torch.nn.Module):
         maps = self.gen_gaussian_map(params)
         return maps
 
+class CenterBias_A_gs(torch.nn.Module):
+    def __init__(self, n=16, input_c=coco_num_classes, in_h=14, in_w=14): # let output size equal to input size
+        super(CenterBias_A_gs, self).__init__()
+        # define some layer members
+        self.n = n
+        self.output_h = in_h
+        self.output_w = in_w
+        print(input_c, in_h, in_w, input_c)
+        self.fc1 = torch.nn.Linear(input_c, input_c//2)
+        # self.fc1 = torch.nn.Linear(input_c*in_h*in_w, 200)
+        self.fc2 = torch.nn.Linear(input_c//2, 4*n)  #mu_x, mu_y, sigma_x, sigma_y
+
+        # torch.nn.init.constant_(self.fc1.weight, 1./input_c)
+        # torch.nn.init.constant_(self.fc2.weight, 2./input_c)
+
+    def gen_gaussian_map(self, params):
+        mu_x = params[:, :self.n]
+        mu_y = params[:, self.n:2*self.n]
+        sigma_x = params[:, 2*self.n:3*self.n]
+        sigma_y = params[:, 3*self.n:]
+
+        mu_x = mu_x.clamp(min=0.25, max=0.75)
+        mu_y = mu_y.clamp(min=0.25, max=0.75)
+        sigma_x = sigma_x.clamp(min=0.1, max=0.9)
+        sigma_y = sigma_y.clamp(min=0.2, max=0.8)
+
+        x_t = torch.mm(torch.ones(self.output_h, 1),
+                       torch.linspace(0, 1.0, self.output_w).unsqueeze(0))
+        y_t = torch.mm(torch.linspace(0, 1.0, self.output_h).unsqueeze(1),
+                       torch.ones(1, self.output_w))
+
+        x_t = x_t.unsqueeze(0).unsqueeze(0).repeat(mu_x.size(0), self.n, 1, 1).to(params.device)
+        y_t = y_t.unsqueeze(0).unsqueeze(0).repeat(mu_x.size(0), self.n, 1, 1).to(params.device)
+        # x_t = x_t.unsqueeze(0).unsqueeze(0).repeat(mu_x.size(0), self.n, 1, 1)
+        # y_t = y_t.unsqueeze(0).unsqueeze(0).repeat(mu_x.size(0), self.n, 1, 1)
+
+        gaussian = 1./(2*np.pi*torch.mul(sigma_x, sigma_y).unsqueeze(-1).unsqueeze(-1).expand_as(x_t))*\
+            torch.exp(-(torch.div(torch.pow(x_t-mu_x.unsqueeze(-1).unsqueeze(-1).expand_as(x_t), 2),
+                                  2*torch.pow(sigma_x.unsqueeze(-1).unsqueeze(-1),2)+1e-8) +
+                        torch.div(torch.pow(y_t-mu_y.unsqueeze(-1).unsqueeze(-1).expand_as(y_t), 2),
+                                  2*torch.pow(sigma_y.unsqueeze(-1).unsqueeze(-1),2)+1e-8)))
+        max_gauss = torch.max(gaussian.view(gaussian.size(0), gaussian.size(1), -1), -1, keepdim=True).values
+        gaussian = torch.div(gaussian, max_gauss.unsqueeze(-1))
+
+        return gaussian
+
+    def forward(self, x):
+        # define forward process
+        # x = F.relu(self.fc1(x.view(x.size(0), -1)))
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = F.relu(self.fc1(x.view(x.size(0), -1)))
+        params = torch.sigmoid(self.fc2(x))
+
+        maps = self.gen_gaussian_map(params)
+        return maps, params
+
 # dilate layer 3 (2) and layer 4 (4)
 class resnet50_dilate(torch.nn.Module):
     def __init__(self):
@@ -13348,7 +13404,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(torch.nn.Module):
         self.to_output_size = torch.nn.Upsample(size=(output_h, output_w))
 
         # self.centerbias = CenterBias_A(n=n_gaussian, input_c=num_features) # gs_A_x
-        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
+        # self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
+        self.centerbias = CenterBias_A_gs(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
@@ -13492,7 +13549,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(torch.nn.Module):
         # ori_logits = F.adaptive_avg_pool2d(x, output_size=(1, 1)).squeeze(-1).squeeze(-1)
 
 
-        gaussian = self.centerbias(x) #previous n_gaussian=8 use this settings; as all other n_gaussians
+        gaussian, gauss_params = self.centerbias(x) #previous n_gaussian=8 use this settings; as all other n_gaussians
         if gaussian.size(0) != x.size(0):
             gaussian = gaussian.repeat(x.size(0), 1, 1, 1)
         if gaussian.size(2) != x.size(2):
@@ -13596,11 +13653,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(torch.nn.Module):
         sal_map = self.to_attention_size(hard_sal_map) # hard_sal_map is already the multiplication of the two
         # sal_map = torch.sigmoid(sal_map)
 
-        # return pred_logits, F.softmax(ori_logits, -1), torch.sigmoid(sal_map)
-        # return pred_logits, pred_comp_logits, torch.clamp(sal_map, min=0.0, max=1.0)
-        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gaussian #, gaussian, gs_map
-        # return pred_logits, pred_comp_logits, sal_map #, gaussian, gs_map
-        # return pred_logits, pred_comp_logits, torch.sigmoid(sal_map)
+
+        # return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gaussian #, gaussian, gs_map
+        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gauss_params #, gaussian, gs_map
+
 
     # def get_config_optim(self, lr, lr_r, lr_f):
     #     return [{'params': self.relation_net.parameters(), 'lr': lr * lr_r},
