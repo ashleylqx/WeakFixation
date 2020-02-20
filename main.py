@@ -60,7 +60,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_ftf_2_3_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_ftf_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
@@ -2615,6 +2615,110 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_m
     with open(os.path.join(args.path_out, folder_name, best_model_file + '.txt'), 'w') as f:
         f.writelines(lists)
 
+def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_gs(model, folder_name, best_model_file, dataloader, args, tgt_sizes):
+    if best_model_file != 'no_training':
+        checkpoint = torch.load(os.path.join(args.path_out, 'Models', best_model_file+'.pt'))  # checkpoint is a dict, containing much info
+        # model.load_state_dict(checkpoint['state_dict'])
+        saved_state_dict = checkpoint['state_dict']
+        new_params = model.state_dict().copy()
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            for k, y in saved_state_dict.items():
+                if k[7:] in new_params.keys():
+                    new_params[k[7:]] = y
+        else:
+            for k, y in saved_state_dict.items():
+                if k in new_params.keys():
+                    new_params[k] = y
+        model.load_state_dict(new_params)
+
+    if args.use_gpu:
+        model.cuda()
+
+    model.eval()
+
+    # out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_img')
+    # out_folder_om = os.path.join(args.path_out, folder_name, best_model_file + '_om')  # object mask
+    # out_folder_gs = os.path.join(args.path_out, folder_name, best_model_file+'_gs') # gaussian bias
+    # out_folder_sc = os.path.join(args.path_out, folder_name, best_model_file+'_sc') # attention score
+    # out_folder_pd = os.path.join(args.path_out, folder_name, best_model_file+'_pd') # pred score
+
+
+    # if not os.path.exists(out_folder):
+    #     os.makedirs(out_folder)
+    # if not os.path.exists(out_folder_om):
+    #     os.makedirs(out_folder_om)
+    # if not os.path.exists(out_folder_gs):
+    #     os.makedirs(out_folder_gs)
+    # if not os.path.exists(out_folder_sc):
+    #     os.makedirs(out_folder_sc)
+    # if not os.path.exists(out_folder_pd):
+    #     os.makedirs(out_folder_pd)
+
+    # N = len(dataloader) // args.batch_size
+    # evals = list()
+    # img_names = list()
+    for tidx in range(10):
+        out_folder_gs = os.path.join(args.path_out, folder_name, best_model_file + '_gs_%02d'%tidx)  # gaussian bias
+        if not os.path.exists(out_folder_gs):
+            os.makedirs(out_folder_gs)
+
+        for i, X in enumerate(dataloader):
+            # MIT1003 & PASCAL-S image, boxes, sal_map, fix_map(, image_name)
+            # ori_inputs, ori_boxes, boxes_nums, _, _, img_name = X
+
+            # SALICON image, label, boxes, sal_map, fix_map(, image_name)
+            # ori_inputs, label, ori_boxes, boxes_nums, sal_maps, _, img_name = X
+            ori_inputs, _, ori_boxes, boxes_nums, _, _, img_name = X
+
+            # MIT300 & SALICON test image, boxes(, image_name)
+            # ori_inputs, ori_boxes, boxes_nums, img_name = X
+
+            # img_names.append(img_name[0])
+
+            if args.use_gpu:
+                ori_inputs = ori_inputs.cuda()
+                ori_boxes = ori_boxes.cuda()
+                # label = label.cuda()
+                # sal_maps = sal_maps.cuda()
+
+            # ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[0] + '.jpeg'))  # height, width, channel
+            # ori_img = scipy.misc.imread(os.path.join(PATH_PASCAL, 'images', img_name[0]+'.jpg')) # height, width, channel
+            # ori_img = scipy.misc.imread(os.path.join(PATH_MIT300, 'images', img_name[0]+'.jpg')) # height, width, channel
+            # ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'val', img_name[0]+'.jpg')) # height, width, channel
+            # ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'test', img_name[0]+'.jpg')) # height, width, channel
+            ori_img = scipy.misc.imread(os.path.join(PATH_SALICON, 'images', 'train', img_name[0]+'.jpg')) # height, width, channel
+
+            ori_size = ori_inputs.size(-1)
+            pred_maps_all = torch.zeros(ori_inputs.size(0), 1, output_h, output_w).to(ori_inputs.device)
+            for tgt_s in tgt_sizes:
+                inputs = F.interpolate(ori_inputs, size=(tgt_s, tgt_s), mode='bilinear', align_corners=True)
+                boxes = torch.zeros_like(ori_boxes)
+                boxes[:, :, 0] = ori_boxes[:, :, 0] / ori_size*tgt_s
+                boxes[:, :, 2] = ori_boxes[:, :, 2] / ori_size*tgt_s
+                boxes[:, :, 1] = ori_boxes[:, :, 1] / ori_size*tgt_s
+                boxes[:, :, 3] = ori_boxes[:, :, 3] / ori_size*tgt_s
+
+                if tgt_s==input_w:
+                    pred_logits, pred_maps, obj_masks, att_scores, gaussians = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+                else:
+                    _, pred_maps, _, _, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+                # pred_maps = torch.nn.Sigmoid()(pred_maps)
+                # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+                # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
+                pred_maps_all += F.interpolate(pred_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
+
+            # print(pred_maps_all.squeeze().size())
+            # np.save(os.path.join(out_folder_gs, img_name[0]+'.npy'), gaussians.squeeze().detach().cpu().numpy())
+
+            for g in range(gaussians.size(0)):
+                scipy.misc.imsave(os.path.join(out_folder_gs, '%s_%02d.png' % (img_name[0], g)),
+                       scipy.misc.imresize(gaussians[g, :, :], (56, 56)))
+
+            # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
+            #                   postprocess_prediction_salgan((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
+            #                                             size=[ori_img.shape[0], ori_img.shape[1]])) # the ratio is not right..
+
+
 
 # for vib_m_cw_maps
 def train_Wildcat_WK_hd_compf_map_cw_vib_logits(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
@@ -4796,6 +4900,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
     # phase = 'test_cw_sa_sp_multiscale'
+    phase = 'test_cw_sa_sp_multiscale_rank'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
 
@@ -4808,7 +4913,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_aug_sa_sp_fixf' ### sa_new_sp, sa_art_sp, obtain fixf_sp
     # phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
-    phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
+    # phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
     # phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
@@ -11092,6 +11197,153 @@ def main_Wildcat_WK_hd_compf_map(args):
 
             test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
             # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+
+
+            # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+            # ds_test = MIT1003_full(return_path=True, img_h=max(tgt_sizes), img_w=max(tgt_sizes))  # N=4,
+            # args.batch_size = 1
+            # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+            #                              shuffle=False, num_workers=2)
+            # test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+
+    elif phase == 'test_cw_sa_sp_multiscale_rank':
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                            fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # for storing all the elements
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_norn_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        if args.use_gpu:
+            model.cuda()
+
+        # folder_name = 'Preds/PASCAL-S'
+        # folder_name = 'Preds/MIT1003'
+        # folder_name = 'Preds/MIT300'
+        # folder_name = 'Preds/SALICON' #validation set
+        # folder_name = 'Preds/SALICON_test'
+        folder_name = 'Preds/SALICON_train'
+        # best_model_file = 'no_training'
+        E_NUM = [0]
+        # E_NUM.extend(list(range(5,16)))
+        prior = 'nips08'
+        args.batch_size = 1
+
+        ds_test = SALICON_full(return_path=True, img_h=input_h, img_w=input_w, mode='train', N=4)  # N=4,
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
+                                 shuffle=False, num_workers=2)
+        # ds_test = SALICON_test(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
+        # # # ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
+        #                              shuffle=False, num_workers=2)
+
+        # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+        #                              shuffle=False, num_workers=2)
+
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+
+        for e_num in E_NUM:
+
+            if ATT_RES:
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                #     fix_feature, dilate, e_num)  # _gcn_all
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_rres_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                    fix_feature, dilate, e_num)  # _gcn_all
+                #
+
+            else: #resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_50_aug7_nips08_rf0.1_hth0.1_ms4_fdim512_34_cw_sa_art_ftf_2_mres_sp_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one3_224_epoch03_multiscale
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                    n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_alt_4_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_aalt_3_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_alt_3_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                #     fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_alt_2_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                #     fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_new_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps,
+                #     fix_feature, dilate, e_num)  # _gcn_all
+
+                # --------------sa_art_fixf_sp-----------------------
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_gbvs_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_fixf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #                             n_gaussian, normf, MAX_BNUM, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature,dilate, e_num)
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+                # best_model_file = 'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_nopsal_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_rf{}_hth{}_ms4_sa_art_fixf_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+
+                # --------------sa_art_ftf_2_sp-----------------------
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_3_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #                             n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_gbvs_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #                             n_gaussian, normf, MAX_BNUM, GBVS_R, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_ftf_2_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature,dilate, e_num)
+
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbG{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+                # best_model_file = 'resnet50_wildcat_wk_hd_nobs_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_norn_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_nopsal_rf{}_hth{}_ms4_sa_art_ftf_2_3_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+                # best_model_file = 'resnet101_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_noGrid_rf{}_hth{}_ms4_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, kmax, kmin, alpha, num_maps, fix_feature, dilate, e_num)  # _gcn_all
+
+                # --------------alt sa_art_ftf_2_sp-----------------------
+                # best_model_file = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_bms_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224_epoch{:02d}'.format(
+                #                             n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
+
+
+            print("Testing %s ..."%best_model_file)
+            # ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  #N=4,
+            # args.batch_size = 1
+            # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+            #                              shuffle=False, num_workers=2)
+            # test_Wildcat_WK_hd_compf_cw_sa(model, folder_name, best_model_file, test_dataloader, args)
+            # test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
+
+            # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+            # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+            test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_gs(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
 
             # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
