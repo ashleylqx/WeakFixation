@@ -2034,8 +2034,8 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         # inputs, gt_labels, boxes, boxes_nums, _ = X
         inputs, gt_labels, boxes, boxes_nums, prior_maps = X
 
-        prior_maps = torch.relu(prior_maps - torch.mean(prior_maps.view(prior_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
-        prior_maps = GBVS_R * prior_maps # for gbvs
+        # prior_maps = torch.relu(prior_maps - torch.mean(prior_maps.view(prior_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
+        # prior_maps = GBVS_R * prior_maps # for gbvs
 
         if args.use_gpu:
             inputs = inputs.cuda()
@@ -7426,9 +7426,9 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('lr %.4f'%args.lr)
 
 
-        prior='gbvs'
+        # prior='gbvs'
         # prior='bms'
-        # prior='nips08'
+        prior='nips08'
 
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)

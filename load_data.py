@@ -915,7 +915,7 @@ class MS_COCO_ALL_map_full_aug(Dataset):
             boxes[:, 1] = boxes[:, 1] * image.shape[0]
             boxes[:, 3] = boxes[:, 3] * image.shape[0]
 
-            image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
+            image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes) #.copy()
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
 
