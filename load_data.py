@@ -183,8 +183,11 @@ class SALICON_full(Dataset):
         # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
         boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-        boxes = np.vstack(boxes)
-        boxes = boxes[:MAX_BNUM, :]
+        if len(boxes > 0):
+            boxes = np.vstack(boxes)
+            boxes = boxes[:MAX_BNUM, :]
+        else:
+            boxes = np.zeros((0, boxes_tmp.shape[1]))
 
         if os.path.exists(sal_path):
             saliency = cv2.imread(sal_path, 0)
@@ -715,8 +718,12 @@ class MS_COCO_map_full_aug(Dataset):
         # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
         boxes = [box for box in boxes_tmp if (box[2]-box[0])*(box[3]-box[1])<PRO_RATIO]
-        boxes = np.vstack(boxes)
-        boxes = boxes[:MAX_BNUM, :]
+        if len(boxes>0):
+            boxes = np.vstack(boxes)
+            boxes = boxes[:MAX_BNUM, :]
+        else:
+            boxes = np.zeros((0, boxes_tmp.shape[1]))
+
 
         if boxes.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
