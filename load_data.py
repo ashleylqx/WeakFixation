@@ -183,7 +183,7 @@ class SALICON_full(Dataset):
         # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
         boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-        if len(boxes > 0):
+        if len(boxes)>0:
             boxes = np.vstack(boxes)
             boxes = boxes[:MAX_BNUM, :]
         else:
@@ -718,7 +718,7 @@ class MS_COCO_map_full_aug(Dataset):
         # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
         boxes = [box for box in boxes_tmp if (box[2]-box[0])*(box[3]-box[1])<PRO_RATIO]
-        if len(boxes>0):
+        if len(boxes)>0:
             boxes = np.vstack(boxes)
             boxes = boxes[:MAX_BNUM, :]
         else:
