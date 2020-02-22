@@ -1870,7 +1870,16 @@ class MIT1003_full(Dataset):
 
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
 
-        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+        if PRO_RATIO is None:
+            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+        else:
+            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
+            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            if len(boxes) > 0:
+                boxes = np.vstack(boxes)
+                boxes = boxes[:MAX_BNUM, :]
+            else:
+                boxes = np.zeros((0, boxes_tmp.shape[1]))
 
         # -------------------------------
         # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
