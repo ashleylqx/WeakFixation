@@ -180,14 +180,16 @@ class SALICON_full(Dataset):
         # saliency = cv2.imread(sal_path, 0)
         fixation = scipy.io.loadmat(fix_path)
         fix_processed = fixationProcessing_mat(fixation)
-        # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
-        boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
-        boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-        if len(boxes)>0:
-            boxes = np.vstack(boxes)
-            boxes = boxes[:MAX_BNUM, :]
+        if PRO_RATIO is None:
+            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         else:
-            boxes = np.zeros((0, boxes_tmp.shape[1]))
+            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
+            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            if len(boxes) > 0:
+                boxes = np.vstack(boxes)
+                boxes = boxes[:MAX_BNUM, :]
+            else:
+                boxes = np.zeros((0, boxes_tmp.shape[1]))
 
         if os.path.exists(sal_path):
             saliency = cv2.imread(sal_path, 0)
@@ -715,14 +717,16 @@ class MS_COCO_map_full_aug(Dataset):
 
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
         saliency = cv2.imread(sal_path, 0)
-        # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
-        boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
-        boxes = [box for box in boxes_tmp if (box[2]-box[0])*(box[3]-box[1])<PRO_RATIO]
-        if len(boxes)>0:
-            boxes = np.vstack(boxes)
-            boxes = boxes[:MAX_BNUM, :]
+        if PRO_RATIO is None:
+            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         else:
-            boxes = np.zeros((0, boxes_tmp.shape[1]))
+            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
+            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            if len(boxes) > 0:
+                boxes = np.vstack(boxes)
+                boxes = boxes[:MAX_BNUM, :]
+            else:
+                boxes = np.zeros((0, boxes_tmp.shape[1]))
 
 
         if boxes.shape[0]==0:
@@ -915,7 +919,16 @@ class MS_COCO_ALL_map_full_aug(Dataset):
 
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
         saliency = cv2.imread(sal_path, 0)
-        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+        if PRO_RATIO is None:
+            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+        else:
+            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
+            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            if len(boxes) > 0:
+                boxes = np.vstack(boxes)
+                boxes = boxes[:MAX_BNUM, :]
+            else:
+                boxes = np.zeros((0, boxes_tmp.shape[1]))
 
         if boxes.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
