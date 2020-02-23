@@ -145,7 +145,7 @@ run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_proa_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussi
 # run = 'hd_gs_A{}_alt_6_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_5_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_all_4_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_all_5_proa_{}_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, PRO_RATIO,FEATURE_DIM) # 1.0 
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_all_5_proa_{}_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, PRO_RATIO,FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_alt_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -4896,12 +4896,12 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    # phase = 'test_cw_multiscale'
+    phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
-    phase = 'test_cw_sa_sp_multiscale'
+    # phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp_multiscale_rank'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
@@ -11466,7 +11466,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
 
-        E_NUM = [1,2,4] #
+        E_NUM = [1,2,6,7] #
         # E_NUM = [1,2,8] # _gbs
         # E_NUM = [1,2,3,4,5,7] # _nobs
         for e_num in E_NUM:
