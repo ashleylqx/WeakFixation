@@ -10339,35 +10339,35 @@ class GenAttentionMapFunction(torch.autograd.Function):
 
         grad_att_scores = None
         # comment below block for _nob (no gradient backpropagation)
-        if ctx.needs_input_grad[0]:
-            grad_att_scores = grad_output.sum()
-            grad_att_scores = grad_att_scores.expand_as(att_scores) # same grad
-            # grad_att_scores = grad_output.sum() * att_scores
-
-            # possible_scales = []
-            # for s1, s2 in zip(output_size, input_size):
-            #     approx_scale = float(s1) / s2
-            #     scale = 2 ** torch.tensor(approx_scale, dtype=grad_output.dtype, device=grad_output.device).log2().round().item()
-            #     # scale = 2 ** approx_scale.clone().detach().log2().round().item()
-            #     possible_scales.append(scale)
-            # assert possible_scales[0] == possible_scales[1]
-            #
-            # resized_boxes = boxes * possible_scales[0]
-            # # att_maps = torch.zeros_like(grad_output)
-            # grad_att_scores = torch.zeros_like(att_scores)
-            # grad_output_2 = grad_output.clone()
-            # for box_i in range(att_scores.size(0)):
-            #     # att_maps = torch.zeros_like(grad_output)
-            #     # box = resized_boxes[box_i].int()
-            #     # att_maps[box[1]:box[3], box[0]:box[2]] = 1.0
-            #     # grad_att_scores[box_i] = torch.mul(att_maps, grad_output).sum()
-            #     box = resized_boxes[box_i].int()
-            #     tmp = grad_output_2[box[1]:box[3], box[0]:box[2]]
-            #     grad_att_scores[box_i] = tmp.sum()
-            #
-            # # pdb.set_trace()
-            # # grad_att_scores = torch.mul(att_maps, grad_output.unsqueeze(0).expand_as(att_maps))
-            # # grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
+        # if ctx.needs_input_grad[0]:
+        #     # grad_att_scores = grad_output.sum()
+        #     # grad_att_scores = grad_att_scores.expand_as(att_scores) # same grad
+        #     grad_att_scores = grad_output.sum() * att_scores
+        #
+        #     # possible_scales = []
+        #     # for s1, s2 in zip(output_size, input_size):
+        #     #     approx_scale = float(s1) / s2
+        #     #     scale = 2 ** torch.tensor(approx_scale, dtype=grad_output.dtype, device=grad_output.device).log2().round().item()
+        #     #     # scale = 2 ** approx_scale.clone().detach().log2().round().item()
+        #     #     possible_scales.append(scale)
+        #     # assert possible_scales[0] == possible_scales[1]
+        #     #
+        #     # resized_boxes = boxes * possible_scales[0]
+        #     # # att_maps = torch.zeros_like(grad_output)
+        #     # grad_att_scores = torch.zeros_like(att_scores)
+        #     # grad_output_2 = grad_output.clone()
+        #     # for box_i in range(att_scores.size(0)):
+        #     #     # att_maps = torch.zeros_like(grad_output)
+        #     #     # box = resized_boxes[box_i].int()
+        #     #     # att_maps[box[1]:box[3], box[0]:box[2]] = 1.0
+        #     #     # grad_att_scores[box_i] = torch.mul(att_maps, grad_output).sum()
+        #     #     box = resized_boxes[box_i].int()
+        #     #     tmp = grad_output_2[box[1]:box[3], box[0]:box[2]]
+        #     #     grad_att_scores[box_i] = tmp.sum()
+        #     #
+        #     # # pdb.set_trace()
+        #     # # grad_att_scores = torch.mul(att_maps, grad_output.unsqueeze(0).expand_as(att_maps))
+        #     # # grad_att_scores = torch.sum(grad_att_scores, dim=[1,2])
 
         return grad_att_scores, None, None, None
 
@@ -13654,8 +13654,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(torch.nn.Module):
         # sal_map = torch.sigmoid(sal_map)
 
 
-        # return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gaussian #, gaussian, gs_map
-        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gauss_params #, gaussian, gs_map
+        # return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gaussian
+        return pred_comp_logits, sal_map, self.to_attention_size(obj_att_maps), att_scores, gauss_params, masked_cw_maps
 
 
     # def get_config_optim(self, lr, lr_r, lr_f):

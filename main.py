@@ -144,7 +144,7 @@ run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_proa_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussi
 # run = 'hd_gs_A{}_aalt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_alt_3_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_6_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_5_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_all_4_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_all_6_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_all_5_proa_{}_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, PRO_RATIO,FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_2_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_4_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -2529,23 +2529,26 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_m
         model.cuda()
     model.eval()
 
-    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_img')
-    out_folder_om = os.path.join(args.path_out, folder_name, best_model_file + '_om')  # object mask
-    out_folder_gs = os.path.join(args.path_out, folder_name, best_model_file+'_gs') # gaussian bias
-    out_folder_sc = os.path.join(args.path_out, folder_name, best_model_file+'_sc') # attention score
-    out_folder_pd = os.path.join(args.path_out, folder_name, best_model_file+'_pd') # pred score
+    # out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_img')
+    # out_folder_om = os.path.join(args.path_out, folder_name, best_model_file + '_om')  # object mask
+    # out_folder_gs = os.path.join(args.path_out, folder_name, best_model_file+'_gs') # gaussian bias
+    # out_folder_sc = os.path.join(args.path_out, folder_name, best_model_file+'_sc') # attention score
+    # out_folder_pd = os.path.join(args.path_out, folder_name, best_model_file+'_pd') # pred score
+    out_folder_cw = os.path.join(args.path_out, folder_name, best_model_file+'_cw') # pred score
 
 
-    if not os.path.exists(out_folder):
-        os.makedirs(out_folder)
-    if not os.path.exists(out_folder_om):
-        os.makedirs(out_folder_om)
-    if not os.path.exists(out_folder_gs):
-        os.makedirs(out_folder_gs)
-    if not os.path.exists(out_folder_sc):
-        os.makedirs(out_folder_sc)
-    if not os.path.exists(out_folder_pd):
-        os.makedirs(out_folder_pd)
+    # if not os.path.exists(out_folder):
+    #     os.makedirs(out_folder)
+    # if not os.path.exists(out_folder_om):
+    #     os.makedirs(out_folder_om)
+    # if not os.path.exists(out_folder_gs):
+    #     os.makedirs(out_folder_gs)
+    # if not os.path.exists(out_folder_sc):
+    #     os.makedirs(out_folder_sc)
+    # if not os.path.exists(out_folder_pd):
+    #     os.makedirs(out_folder_pd)
+    if not os.path.exists(out_folder_cw):
+        os.makedirs(out_folder_cw)
 
     N = len(dataloader) // args.batch_size
     evals = list()
@@ -2586,9 +2589,11 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_m
             boxes[:, :, 3] = ori_boxes[:, :, 3] / ori_size*tgt_s
 
             if tgt_s==input_w:
-                pred_logits, pred_maps, obj_masks, att_scores, gaussians = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+                # pred_logits, pred_maps, obj_masks, att_scores, gaussians = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+                _, pred_maps, _, _, _, cw_maps = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
             else:
-                _, pred_maps, _, _, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+                # _, pred_maps, _, _, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
+                _, pred_maps, _, _, _, _ = model(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
             # pred_maps = torch.nn.Sigmoid()(pred_maps)
             # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
             # print(pred_maps.squeeze(1).size(), HLoss_th()(pred_maps.squeeze(1)).item())
@@ -2598,24 +2603,25 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_m
         rf_loss = torch.nn.BCELoss()(torch.clamp((pred_maps_all/len(tgt_sizes)), min=0.0, max=1.0), sal_maps)
         evals.append(rf_loss.item())
 
-        scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
-                          postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
-                                                 size=[ori_img.shape[0], ori_img.shape[1]]))
-        scipy.misc.imsave(os.path.join(out_folder_om, img_name[0]+'.png'),
-                          postprocess_prediction(obj_masks.squeeze().detach().cpu().numpy(), size=[ori_img.shape[0], ori_img.shape[1]]))
-        np.save(os.path.join(out_folder_gs, img_name[0]+'.npy'), gaussians.squeeze().detach().cpu().numpy())
-        np.save(os.path.join(out_folder_pd, img_name[0]+'.npy'), pred_logits.squeeze().detach().cpu().numpy())
-        np.save(os.path.join(out_folder_pd, img_name[0]+'_label.npy'), label.squeeze().detach().cpu().numpy())
-        np.save(os.path.join(out_folder_sc, img_name[0]+'.npy'), att_scores.squeeze().detach().cpu().numpy())
+        # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
+        #                   postprocess_prediction((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
+        #                                          size=[ori_img.shape[0], ori_img.shape[1]]))
+        # scipy.misc.imsave(os.path.join(out_folder_om, img_name[0]+'.png'),
+        #                   postprocess_prediction(obj_masks.squeeze().detach().cpu().numpy(), size=[ori_img.shape[0], ori_img.shape[1]]))
+        # np.save(os.path.join(out_folder_gs, img_name[0]+'.npy'), gaussians.squeeze().detach().cpu().numpy())
+        # np.save(os.path.join(out_folder_pd, img_name[0]+'.npy'), pred_logits.squeeze().detach().cpu().numpy())
+        # np.save(os.path.join(out_folder_pd, img_name[0]+'_label.npy'), label.squeeze().detach().cpu().numpy())
+        # np.save(os.path.join(out_folder_sc, img_name[0]+'.npy'), att_scores.squeeze().detach().cpu().numpy())
+        np.save(os.path.join(out_folder_cw, img_name[0]+'.npy'), cw_maps.squeeze().detach().cpu().numpy())
         # scipy.misc.imsave(os.path.join(out_folder, img_name[0]+'.png'),
         #                   postprocess_prediction_salgan((pred_maps_all/len(tgt_sizes)).squeeze().detach().cpu().numpy(),
         #                                             size=[ori_img.shape[0], ori_img.shape[1]])) # the ratio is not right..
-    inds = np.argsort(np.array(evals))
-    img_names = np.array(img_names)
-    img_names_sorted = img_names[inds]
-    lists = [line + '\n' for line in img_names_sorted]
-    with open(os.path.join(args.path_out, folder_name, best_model_file + '.txt'), 'w') as f:
-        f.writelines(lists)
+    # inds = np.argsort(np.array(evals))
+    # img_names = np.array(img_names)
+    # img_names_sorted = img_names[inds]
+    # lists = [line + '\n' for line in img_names_sorted]
+    # with open(os.path.join(args.path_out, folder_name, best_model_file + '.txt'), 'w') as f:
+    #     f.writelines(lists)
 
 def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_gs(model, folder_name, best_model_file, dataloader, args, tgt_sizes):
     if best_model_file != 'no_training':
@@ -4896,7 +4902,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
-    phase = 'test_cw_multiscale'
+    # phase = 'test_cw_multiscale'
     # phase = 'test'
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
@@ -4915,7 +4921,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_cw_aug_sa'
     # phase = 'train_cw_aug_sa_sp_fixf' ### sa_new_sp, sa_art_sp, obtain fixf_sp
     # phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
-    # phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
+    phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
     # phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
@@ -7577,8 +7583,11 @@ def main_Wildcat_WK_hd_compf_map(args):
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_3_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_all_5_proa_{}_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
-                n_gaussian, normf, MAX_BNUM, PRO_RATIO, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
+            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_all_5_proa_{}_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #     n_gaussian, normf, MAX_BNUM, PRO_RATIO, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
+
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_all_6_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+                n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
@@ -11351,8 +11360,8 @@ def main_Wildcat_WK_hd_compf_map(args):
             # test_Wildcat_WK_hd_compf_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args)
 
             # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
-            # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
-            test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_gs(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+            test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+            # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_gs(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
 
 
             # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
