@@ -123,6 +123,6 @@ ATT_RES = False
 GBVS_R = 0.5 #0.25
 BMS_R = 0.25
 
-ALT_RATIO = 1.05
+ALT_RATIO = 1.1
 
 PRO_RATIO = None #0.35
