@@ -84,7 +84,7 @@ rf_weight = 0.1 #0.1 #1.0 #
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_twocls_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_all_8_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-run = 'hd_gs_A{}_all_9_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
+# run = 'hd_gs_A{}_all_9_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_proa_{}_aug7_rf{}_hth{}_2_a'.format(n_gaussian, MAX_BNUM, PRO_RATIO, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_sft_2_a'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a_fixf_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
@@ -144,6 +144,7 @@ run = 'hd_gs_A{}_all_9_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_a'.format(n_gaussian, 
 # run = 'hd_gs_A{}_alt_r{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, ALT_RATIO, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_aalt_all_2_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_aalt_all_4_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, ALT_RATIO, MAX_BNUM, FEATURE_DIM) # 1.0 
+run = 'hd_gs_A{}_aalt_val_4_{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, ALT_RATIO, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_aaalt_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_aalt_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_aalt_3_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_alt_3_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
 # run = 'hd_gs_A{}_alt_6_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
@@ -2040,7 +2041,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         # inputs, gt_labels, boxes, boxes_nums, _ = X
         inputs, gt_labels, boxes, boxes_nums, prior_maps = X
 
-        # prior_maps = torch.relu(prior_maps - torch.mean(prior_maps.view(prior_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
+        prior_maps = torch.relu(prior_maps - torch.mean(prior_maps.view(prior_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm
         # prior_maps = GBVS_R * prior_maps # for gbvs
 
         if args.use_gpu:
@@ -4911,7 +4912,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'test_cw'
     # phase = 'test_cw_sa'
     # phase = 'test_cw_sa_multiscale' # for _sa_art, without object mask
-    phase = 'test_cw_sa_sp_multiscale'
+    # phase = 'test_cw_sa_sp_multiscale'
     # phase = 'test_cw_sa_sp_multiscale_rank'
     # phase = 'test_cw_sa_sp'
     # phase = 'test_cw_ils_tgt'
@@ -4926,7 +4927,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_cw_aug_sa_sp_fixf' ### sa_new_sp, sa_art_sp, obtain fixf_sp
     # phase = 'train_cw_aug_sa_sp' ### sa_new_sp, sa_art_sp, obtain ftf_2
     # phase = 'train_all_cw_aug_sa_sp' ### train model with the whole MS_COCO
-    # phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
+    phase = 'train_cw_aug_alt_alpha_sa_sp' ### obtain alt_ftf_2, and ftf_2_mres with grad
     # phase = 'train_cw_vib_aug'
     # phase = 'train_sup_alpha'
     # phase = 'train_alt_alpha' ### obtain f
@@ -7893,8 +7894,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('lr %.4f'%args.lr)
 
 
-        prior='nips08'
-        # prior='bms'
+        # prior='nips08'
+        prior='bms'
         # # model = Wildcat_WK_sft_gs_compf_cls_att(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                    fix_feature=fix_feature, dilate=dilate)
 
@@ -7949,7 +7950,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             ##                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_thm_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_aalt_all_4_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            # model_name = 'resnet50_wildcat_wk_hd_cbA{}_aalt_all_4_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            #                             n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_aalt_val_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                                         n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate) #_gcn_all
 
         # model_name = 'resnet50_wildcat_wk_hd_cbA{}_alt_6_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
@@ -8164,7 +8167,8 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         # assert os.path.exists(rf_path)
         # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)
+        ds_train = MS_COCO_map_full_aug(mode='val', img_h=input_h, img_w=input_w, prior=prior)
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)
         # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
         # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
 
@@ -8190,7 +8194,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         h_loss = HLoss_th_2()
         # h_loss = HLoss_th()
         # h_loss = HLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=5e-6) ######################
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-5) ######################
         # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) ######################
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
@@ -8198,7 +8202,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
 
-        print('finetune lr rate: 5e-6')
+        print('finetune lr rate: 1e-5')
         # print('relation lr factor: 1.0')
 
         if args.use_gpu:
