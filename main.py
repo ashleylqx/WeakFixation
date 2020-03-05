@@ -1870,8 +1870,8 @@ def train_Wildcat_WK_hd_compf_map_cw_sa_sp(epoch, model, optimizer, logits_loss,
 
         # rf_maps = rf_maps - rf_maps.min() # do not have this previously
         rf_maps = rf_maps - torch.min(torch.min(rf_maps, dim=2, keepdim=True).values, dim=1, keepdim=True).values
-        # rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm, gbvs_thm
-        # rf_maps = GBVS_R * rf_maps # for gbvs
+        rf_maps = torch.relu(rf_maps - torch.mean(rf_maps.view(rf_maps.size(0), -1), dim=-1, keepdim=True).unsqueeze(2))  # for bms_thm, gbvs_thm
+        rf_maps = GBVS_R * rf_maps # for gbvs
 
         # losses = loss_HM(pred_logits, gt_labels) # use bce loss with sigmoid
         # losses = logits_loss(pred_logits, gt_labels) # use bce loss with sigmoid
@@ -7606,7 +7606,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_all_9_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
             #     n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
-            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_all_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
+            model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_all_2_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
                 n_gaussian, normf, MAX_BNUM, prior, rf_weight, hth_weight, FEATURE_DIM, kmax, kmin, alpha, num_maps, fix_feature, dilate)  # _gcn_all
 
             # model_name = 'resnet50_wildcat_wk_hd_cbA{}_compf_cls_att_gd_nf4_norm{}_hb_{}_aug7_{}_rf{}_hth{}_ms4_fdim{}_34_cw_sa_art_ftf_2_nob_mres_sp_kmax{}_kmin{}_a{}_M{}_f{}_dl{}_one3_224'.format(
