@@ -11140,7 +11140,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         # folder_name = 'Preds/SALICON_test'
         # folder_name = 'Preds/SALICON_train'
         # best_model_file = 'no_training'
-        E_NUM = [0,1,2,3]
+        E_NUM = list(range(4,11))
         # E_NUM.extend(list(range(5,16)))
         # prior = 'nips08'
         # prior = 'bms'
