@@ -1131,6 +1131,7 @@ class MS_COCO_ALL_map_full_aug_prior(Dataset):
         saliency3 = cv2.imread(sal_path3, 0)
         saliency3 = saliency3.astype(np.float32)
         saliency3 = GBVS_R * (saliency3 - saliency3.mean())  # gbvs
+        saliency3 = cv2.resize(saliency3, (saliency2.shape[1], saliency2.shape[0]), interpolation=cv2.INTER_AREA).astype(np.float32)
         # saliency = (saliency1.astype(np.float32)+saliency2.astype(np.float32)+saliency3.astype(np.float32))/3.
         saliency = (saliency2.astype(np.float32) + saliency3.astype(np.float32)) / 2.
         saliency = saliency.astype(np.uint8)
