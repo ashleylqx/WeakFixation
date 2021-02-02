@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import scipy.misc
+import pdb
 import torch
 
 from config import *
@@ -17,7 +18,7 @@ def normalize_map(s_map):
 	norm_s_map = (s_map - np.min(s_map))/((np.max(s_map)-np.min(s_map))*1.0)
 	return norm_s_map
 
-def postprocess_prediction(prediction, size=None):
+def postprocess_prediction(prediction, size=None, printinfo=False):
     """
     Postprocess saliency maps by resizing and applying gaussian blurringself.
     args:
@@ -27,11 +28,12 @@ def postprocess_prediction(prediction, size=None):
         numpy array with saliency map normalized 0-255 (int8)
     """
     prediction = prediction - np.min(prediction)
-
+    # pdb.set_trace()
     # prediction = prediction - np.mean(prediction)
     # prediction[prediction<0] = 0
+    if printinfo:
+        print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
 
-    print('max %.4f min %.4f'%(np.max(prediction), np.min(prediction)))
     if np.max(prediction) != 0:
         saliency_map = (prediction/np.max(prediction) * 255).astype(np.uint8)
     else:

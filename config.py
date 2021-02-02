@@ -1,7 +1,7 @@
 # base_path = '/home/qx/'
 # base_path = '/home/hz1/QX/'
-# base_path = '/research/dept2/qxlai/'
-base_path = '/raid/QX/'
+base_path = '/research/dept2/qxlai/'
+# base_path = '/raid/QX/'
 
 
 input_h = 224 #224
@@ -21,11 +21,14 @@ output_w = 56
 
 SALGAN_RESIZE = [224, 224]
 
-train_log_interval = 400
-eval_log_interval = 100
-test_log_interval = 20
+# train_log_interval = 400
+# eval_log_interval = 100
+# test_log_interval = 20
+train_log_interval = 10
+eval_log_interval = 5
+test_log_interval = 5
 
-tb_log_interval = 50
+tb_log_interval = 10
 # PATH_LOG = base_path + 'tbx_log/'
 # PATH_LOG = base_path + 'WF/log/'
 PATH_LOG = base_path + 'WF/log2/'
