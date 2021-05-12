@@ -88,7 +88,7 @@ class HLoss_th(torch.nn.Module):
         #     F.softmax(ratio_w, dim=-1) * F.log_softmax(ratio_w, dim=-1) #_5
         b = -1.0 * b.sum(dim=-1)
         return b.mean()
-
+# *** default ***
 class HLoss_th_2(torch.nn.Module):
     def __init__(self):
         super(HLoss_th_2, self).__init__()
@@ -114,6 +114,45 @@ class HLoss_th_2(torch.nn.Module):
         # pixel percentage of region
         pos_ind = torch.mul(pos_mask, ind).sum(-1, keepdim=True)
         neg_ind = torch.mul((1. - pos_mask), ind).sum(-1, keepdim=True)
+        ratio_w = torch.cat([pos_ind, neg_ind], dim=-1)
+
+        # b = F.softmax(p, dim=-1) * F.log_softmax(ratio_w, dim=-1) # recent best
+        b = F.softmax(ratio_w, dim=-1) * F.log_softmax(p, dim=-1) # _2
+        # b = F.softmax(p, dim=-1) * F.log_softmax(p, dim=-1) # _3
+        # b = F.softmax(ratio_w, dim=-1) * F.log_softmax(ratio_w, dim=-1) # _4
+        # b = F.softmax(p, dim=-1) * F.log_softmax(p, dim=-1) + \
+        #     F.softmax(ratio_w, dim=-1) * F.log_softmax(ratio_w, dim=-1) #_5
+        b = -1.0 * b.sum(dim=-1)
+        return b.mean()
+
+class HLoss_th_210423(torch.nn.Module):
+    def __init__(self):
+        super(HLoss_th_210423, self).__init__()
+
+    def forward(self, x):
+        batch_size = x.size(0)
+        x = x.view(batch_size, -1)
+        # x = x/x.max(-1)
+        # assert x.sum()!=0
+        x = torch.softmax(x, dim=-1)
+        ind = torch.ones_like(x, requires_grad=True)
+        ind = torch.div(ind , ind.sum(-1, keepdim=True))
+        # print('x', x.size())
+
+        # pos_mask = torch.nn.ReLU()((x - x.mean(-1, keepdim=True).expand_as(x)))  # /sal_map_hot.var()
+        # pos_mask = torch.nn.Softsign()(torch.div(pos_mask, (x.var(-1, keepdim=True)+1e-8)) * 1e3)
+        pos_mask = x - x.mean(-1, keepdim=True).expand_as(x)  # /sal_map_hot.var()
+        pos_mask = pos_mask > 0
+
+
+        # saliency value of region
+        pos_x = torch.masked_select(x, pos_mask).sum(-1, keepdim=True)
+        neg_x = torch.masked_select(x, (1.-pos_mask)).sum(-1, keepdim=True)
+        p = torch.cat([pos_x, neg_x], dim=-1)
+
+        # pixel percentage of region
+        pos_ind = torch.masked_select(ind, pos_mask).sum(-1, keepdim=True)
+        neg_ind = torch.masked_select(ind, (1.-pos_mask)).sum(-1, keepdim=True)
         ratio_w = torch.cat([pos_ind, neg_ind], dim=-1)
 
         # b = F.softmax(p, dim=-1) * F.log_softmax(ratio_w, dim=-1) # recent best
@@ -254,7 +293,8 @@ if __name__ == '__main__':
     # losses.backward()
     # print(losses.item())
 
-    criterion = HLoss_th()# backpropgate
+    # criterion = HLoss_th()# backpropgate
+    criterion = HLoss_th_210423()# backpropgate
     # criterion = torch.nn.L1Loss()# backpropgate
     # criterion = HLoss() # backpropgate
     # criterion = Compress_percent() # do not propagate
@@ -270,6 +310,12 @@ if __name__ == '__main__':
 
     x = torch.mul(x, pos_mask.float())
     # x3 = torch.mul(x2, pos_mask)
+
+
+    # pos_mask = mask - mask.view(2, -1).mean(-1, keepdim=True).unsqueeze(-1).expand_as(mask)
+    # pos_mask = pos_mask > 0
+    # x = torch.masked_select(x, pos_mask)
+
 
     # x = torch.randn(2, 10, 10)
     w = torch.ones(2, 10, 3, requires_grad=True) #requires_grad=True

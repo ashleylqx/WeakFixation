@@ -2758,8 +2758,8 @@ def collate_fn_mit1003_rn(batch): # batch: image, boxes, sal_map, fix_map(, imag
     images = list()
     # box_features = list()
 
-    boxes_nums = [X[1].shape[0] for X in batch]
-    max_boxes_num = np.max(np.array(boxes_nums))
+    boxes_nums = np.array([X[1].shape[0] for X in batch])
+    max_boxes_num = np.max(boxes_nums)
     boxes_batch = np.zeros((len(batch), max_boxes_num, 4))
     # box_features_batch = np.zeros((len(batch), max_boxes_num, batch[0][1].shape[-1]))
 
@@ -2790,24 +2790,25 @@ def collate_fn_mit1003_rn(batch): # batch: image, boxes, sal_map, fix_map(, imag
 
     # box_features_batch = torch.FloatTensor(box_features_batch)
     boxes_batch = torch.FloatTensor(boxes_batch)
+    boxes_nums_batch = torch.LongTensor(boxes_nums)
 
     sal_maps_batch = torch.cat(sal_maps, dim=0)
     fix_maps_batch = torch.cat(fix_maps, dim=0)
 
     if len(batch[0]) == 4:
-        return images_batch, boxes_batch, boxes_nums, sal_maps_batch, fix_maps_batch
+        return images_batch, boxes_batch, boxes_nums_batch, sal_maps_batch, fix_maps_batch
 
     elif len(batch[0]) == 5:
         image_names_batch = [X[-1] for X in batch]
-        return images_batch, boxes_batch, boxes_nums, sal_maps_batch, fix_maps_batch, image_names_batch
+        return images_batch, boxes_batch, boxes_nums_batch, sal_maps_batch, fix_maps_batch, image_names_batch
 
 # MIT300 (no sal maps, no labels)
 def collate_fn_mit300_rn(batch): # batch: image, boxes(, image_name)
     images = list()
     # box_features = list()
 
-    boxes_nums = [X[1].shape[0] for X in batch]
-    max_boxes_num = np.max(np.array(boxes_nums))
+    boxes_nums = np.array([X[1].shape[0] for X in batch])
+    max_boxes_num = np.max(boxes_nums)
     boxes_batch = np.zeros((len(batch), max_boxes_num, 4))
 
     for i, X in enumerate(batch):
@@ -2828,13 +2829,14 @@ def collate_fn_mit300_rn(batch): # batch: image, boxes(, image_name)
     #     box_features_batch = None
 
     boxes_batch = torch.FloatTensor(boxes_batch)
+    boxes_nums_batch = torch.LongTensor(boxes_nums)
 
     if len(batch[0]) == 2:
-        return images_batch, boxes_batch, boxes_nums
+        return images_batch, boxes_batch, boxes_nums_batch
 
     elif len(batch[0]) == 3:
         image_names_batch = [X[-1] for X in batch]
-        return images_batch, boxes_batch, boxes_nums, image_names_batch
+        return images_batch, boxes_batch, boxes_nums_batch, image_names_batch
 
 
 # can change box loading to real time edge box calculation, then return to function

@@ -71,7 +71,7 @@ def auc_shuff_acl(s_map, gt, other_map, n_splits=100, stepsize=0.1):
     S = s_map.flatten()
     F = gt.flatten()
     Oth = other_map.flatten()
-
+    # pdb.set_trace()
     Sth = S[F > 0]  # sal map values at fixation locations
     Nfixations = len(Sth)
 
@@ -139,7 +139,7 @@ def nss(pred, fixations):
     pred = pred.reshape(new_size)
     fixations = fixations.reshape(new_size)
     # pdb.set_trace()
-    pred_normed = (pred - pred.mean(-1, True)) / pred.std(-1, keepdim=True)
+    pred_normed = (pred - pred.mean(-1, True)) / (pred.std(-1, keepdim=True)+1e-9)
     results = []
     for this_pred_normed, mask in zip(torch.unbind(pred_normed, 0),
                                       torch.unbind(fixations, 0)): # delete dimention 0

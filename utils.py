@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import shutil
 import scipy.misc
 import pdb
 import torch
@@ -181,7 +182,7 @@ def postprocess_prediction_my(pred, shape_r, shape_c):
 
 
 # Method to save trained model
-def save_model(net, optim, epoch, p_out, eval_loss, name_model=None):
+def save_model(net, optim, epoch, p_out, eval_loss, name_model=None, results=None, is_best=False, best_name='best.pt'):
 
     if name_model is None:
         name_model = epoch
@@ -190,12 +191,34 @@ def save_model(net, optim, epoch, p_out, eval_loss, name_model=None):
     for key in state_dict.keys():
         state_dict[key] = state_dict[key].cpu()
 
-    torch.save({
+    # opt_state_dict = optim.state_dict()
+    # for key in opt_state_dict.keys():
+    #     opt_state_dict[key] = opt_state_dict[key].cpu()
+
+    model_dict = {
             'epoch': epoch,
             'state_dict': state_dict,
-            'optimizer': optim,
-             'eval_loss': eval_loss},
-            os.path.join(p_out,'{}_epoch{:02d}.pt'.format(name_model, epoch)))
+            'optimizer': optim.state_dict(),
+            'eval_loss': eval_loss}
+
+    for k in results.keys():
+        model_dict[k] = results[k].mean
+
+    # filepath = os.path.join(p_out,'{}.pt'.format(name_model))
+    filepath = os.path.join(p_out, name_model)
+    torch.save(model_dict, filepath)
+
+    if is_best:
+        # shutil.copyfile(filepath, os.path.join(p_out, '{}_best.pt'.format(name_model)))
+        shutil.copyfile(filepath, os.path.join(p_out, best_name))
+
+    # torch.save({
+    #         'epoch': epoch,
+    #         'state_dict': state_dict,
+    #         'optimizer': optim,
+    #         'eval_loss': eval_loss},
+    #         os.path.join(p_out,'{}_epoch{:02d}.pt'.format(name_model, epoch)))
+
 
 
 def get_lr_optimizer( optimizer ):
