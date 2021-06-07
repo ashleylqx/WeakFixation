@@ -82,7 +82,26 @@ run = 'sa_art_210511_adam'   # 1e-5
 run = 'sa_art_210511_adam_2' # 1e-4
 run = 'sa_sp_fixf_210511_adam' # 1e-5, basemodel init
 run = 'sa_sp_alt_210511_adam' # 1e-5, using sa_sp trained from scratch nss 1.47
-run = 'sa_sp_alt_210511_sgd' # 1e-2, using sa_sp trained from scratch nss 1.47
+# run = 'sa_sp_alt_210511_sgd' # 1e-2, using sa_sp trained from scratch nss 1.47
+run = 'sa_art_210514_adam' # 1e-5, init from basemodel_alt_210509_adam_2 1.7505
+run = 'sa_sp_fixf_210515_adam' # 1e-5, init from basemodel_alt_210509_adam_2 1.7505
+run = 'sa_sp_210516_adam' # 1e-5, init from sa_sp_fixf_210515_adam 1.7802
+# run = 'sa_sp_210516_sgd' # 1e-2, init from sa_sp_fixf_210515_adam 1.7802
+run = 'sa_sp_210517_adam' # 1e-5, init from sa_sp_fixf_210515_adam 1.7802
+run = 'sa_sp_210517_adam_2' # 1e-4, init from sa_sp_fixf_210515_adam 1.7802
+run = 'sa_sp_alt_210517_adam' # 1e-5, init from sa_sp_210517_adam 1.7329
+##run = 'sa_sp_alt_210517_sgd' # 1e-2, init from sa_sp_210517_adam 1.7329
+#run = 'sa_sp_alt_210520_sgd' # 1e-2, init from sa_sp_210517_adam 1.7329
+# run = 'sa_sp_alt_210518_adam' # 1e-5, init from sa_sp_fixf_210515_adam 1.7802
+run = 'sa_sp_alt_210522_adam' # 1e-5, init from sa_sp_210517_adam 1.7329; init both
+run = 'sa_sp_alt_210523_adam' # 1e-5, init from sa_sp_210517_adam 1.7329; init both; aux_maps = aux_maps * ALT_RATIO
+run = 'sa_sp_alt_210524_adam' # 1e-5, init from sa6_sp_fixf_210515_adam 1.7802; init both; no ALT_RATIO
+run = 'sa_sp_alt_210526_sgd' # 1e-2, init from sa_sp_fixf_210515_adam 1.7802; init both; no ALT_RATIO
+run = 'sa_sp_210528_all_adam' # 1e-4, init from sa_sp_fixf_210515_adam 1.7802; train COCO_ALL
+run = 'basemodel_210528_all_sgd' # 1e-2, init from sa_sp_fixf_210515_adam 1.7802; train COCO_ALL
+# run = 'sa_sp_fixf_210529_all_adam' # 1e-5, init from sa_art_210514_adam 1.7342; train COCO_ALL
+run = 'basemodel_alt_210531_all_adam' # 1e-5, init from basemodel_210528_all_sgd 1.4810; train COCO_ALL
+# run = 'sa_art_210607_all_adam' # 1e-5, init from basemodel_alt_210531_all_adam 1.6821; train COCO_ALL
 # run = 'tmp' #
 
 '''old run folder'''
@@ -133,8 +152,7 @@ run = 'sa_sp_alt_210511_sgd' # 1e-2, using sa_sp trained from scratch nss 1.47
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_a_fixf_2'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_a_fixf_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_rf{}_hth{}_norn_a_ftf_2_sp'.format(n_gaussian, MAX_BNUM, rf_weight, hth_weight) # 1.0
-# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0 
-
+# run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_cw_sa_art_ftf_2'.format(n_gaussian, MAX_BNUM, FEATURE_DIM) # 1.0
 
 
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_pll_a'.format(n_gaussian) # 1.0
@@ -2213,7 +2231,7 @@ def train_Wildcat_WK_hd_compf_map_alt_alpha_sa_sp(epoch, model, model_aux, optim
         _, aux_maps, _, _ = model_aux(img=inputs, boxes=boxes, boxes_nums=boxes_nums)
         # aux_maps = aux_maps - aux_maps.min()
         aux_maps = aux_maps - torch.min(torch.min(aux_maps, dim=3, keepdim=True).values, dim=2, keepdim=True).values
-        ##aux_maps = aux_maps * ALT_RATIO # comment this for ftf_2_mres training from fixf
+        # aux_maps = aux_maps * ALT_RATIO # comment this for ftf_2_mres training from fixf
         # aux_maps = aux_maps * alt_ratio_current
         # print('aux_maps', aux_maps.size(), 'prior_maps', prior_maps.size())
         rf_maps = ALPHA*aux_maps.detach().squeeze() + (1-ALPHA)*prior_maps
@@ -5024,10 +5042,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) #, N=48
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
-        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) #, N=48 ******
+        # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
+        # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # *******
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w) #, N=24
@@ -5572,9 +5591,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
-        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # *******
+        # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)  # ********
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w)
@@ -6308,9 +6328,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
-        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # ********
+        # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # ********
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w)
@@ -6654,7 +6675,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         model.load_state_dict(new_params)
 
         s_epoch = 0
-        nss_value = checkpoint['nss']
+        # nss_value = checkpoint['nss']
+        nss_value = 0
         model_name = args.model_name
         print(model_name)
 
@@ -6664,7 +6686,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                             weight_decay=args.weight_decay) ###### if train using large lr
         # optimizer = torch.optim.Adam(model.get_config_optim(args.lr, 1.0, 0.1), lr=args.lr)
 
-        # optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
+        # optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4) ###########
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
         # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5)
 
@@ -6728,12 +6750,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior, N=4) #, N=48
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
-        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) #, N=48 ******
+        # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
+        # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # ********
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
-        ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w, N=4) # , N=32
+        ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w) # , N=32
 
         # train_dataloader = DataLoader(ds_train, batch_size=args.batch_size, collate_fn=collate_fn_coco_map_rn_multiscale,
         #                               shuffle=True, num_workers=2)
@@ -6762,7 +6785,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                              shuffle=False, num_workers=2)
 
         # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w, N=4)  # N=4,
+        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size*gpu_number, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
         # tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)] # batch_size=4
@@ -6790,7 +6813,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         print('Initial nss value: %.4f' % nss_value)
         # args.n_epochs = 5
         for i_epoch in range(s_epoch, args.n_epochs):
-            adjust_learning_rate(optimizer, i_epoch, args.schedule)
+            # adjust_learning_rate(optimizer, i_epoch, args.schedule)
             is_best = False
             train_cps, train_h, train_map = train_Wildcat_WK_hd_compf_map_cw_sa_sp(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
 
@@ -7510,9 +7533,13 @@ def main_Wildcat_WK_hd_compf_map(args):
             s_epoch = checkpoint['epoch'] + 1
 
             # load model_aux from previous best basemodel_alt
-            checkpoint_aux = torch.load(os.path.join(path_models, args.bestname), map_location='cuda:0')
-            nss_value = checkpoint_aux['nss']
+            if os.path.exists(os.path.join(path_models, args.bestname)):
+                checkpoint_aux = torch.load(os.path.join(path_models, args.bestname), map_location='cuda:0')
+            else:
+                model_aux_path = os.path.join(args.path_out, 'Models', args.init_model, args.bestname)
+                checkpoint_aux = torch.load(model_aux_path, map_location='cuda:0')
 
+            nss_value = checkpoint_aux['nss']
             saved_state_dict = checkpoint_aux['state_dict']
             if list(saved_state_dict.keys())[0][:7] == 'module.':
                 new_params = model_aux.state_dict().copy()
@@ -7526,7 +7553,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         else:
             # load model_aux from basemodel_sgd
             model_aux_path = os.path.join(args.path_out, 'Models', args.init_model, args.bestname)
-            checkpoint_aux = torch.load(model_aux_path)
+            checkpoint_aux = torch.load(model_aux_path, map_location='cuda:0')
             nss_value = checkpoint_aux['nss']
 
             saved_state_dict = checkpoint_aux['state_dict']
@@ -7537,6 +7564,9 @@ def main_Wildcat_WK_hd_compf_map(args):
             else:
                 new_params = saved_state_dict.copy()
             model_aux.load_state_dict(new_params)
+
+            model.load_state_dict(new_params) # try to load to initial model, too, as we have done previously.
+                                              # but we do not load for basemodel_alt, following previous efforts.
 
             logger = Logger(os.path.join(path_models, 'log.txt'), title=title)
             # logger.set_names(['Epoch', 'LR', 'T_cps', 'V_cps', 'T_h', 'V_h', 'T_map', 'V_map', 'Nss'])
@@ -8148,9 +8178,13 @@ def main_Wildcat_WK_hd_compf_map(args):
             s_epoch = checkpoint['epoch'] + 1
 
             # load model_aux from previous best basemodel_alt
-            checkpoint_aux = torch.load(os.path.join(path_models, args.bestname), map_location='cuda:0')
-            nss_value = checkpoint_aux['nss']
+            if os.path.exists(os.path.join(path_models, args.bestname)):
+                checkpoint_aux = torch.load(os.path.join(path_models, args.bestname), map_location='cuda:0')
+            else:
+                model_aux_path = os.path.join(args.path_out, 'Models', args.init_model, args.bestname)
+                checkpoint_aux = torch.load(model_aux_path, map_location='cuda:0')
 
+            nss_value = checkpoint_aux['nss']
             saved_state_dict = checkpoint_aux['state_dict']
             if list(saved_state_dict.keys())[0][:7] == 'module.':
                 new_params = model_aux.state_dict().copy()
@@ -8196,10 +8230,11 @@ def main_Wildcat_WK_hd_compf_map(args):
             model_aux = torch.nn.DataParallel(model_aux).cuda()
             cudnn.benchmark = True
         gpu_number = torch.cuda.device_count()
-        # ds_train = MS_COCO_map_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior = prior) # , N=48
-        # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
-        # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
+        # # ds_train = MS_COCO_map_full(mode='train', img_h=input_h, img_w=input_w)
+        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior = prior) # , N=48 # ***
+        # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
+        # # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
+        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)  # *******
 
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w) # , N=24
 

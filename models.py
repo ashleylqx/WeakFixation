@@ -13265,7 +13265,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
                 # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
                 # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
             else:
-                att_scores = torch.tensor([0], device=img.device)
+                # att_scores = torch.tensor([0], device=img.device)
+                att_scores = torch.tensor([[[[0]]]], device=img.device)
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
@@ -16176,8 +16177,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_210423(torch.nn.Module):
                 # tmp_att_maps = gen_attention_map(att_scores.squeeze(), boxes_list[b_i], img.size()[-2:], cw_maps.size()[-2:])
                 # obj_att_maps[b_i, 0, :, :] = tmp_att_maps.sum(0)
             else:
-                att_scores = torch.tensor([0], device=img.device)
-
+                # att_scores = torch.tensor([0], device=img.device)
+                att_scores = torch.tensor([[[[0]]]], device=img.device)
 
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps_refined),

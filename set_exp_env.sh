@@ -1,4 +1,4 @@
 #!/bin/bash
 
-source activate torch36_wk
+source activate torch36
 

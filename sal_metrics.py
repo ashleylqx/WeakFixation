@@ -148,7 +148,7 @@ def nss(pred, fixations):
             print("No fixations.")
             results.append(torch.ones([]).float().to(fixations.device))
             continue
-        nss_ = torch.masked_select(this_pred_normed, mask)
+        nss_ = torch.masked_select(this_pred_normed, mask.bool())
         nss_ = nss_.mean(-1)
         results.append(nss_)
     results = torch.stack(results)
