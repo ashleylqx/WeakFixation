@@ -101,7 +101,8 @@ run = 'sa_sp_210528_all_adam' # 1e-4, init from sa_sp_fixf_210515_adam 1.7802; t
 run = 'basemodel_210528_all_sgd' # 1e-2, init from sa_sp_fixf_210515_adam 1.7802; train COCO_ALL
 # run = 'sa_sp_fixf_210529_all_adam' # 1e-5, init from sa_art_210514_adam 1.7342; train COCO_ALL
 run = 'basemodel_alt_210531_all_adam' # 1e-5, init from basemodel_210528_all_sgd 1.4810; train COCO_ALL
-# run = 'sa_art_210607_all_adam' # 1e-5, init from basemodel_alt_210531_all_adam 1.6821; train COCO_ALL
+run = 'sa_art_210607_all_adam' # 1e-5, init from basemodel_alt_210531_all_adam 1.6821; train COCO_ALL
+run = 'sa_sp_fixf_210610_all_adam' # 1e-5, init from sa_art_210607_all_adam 1.6912; train COCO_ALL
 # run = 'tmp' #
 
 '''old run folder'''

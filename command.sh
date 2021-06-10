@@ -65,7 +65,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --resume --phase train_cw_alt_alpha 
 CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --resume --phase train_cw_alt_alpha --init_model basemodel_210504_sgd --model_name basemodel_alt_210509_adam_2 --train-batch 48 --test-batch 24 --batch-size 24 --lr 1e-5 # single_scale test
     # *** Done ***; submit to 146300; submit to 146971;
 CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --phase train_cw_alt_alpha --init_model basemodel_210528_all_sgd --model_name basemodel_alt_210531_all_adam --train-batch 48 --test-batch 24 --batch-size 24 --lr 1e-5 # single_scale test
-        # *** Running *** (300 epochs) submit to 147441
+        # *** Done *** (300 epochs) submit to 147441
 CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --resume --phase train_cw_alt_alpha --init_model basemodel_210528_all_sgd --model_name basemodel_alt_210531_all_adam --train-batch 48 --test-batch 24 --batch-size 24 --lr 1e-5 --n_epochs 300 # single_scale test
 
 
@@ -104,6 +104,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --resume --phase train_cw_aug_sa_sp_
 CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --resume --phase train_cw_aug_sa_sp_fixf --init_model sa_art_210514_adam --model_name sa_sp_fixf_210515_adam --train-batch 144 --test-batch 72 --batch-size 72 --lr 1e-5 # single_scale test
       # *** Done *** init nss 1.7342, train COCO_ALL
 CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --phase train_cw_aug_sa_sp_fixf --init_model sa_art_210514_adam --model_name sa_sp_fixf_210529_all_adam --train-batch 144 --test-batch 72 --batch-size 72 --lr 1e-5 # single_scale test
+
+      # *** Pending *** init nss 1.6912, train COCO_ALL, submit to 147987
+CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --phase train_cw_aug_sa_sp_fixf --init_model sa_art_210607_all_adam --model_name sa_sp_fixf_210610_all_adam --train-batch 144 --test-batch 72 --batch-size 72 --lr 1e-5 # single_scale test
 
 
 # (4) sa_sp *********************************
