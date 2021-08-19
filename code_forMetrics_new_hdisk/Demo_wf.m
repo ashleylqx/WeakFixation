@@ -17,7 +17,8 @@ end
 % options.Result_path = '/home/qx/WF/Preds/';
 % options.DS_path = '/home/qx/DataSets/';
 % base_path = '/media/qx/dgx-r69-1/';
-base_path = '/home/qx/';
+% base_path = '/home/qx/';
+base_path = '/research/dept2/qxlai/';
 
 Datasets{1} = 'MIT1003';
 % Datasets{1} = 'PASCAL-S';
@@ -29,13 +30,13 @@ options.DS_path = [base_path, 'DataSets/'];
 
 
 Metrics{1} = 'NSS'; 
-Metrics{2} = 'similarity'; 
-Metrics{3} = 'CC';
-Metrics{4} = 'AUC_Judd';
-Metrics{5} = 'AUC_shuffled';
+%Metrics{2} = 'similarity'; 
+%Metrics{3} = 'CC';
+%Metrics{4} = 'AUC_Judd';
+%Metrics{5} = 'AUC_shuffled';
 
 %Results{1} = 'MotionAwareTwoStream';
-%Results{1} = 'UNISAL';
+Results{1} = 'UNISAL';
 % Results{1} = 'SALLSTM';
 % Results{1} = 'resnet50_wildcat_wk_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch03';
 % Results{1} = 'resnet50_wildcat_wk_comp2_conv_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch00';
@@ -63,7 +64,7 @@ Metrics{5} = 'AUC_shuffled';
 % % Results{7} = 'resnet50_wildcat_wk_hth0.2_ms_kmax1_kmin1_a1.0_M1_fFalse_dlFalse_448_epoch19';
 % % Results{8} = 'resnet50_wildcat_wk_hth0.2_ms_kmax1_kminNone_a1.0_M1_fFalse_dlFalse_448_epoch22';
 % Results{6} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch01';
-Results{1} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch04';
+%%==Results{1} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch04';
 % Results{2} = 'resnet50_wildcat_wk_compf_self_ms_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch04';
 % Results{2} = 'resnet50_wildcat_wk_compf_ms_hth0.2_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch13';
 % Results{2} = 'resnet50_wildcat_wk_hth0.05_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch08';
@@ -72,11 +73,11 @@ Results{1} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7
 % Results{2} = 'resnet50_wildcat_wk_hth0.15_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch10';
 % Results{3} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch14';
 % Results{2} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch10';
-Results{2} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch13';
+%%==Results{2} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch13';
 % Results{3} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch10';
 % Results{4} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch09';
 % Results{5} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch05';
-Results{3} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch14';
+%%==Results{3} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch14';
 % Results{4} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch11';
 % Results{5} = 'resnet50_wildcat_wk_hth0.0_ms_signorm_nosigmap_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch03';
 % Results{4} = 'resnet50_wildcat_wk_compf_self_res_ms_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch06';
@@ -121,9 +122,9 @@ Results{3} = 'resnet50_wildcat_wk_hth0.1_ms_signorm_nosigmap_kmax1_kminNone_a0.7
 % 
 % Results{20} = 'resnet50_wildcat_wk_compf_cb8_G_self_x_res_ms_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch06';
 
-Results{4} = 'gbvs';
-Results{5} = 'itti';
-Results{6} = 'ACoL';
+%%==Results{4} = 'gbvs';
+%%==Results{5} = 'itti';
+%%==Results{6} = 'ACoL';
 
 % Results{6} = 'resnet50_wildcat_wk_compf_cb8_2_self_x_res_ms_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch07';
 % Results{7} = 'resnet50_wildcat_wk_compf_cb8_2_self_x_res_ms_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one_224_epoch05';
@@ -441,9 +442,9 @@ Results{6} = 'ACoL';
 % Results{37} = 'resnet50_wildcat_wk_compf_cb16_2_self_x_res_aug1.0_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_new4_epoch06';
 % Results{38} = 'resnet50_wildcat_wk_compf_cb16_2_self_x_res_aug1.0_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_new4_epoch03';
 
-Results{7} = 'nips08';
-Results{8} = 'CAM_res50';
-Results{9} = 'CAM_sqz1_1';
+%%==Results{7} = 'nips08';
+%%==Results{8} = 'CAM_res50';
+%%==Results{9} = 'CAM_sqz1_1';
 
 % Results{10} = 'resnet50_wildcat_wk_compf_cb16_2_self_x_res_aug0.2_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_new4_epoch12';
 % Results{11} = 'resnet50_wildcat_wk_compf_cb16_2_self_x_res_aug0.2_hth0.1_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_new4_epoch13';
@@ -1638,10 +1639,10 @@ Results{9} = 'CAM_sqz1_1';
 % Results{12} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_500_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03';
 % Results{13} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_300_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03';
 
-Results{10} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim512_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03';
-Results{11} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim512_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch06';
+%%==Results{10} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim512_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch03';
+%%==Results{11} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim512_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch06';
 % 
-Results{12} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim256_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch06';
+%%==Results{12} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim256_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch06';
 % Results{13} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim256_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch01';
 % Results{14} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim256_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch04';
 % Results{15} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdim256_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch05';
@@ -1688,7 +1689,7 @@ Results{12} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_fdi
 for i = 1:length(Datasets)
     disp(Datasets{i});
     options.Result_path = [base_path, 'WF/Preds/', Datasets{i}, '/'];
-    for k = 10:12 %length(Results)
+    for k = 1:1 %length(Results)
 %     for k =length(Results):-1:1    
         % saliency prediction results
         % options.SALIENCY_DIR = [options.Result_path Datasets{i} '/' Results{k} '/'];
@@ -1696,22 +1697,55 @@ for i = 1:length(Datasets)
         disp(Results{k});
         
         % dataset path
+        %if isequal(Datasets{i}, 'MIT1003')
+        %    options.DS_GT_DIR = [options.DS_path, Datasets{i} '/ALLFIXATIONMAPS/'];
+        %    options.IMG_DIR = [options.DS_path, Datasets{i}, '/ALLSTIMULI/']; 
+        %elseif isequal(Datasets{i}, 'SALICON')
+        %    options.DS_GT_DIR = [options.DS_path, Datasets{i} '/maps/val/'];
+        %    options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/val/']; % 
+        %elseif isequal(Datasets{i}, 'PASCAL-S')
+        %    options.DS_GT_DIR = [options.DS_path, Datasets{i} '/maps/'];
+        %    options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/'];     
+        %end
         if isequal(Datasets{i}, 'MIT1003')
             options.DS_GT_DIR = [options.DS_path, Datasets{i} '/ALLFIXATIONMAPS/'];
             options.IMG_DIR = [options.DS_path, Datasets{i}, '/ALLSTIMULI/']; 
         elseif isequal(Datasets{i}, 'SALICON')
             options.DS_GT_DIR = [options.DS_path, Datasets{i} '/maps/val/'];
             options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/val/']; % 
-        elseif isequal(Datasets{i}, 'PASCAL-S')
+        elseif isequal(Datasets{i}, 'PASCAL-S')||isequal(Datasets{i}, 'DUTOMRON')||isequal(Datasets{i}, 'toronto')
             options.DS_GT_DIR = [options.DS_path, Datasets{i} '/maps/'];
-            options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/'];     
+            options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/'];
+        elseif isequal(Datasets{i}, 'CAT2000')
+            options.DS_GT_DIR = [options.DS_path, Datasets{i} '/train/maps/'];
+            options.IMG_DIR = [options.DS_path, Datasets{i}, '/train/images/*/']; %    
         end
         
                 
-        for j =1:2%length(Metrics)
-            if ~exist([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'file')                 
-                [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
-%                 [result, allMetric, ~] = evaluationFunc_wf_pascal(options, Metrics{j});
+        %for j =1:2%length(Metrics)
+        %    if ~exist([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'file')                 
+        %        [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
+%       %          [result, allMetric, ~] = evaluationFunc_wf_pascal(options, Metrics{j});
+        %        save([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'result');
+        %        % save([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '_all.mat'], 'result');
+        %        % std_value = std(allMetric); % calculate std value if you want to
+        %    else
+        %        load([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat']);
+%       %          [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
+%       %          save([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'result');
+        %    end
+        %    meanMetric{i}(k,j) = result;
+        %    fprintf('%s :%.4f \n', Metrics{j}, result);
+        %end
+        for j =1:length(Metrics)
+            if ~exist([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'file')
+                if isequal(Datasets{i}, 'MIT1003')
+                    [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
+                elseif isequal(Datasets{i}, 'PASCAL-S')||isequal(Datasets{i}, 'DUTOMRON')||isequal(Datasets{i}, 'toronto')
+                    [result, allMetric, ~] = evaluationFunc_wf_pascal(options, Metrics{j});
+                elseif isequal(Datasets{i}, 'CAT2000')
+                    [result, allMetric, ~] = evaluationFunc_wf_cat2000(options, Metrics{j});
+                end
                 save([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'result');
                 % save([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '_all.mat'], 'result');
                 % std_value = std(allMetric); % calculate std value if you want to

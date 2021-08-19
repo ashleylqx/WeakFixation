@@ -46,7 +46,8 @@ allMetrics = zeros(length(frames),1);
 % for i = 1:min(nframe, 50000)
 for i = 1:nframe
 
-    gt_fold = frames(i).folder;
+    % gt_fold = frames(i).folder;
+    gt_fold = options.IMG_DIR;
     gt_fold = strrep(gt_fold, '\','/');
     gt_name = frames(i).name;
     
