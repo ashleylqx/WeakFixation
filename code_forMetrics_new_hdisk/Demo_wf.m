@@ -21,7 +21,9 @@ end
 base_path = '/research/dept2/qxlai/';
 
 Datasets{1} = 'MIT1003';
-% Datasets{1} = 'PASCAL-S';
+Datasets{2} = 'PASCAL-S';
+Datasets{3} = 'DUTOMRON';
+Datasets{4} = 'TORONTO';
 % Datasets{2} = 'Hollywood-2';
 % Datasets{3} = 'DHF1K';
 
@@ -29,14 +31,16 @@ Datasets{1} = 'MIT1003';
 options.DS_path = [base_path, 'DataSets/'];
 
 
-Metrics{1} = 'NSS'; 
-%Metrics{2} = 'similarity'; 
-%Metrics{3} = 'CC';
-%Metrics{4} = 'AUC_Judd';
-%Metrics{5} = 'AUC_shuffled';
+Metrics{5} = 'NSS'; 
+Metrics{2} = 'similarity'; 
+Metrics{4} = 'CC';
+Metrics{1} = 'AUC_Judd';
+Metrics{3} = 'AUC_shuffled';
 
 %Results{1} = 'MotionAwareTwoStream';
 Results{1} = 'UNISAL';
+Results{2} = 'scribble_saliency';
+Results{3} = 'scwssod';
 % Results{1} = 'SALLSTM';
 % Results{1} = 'resnet50_wildcat_wk_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch03';
 % Results{1} = 'resnet50_wildcat_wk_comp2_conv_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch00';
@@ -1686,10 +1690,10 @@ Results{1} = 'UNISAL';
 % Results{18} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_aug3_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch07';
 
 %%
-for i = 1:length(Datasets)
+for i = 2:3 % 1:length(Datasets)
     disp(Datasets{i});
     options.Result_path = [base_path, 'WF/Preds/', Datasets{i}, '/'];
-    for k = 1:1 %length(Results)
+    for k = 2:3 %length(Results)
 %     for k =length(Results):-1:1    
         % saliency prediction results
         % options.SALIENCY_DIR = [options.Result_path Datasets{i} '/' Results{k} '/'];
@@ -1713,7 +1717,7 @@ for i = 1:length(Datasets)
         elseif isequal(Datasets{i}, 'SALICON')
             options.DS_GT_DIR = [options.DS_path, Datasets{i} '/maps/val/'];
             options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/val/']; % 
-        elseif isequal(Datasets{i}, 'PASCAL-S')||isequal(Datasets{i}, 'DUTOMRON')||isequal(Datasets{i}, 'toronto')
+        elseif isequal(Datasets{i}, 'PASCAL-S')||isequal(Datasets{i}, 'DUTOMRON')||isequal(Datasets{i}, 'toronto')||isequal(Datasets{i}, 'TORONTO')
             options.DS_GT_DIR = [options.DS_path, Datasets{i} '/maps/'];
             options.IMG_DIR = [options.DS_path, Datasets{i}, '/images/'];
         elseif isequal(Datasets{i}, 'CAT2000')
@@ -1741,7 +1745,7 @@ for i = 1:length(Datasets)
             if ~exist([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'file')
                 if isequal(Datasets{i}, 'MIT1003')
                     [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
-                elseif isequal(Datasets{i}, 'PASCAL-S')||isequal(Datasets{i}, 'DUTOMRON')||isequal(Datasets{i}, 'toronto')
+                elseif isequal(Datasets{i}, 'PASCAL-S')||isequal(Datasets{i}, 'DUTOMRON')||isequal(Datasets{i}, 'toronto')||isequal(Datasets{i}, 'TORONTO')
                     [result, allMetric, ~] = evaluationFunc_wf_pascal(options, Metrics{j});
                 elseif isequal(Datasets{i}, 'CAT2000')
                     [result, allMetric, ~] = evaluationFunc_wf_cat2000(options, Metrics{j});

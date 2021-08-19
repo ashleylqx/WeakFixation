@@ -112,8 +112,9 @@ for i = 1:nframe
             fixation_point = zeros(0,2);
             for k = 1:min(10,length(frames))
                 fx_name = frames(ids(k)).name;
-                fx_fold = frames(ids(k)).folder;
-                fx_fold = strrep(fx_fold, '\','/');
+                %fx_fold = frames(ids(k)).folder;
+                fx_fold = options.IMG_DIR;
+		fx_fold = strrep(fx_fold, '\','/');
 
                 % fix_path = strrep(fx_fold,'/ALLSTIMULI', '/ALLFIXATIONS/');
                 fix_path = strrep(fx_fold,'/images/', '/fixations/');
