@@ -45,10 +45,6 @@ transform = transforms.Compose([
         transforms.Normalize(mean=[0.485, 0.456, 0.406], # rgb_mean,
                              std=[0.229, 0.224, 0.225])])
 
-Proposal_Methods = ['eb500', 'mcg']
-prop_idx = 1
-prop_m = Proposal_Methods[prop_idx]
-
 # TODO: discuss if the resize should preserve aspect ratio; now image and sal_img does not preserve
 def imageProcessing(image, saliency, h=input_h, w=input_w):
     image = cv2.resize(image, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
@@ -127,9 +123,9 @@ class SALICON_full(Dataset):
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
         if mode=='val':
-            self.edge_boxes = os.path.join(self.path_dataset, prop_m, mode)
+            self.edge_boxes = os.path.join(self.path_dataset, 'eb500', mode)
         else:
-            self.edge_boxes = os.path.join(PATH_COCO, 'train2014_%s' % prop_m)
+            self.edge_boxes = os.path.join(PATH_COCO, 'train2014_eb500')
 
         self.path_saliency = os.path.join(self.path_dataset, 'maps', mode)
         self.path_fixation = os.path.join(self.path_dataset, 'fixations', mode)
@@ -238,7 +234,7 @@ class SALICON_test(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', mode)
         # self.path_saliency = os.path.join(self.path_dataset, 'maps', mode)
         # self.path_fixation = os.path.join(self.path_dataset, 'fixations', mode)
         self.return_path = return_path
@@ -331,7 +327,6 @@ class SALICON_test(Dataset):
         else:
             return img_processed, boxes
 
-####
 class MS_COCO_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None,
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -340,7 +335,7 @@ class MS_COCO_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, mode+'2014')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_eb500')
         self.return_path = return_path
 
         self.img_h = img_h
@@ -387,17 +382,15 @@ class MS_COCO_full(Dataset):
 
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
 
         image = cv2.resize(image, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA).astype(np.float32)
 
         img_processed = transform(image/255.)
 
-        boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
@@ -416,26 +409,16 @@ class MS_COCO_full(Dataset):
         #     box_f_max[box_f_max == 0.] = 1e-8
         #     box_features = box_features / box_f_max
         # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        # # x1, y1, x2, y2 normalized
-        # boxes[:, 0] = boxes[:, 0] * self.img_w
-        # boxes[:, 2] = boxes[:, 2] * self.img_w
-        # boxes[:, 1] = boxes[:, 1] * self.img_h
-        # boxes[:, 3] = boxes[:, 3] * self.img_h
-
-        # y1, x1, y2, x2 not normalized
-        # swap and normalize
-        boxes[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w # x1
-        boxes[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w # x2
-        boxes[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h # y1
-        boxes[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h # y2
-
-
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
 
         if self.return_path:
             return img_processed, label, boxes, self.list_names[index]
         else:
             return img_processed, label, boxes
-####
+
 class MS_COCO_ALL_full(Dataset):
     def __init__(self, mode=None, return_path=False, N=None,
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -445,8 +428,8 @@ class MS_COCO_ALL_full(Dataset):
         self.path_images_val = os.path.join(self.path_dataset, 'val2014')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_%s' % prop_m)
-        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_%s' % prop_m)
+        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_eb500')
+        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_eb500')
         self.return_path = return_path
 
         self.img_h = img_h
@@ -502,16 +485,14 @@ class MS_COCO_ALL_full(Dataset):
 
         else:
             rgb_ima = os.path.join(self.path_images_train, self.list_names[index]+'.jpg')
-            box_path = os.path.join(self.edge_boxes_train, self.list_names[index] + '.mat')
+            box_path = os.path.join(self.edge_boxes_train, self.list_names[index] + '_bboxes.mat')
 
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
         image = cv2.resize(image, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA).astype(np.float32)
         img_processed = transform(image/255.)
 
-        boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
@@ -530,24 +511,16 @@ class MS_COCO_ALL_full(Dataset):
         #     box_f_max[box_f_max == 0.] = 1e-8
         #     box_features = box_features / box_f_max
         # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        # # x1, y1, x2, y2, normalized
-        # boxes[:, 0] = boxes[:, 0] * self.img_w
-        # boxes[:, 2] = boxes[:, 2] * self.img_w
-        # boxes[:, 1] = boxes[:, 1] * self.img_h
-        # boxes[:, 3] = boxes[:, 3] * self.img_h
-
-        # y1, x1, y2, x2 not normalized
-        # swap and normalize
-        boxes[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w  # x1
-        boxes[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w  # x2
-        boxes[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h  # y1
-        boxes[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h  # y2
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
 
         if self.return_path:
             return img_processed, label, boxes, self.list_names[index]
         else:
             return img_processed, label, boxes
-####
+
 class MS_COCO_map_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None, prior = 'nips08',
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -556,7 +529,7 @@ class MS_COCO_map_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, mode+'2014')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_eb500')
 
         self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s'%prior)
         self.return_path = return_path
@@ -595,16 +568,14 @@ class MS_COCO_map_full(Dataset):
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index] + '.png')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
         saliency = cv2.imread(sal_path, 0)
 
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
 
-        boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
@@ -623,18 +594,10 @@ class MS_COCO_map_full(Dataset):
         #     box_f_max[box_f_max == 0.] = 1e-8
         #     box_features = box_features / box_f_max
         # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        # # x1, y1, x2 ,y2
-        # boxes[:, 0] = boxes[:, 0] * self.img_w
-        # boxes[:, 2] = boxes[:, 2] * self.img_w
-        # boxes[:, 1] = boxes[:, 1] * self.img_h
-        # boxes[:, 3] = boxes[:, 3] * self.img_h
-
-        # y1, x1, y2, x2 not normalized
-        # swap and normalize
-        boxes[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w  # x1
-        boxes[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w  # x2
-        boxes[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h  # y1
-        boxes[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h  # y2
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
 
         if self.return_path:
             return img_processed, label, boxes, sal_processed, self.list_names[index]
@@ -649,7 +612,7 @@ class MS_COCO_map_full_aug(Dataset):
         self.path_images = os.path.join(self.path_dataset, mode+'2014')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_eb500')
 
         self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s'%prior)
         self.return_path = return_path
@@ -834,7 +797,7 @@ class MS_COCO_map_full_aug_prior(Dataset):
         self.path_images = os.path.join(self.path_dataset, mode+'2014')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_eb500')
 
         self.path_saliency1 = os.path.join(self.path_dataset, mode + '2014_nips08')
         self.path_saliency2 = os.path.join(self.path_dataset, mode + '2014_bms')
@@ -1031,8 +994,8 @@ class MS_COCO_ALL_map_full_aug_prior(Dataset):
         self.path_images_val_salicon = os.path.join(PATH_SALICON, 'images', 'val')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_%s' % prop_m)
-        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_%s' % prop_m)
+        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_eb500')
+        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_eb500')
 
         self.path_saliency_train1 = os.path.join(self.path_dataset, 'train2014_nips08')
         self.path_saliency_val1 = os.path.join(self.path_dataset, 'val2014_nips08')
@@ -1254,8 +1217,8 @@ class MS_COCO_ALL_map_full_aug(Dataset):
         self.path_images_val_salicon = os.path.join(PATH_SALICON, 'images', 'val')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_%s' % prop_m)
-        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_%s' % prop_m)
+        self.edge_boxes_train = os.path.join(self.path_dataset, 'train2014_eb500')
+        self.edge_boxes_val = os.path.join(self.path_dataset, 'val2014_eb500')
 
         self.path_saliency_train = os.path.join(self.path_dataset, 'train2014_%s'%prior)
         self.path_saliency_val = os.path.join(self.path_dataset, 'val2014_%s'%prior)
@@ -1456,7 +1419,7 @@ class MS_COCO_map_full_aug_sf(Dataset):
         self.path_images = os.path.join(self.path_dataset, mode+'2014')
         # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_eb500')
 
         self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s'%prior)
         self.return_path = return_path
@@ -1640,7 +1603,7 @@ class ILSVRC_full_wrong(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, self.mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', self.mode)
         self.return_path = return_path
 
         self.img_h = img_h
@@ -1729,7 +1692,7 @@ class ILSVRC_map_full_wrong(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, self.mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', self.mode)
         self.path_saliency = os.path.join(self.path_dataset, 'images', self.mode + '_nips08')
         self.return_path = return_path
 
@@ -1818,7 +1781,7 @@ class ILSVRC_map_full_aug_wrong(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, self.mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', self.mode)
         self.path_saliency = os.path.join(self.path_dataset, 'images', self.mode + '_' + prior)
         self.return_path = return_path
 
@@ -1963,7 +1926,7 @@ class ILSVRC_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, self.mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', self.mode)
         self.return_path = return_path
 
         self.img_h = img_h
@@ -2044,7 +2007,7 @@ class ILSVRC_map_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, self.mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', self.mode)
         self.path_saliency = os.path.join(self.path_dataset, 'images', self.mode + '_nips08')
         self.return_path = return_path
 
@@ -2125,7 +2088,7 @@ class ILSVRC_map_full_aug(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features_2', self.mode)
         # self.path_features = os.path.join(self.path_dataset, 'features', mode)
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m, self.mode)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500', self.mode)
         self.path_saliency = os.path.join(self.path_dataset, 'images', self.mode + '_' + prior)
         self.return_path = return_path
 
@@ -2290,7 +2253,7 @@ def fixationProcessing(fix_img, h=output_h, w=output_w):
         fix[((fix.shape[0] - new_rows) // 2):((fix.shape[0] - new_rows) // 2 + new_rows), :] = fix_img
 
     return fix
-####
+
 class MIT1003_full(Dataset):
     def __init__(self, return_path=False, N=None,
                  img_h = det_input_h, img_w = det_input_w): #'train', 'test', 'val'
@@ -2299,7 +2262,7 @@ class MIT1003_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'ALLSTIMULI')
         # self.path_features = os.path.join(self.path_dataset, 'features_2')
         # self.path_features = os.path.join(self.path_dataset, 'features')
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500')
         self.path_saliency = os.path.join(self.path_dataset, 'ALLFIXATIONMAPS')
         self.path_fixation = os.path.join(self.path_dataset, 'ALLFIXATIONS')
         self.return_path = return_path
@@ -2330,10 +2293,9 @@ class MIT1003_full(Dataset):
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpeg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index]+'_fixMap.jpg')
         fix_path = os.path.join(self.path_fixation, self.list_names[index]+'_fixPts.jpg')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.jpeg.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
         # image = cv2.imread(rgb_ima)
         saliency = cv2.imread(sal_path, 0)
 
@@ -2343,13 +2305,9 @@ class MIT1003_full(Dataset):
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
 
         if PRO_RATIO is None:
-            # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
-            boxes = scipy.io.loadmat(box_path)['proposals'][0][0][0][:MAX_BNUM, :]
+            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
         else:
-            # boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
-            # boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-            # This is also x1, y1, x2, y2
-            boxes_tmp = scipy.io.loadmat(box_path)['proposals'][0][0][0]  # exlude props with area larger than PRO_RATIO
+            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
             boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
             if len(boxes) > 0:
                 boxes = np.vstack(boxes)
@@ -2365,18 +2323,10 @@ class MIT1003_full(Dataset):
         #     box_f_max[box_f_max == 0.] = 1e-8
         #     box_features = box_features / box_f_max
         # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        # # x1, y1, x2, y2, normalized
-        # boxes[:, 0] = boxes[:, 0] * self.img_w
-        # boxes[:, 2] = boxes[:, 2] * self.img_w
-        # boxes[:, 1] = boxes[:, 1] * self.img_h
-        # boxes[:, 3] = boxes[:, 3] * self.img_h
-
-        # x1, y1, x2, y2, not normalized
-        # normalize
-        boxes[:, 0] = boxes[:, 0] * 1.0 / img_WIDTH * self.img_w
-        boxes[:, 2] = boxes[:, 2] * 1.0 / img_WIDTH * self.img_w
-        boxes[:, 1] = boxes[:, 1] * 1.0 / img_HEIGHT * self.img_h
-        boxes[:, 3] = boxes[:, 3] * 1.0 / img_HEIGHT * self.img_h
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
 
         if self.return_path:
             return img_processed, boxes, sal_processed, fix_processed, self.list_names[index]
@@ -2393,7 +2343,7 @@ class PASCAL_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images')
         # self.path_features = os.path.join(self.path_dataset, 'features_2')
         # self.path_features = os.path.join(self.path_dataset, 'features')
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500')
         self.path_saliency = os.path.join(self.path_dataset, 'maps')
         self.path_fixation = os.path.join(self.path_dataset, 'fixation')
         self.return_path = return_path
@@ -2464,7 +2414,7 @@ class MIT300_full(Dataset):
         self.path_images = os.path.join(self.path_dataset, 'images')
         # self.path_features = os.path.join(self.path_dataset, 'features_2')
         # self.path_features = os.path.join(self.path_dataset, 'features')
-        self.edge_boxes = os.path.join(self.path_dataset, prop_m)
+        self.edge_boxes = os.path.join(self.path_dataset, 'eb500')
         self.return_path = return_path
 
         self.img_h = img_h

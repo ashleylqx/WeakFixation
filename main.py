@@ -21,7 +21,7 @@ import torchnet as tnt
 import sal_metrics
 from logger import Logger
 
-# >>> torch.__version__
+# >>> torch.__version__ \\
 # '1.7.1'
 # import horovod.torch as hvd
 
