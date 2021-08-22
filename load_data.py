@@ -117,7 +117,7 @@ def fixationProcessing_mat(fix_mat, h=output_h, w=output_w):
 
     return fix
 
-
+#####
 class SALICON_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None,
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -177,23 +177,25 @@ class SALICON_full(Dataset):
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index]+'.png')
         fix_path = os.path.join(self.path_fixation, self.list_names[index]+'.mat')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index]+'_bboxes.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index]+'.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
+        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
         # image = cv2.imread(rgb_ima)
         # saliency = cv2.imread(sal_path, 0)
         fixation = scipy.io.loadmat(fix_path)
         fix_processed = fixationProcessing_mat(fixation)
         if PRO_RATIO is None:
-            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+            boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
         else:
-            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
-            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-            if len(boxes) > 0:
-                boxes = np.vstack(boxes)
-                boxes = boxes[:MAX_BNUM, :]
+            boxes_tmp_tmp = scipy.io.loadmat(box_path)['boxes']  # exlude props with area larger than PRO_RATIO
+            boxes_tmp = [box for box in boxes_tmp_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            if len(boxes_tmp) > 0:
+                boxes_tmp = np.vstack(boxes_tmp)
+                boxes_tmp = boxes_tmp[:MAX_BNUM, :]
             else:
-                boxes = np.zeros((0, boxes_tmp.shape[1]))
+                boxes_tmp = np.zeros((0, boxes_tmp_tmp.shape[1]))
+        boxes = np.zeros_like(boxes_tmp)
 
         if os.path.exists(sal_path):
             saliency = cv2.imread(sal_path, 0)
@@ -220,10 +222,18 @@ class SALICON_full(Dataset):
         #     box_f_max[box_f_max==0.] = 1e-8
         #     box_features = box_features / box_f_max
         # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        boxes[:, 0] = boxes[:, 0] * self.img_w
-        boxes[:, 2] = boxes[:, 2] * self.img_w
-        boxes[:, 1] = boxes[:, 1] * self.img_h
-        boxes[:, 3] = boxes[:, 3] * self.img_h
+        # # x1, y1, x2, y2, normalized
+        # boxes[:, 0] = boxes[:, 0] * self.img_w
+        # boxes[:, 2] = boxes[:, 2] * self.img_w
+        # boxes[:, 1] = boxes[:, 1] * self.img_h
+        # boxes[:, 3] = boxes[:, 3] * self.img_h
+
+        # y1, x1, y2, x2 not normalized
+        # swap and normalize
+        boxes[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w  # x1
+        boxes[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w  # x2
+        boxes[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h  # y1
+        boxes[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h  # y2
 
         if self.return_path:
             return img_processed, label, boxes, sal_processed, fix_processed, self.list_names[index]
