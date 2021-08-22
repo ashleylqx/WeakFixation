@@ -2774,7 +2774,10 @@ def save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
 
     model.eval()
 
-    out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_multiscale')
+    # out_folder = os.path.join(args.path_out, folder_name, best_model_file+'_multiscale')
+    out_folder = os.path.join(args.path_out, folder_name, best_model_file)
+    if len(tgt_sizes)>1:
+        out_folder = out_folder+'_multiscale'
 
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
@@ -5592,10 +5595,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # *******
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # *******
         # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
         # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)  # ********
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)  # ********
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w)
@@ -5973,8 +5976,11 @@ def main_Wildcat_WK_hd_compf_map(args):
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #################
 
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                  fix_feature=fix_feature, dilate=dilate, use_grid=False, normalize_feature=normf) # noGrid
+
         model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                         fix_feature=fix_feature, dilate=dilate, use_grid=False, normalize_feature=normf) # noGrid
+                         fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
 
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         #                  fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) #
@@ -6329,10 +6335,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # ********
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # ********
         # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
         # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # ********
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # ********
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w)
@@ -6751,10 +6757,10 @@ def main_Wildcat_WK_hd_compf_map(args):
         #rf_path = os.path.join(args.path_out, folder_name, rf_folder)
 
         # assert os.path.exists(rf_path)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) #, N=48 ******
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) #, N=48 ******
         # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
         # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # ********
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # ********
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w) # , N=32
@@ -8024,12 +8030,12 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                  num_maps=num_maps,
-                                                 fix_feature=fix_feature, dilate=dilate, use_grid=False, # False for no grid
+                                                 fix_feature=fix_feature, dilate=dilate, use_grid=True, # False for no grid
                                                  normalize_feature=normf)
 
         model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                      num_maps=num_maps,
-                                                     fix_feature=fix_feature, dilate=dilate, use_grid=False, # False for no grid
+                                                     fix_feature=fix_feature, dilate=dilate, use_grid=True, # False for no grid
                                                      normalize_feature=normf)
         
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_noobj(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
@@ -8894,6 +8900,67 @@ def main_Wildcat_WK_hd_compf_map(args):
             # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
             #                              shuffle=False, num_workers=2)
             # test_Wildcat_WK_hd_compf_multiscale(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
+
+    elif phase == 'test_cw_sa_sp_multiscale_210822':
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # for storing all the elements
+
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                           fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+        #
+        # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_norn_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+        #
+        # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+        #
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        if args.use_gpu:
+            model.cuda()
+
+        model_name = args.model_name
+        print(model_name)
+
+        # folder_name = 'Preds/PASCAL-S'
+        folder_name = 'Preds/MIT1003'
+        # folder_name = 'Preds/MIT300'
+        # folder_name = 'Preds/SALICON' #validation set
+        # folder_name = 'Preds/SALICON_test'
+        # folder_name = 'Preds/SALICON_train'
+        # best_model_file = 'no_training'
+        # E_NUM = [1]
+        # E_NUM.extend(list(range(5,16)))
+        prior = 'nips08'
+        #prior = 'bms'
+        # prior = 'gbvs'
+        # args.batch_size = 1
+
+        # ds_test = SALICON_full(return_path=True, img_h=input_h, img_w=input_w, mode='train')  # N=4,
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_salicon_rn,
+        #                          shuffle=False, num_workers=2)
+        # ds_test = SALICON_test(return_path=True, img_h=input_h, img_w=input_w, mode='test')  # N=4,
+        # # # ds_test = MIT300_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        # test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit300_rn,
+        #                              shuffle=False, num_workers=2)
+
+        # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
+                                     shuffle=False, num_workers=2)
+        tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+        eval_metrics = ('nss',)
+
+        results = save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, model_name, test_dataloader, args,
+                                                               tgt_sizes=tgt_sizes, metrics=eval_metrics)
+
 
     elif phase == 'test_cw_sa_sp_multiscale_rank_rebuttal':
         # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
