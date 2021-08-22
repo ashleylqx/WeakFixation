@@ -2315,7 +2315,8 @@ class MIT1003_full(Dataset):
         self.list_names = list_names
 
         if N is not None:
-            self.list_names = list_names[:N]
+            # self.list_names = list_names[:N]
+            self.list_names = list_names[-N:]
 
         # embed()
         print("Init MIT1003 full dataset.")
