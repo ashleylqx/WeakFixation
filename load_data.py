@@ -45,7 +45,7 @@ transform = transforms.Compose([
         transforms.Normalize(mean=[0.485, 0.456, 0.406], # rgb_mean,
                              std=[0.229, 0.224, 0.225])])
 
-Proposal_Methods = ['eb500', 'mcg']
+Proposal_Methods = ['eb500', 'mcg', 'objectness']
 prop_idx = 1
 prop_m = Proposal_Methods[prop_idx]
 
