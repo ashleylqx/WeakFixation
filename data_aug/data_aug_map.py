@@ -4,6 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 import sys
 import os
+import pdb
 # from bbox_util import *
 from data_aug.bbox_util import *
 
@@ -492,6 +493,7 @@ class RandomRotate(object):
         img = cv2.resize(img, (w,h))
         map = cv2.resize(map, (w,h))
 
+        pdb.set_trace()
         new_bbox[:,:4] /= [scale_factor_x, scale_factor_y, scale_factor_x, scale_factor_y] 
     
         bboxes  = new_bbox
