@@ -9016,7 +9016,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                              shuffle=False, num_workers=2)
 
         # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
+        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w, N=10)  # N=4,
         test_dataloader = DataLoader(ds_test, batch_size=args.test_batch, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
         tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]

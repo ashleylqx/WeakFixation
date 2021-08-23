@@ -117,7 +117,7 @@ def fixationProcessing_mat(fix_mat, h=output_h, w=output_w):
 
     return fix
 
-#####
+##### ****
 class SALICON_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None,
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -652,7 +652,7 @@ class MS_COCO_map_full(Dataset):
             return img_processed, label, boxes, sal_processed, self.list_names[index]
         else:
             return img_processed, label, boxes, sal_processed
-#### ####
+#### *****
 class MS_COCO_map_full_aug(Dataset):
     def __init__(self, mode='train', return_path=False, N=None, prior = 'nips08',
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -2312,7 +2312,7 @@ def fixationProcessing(fix_img, h=output_h, w=output_w):
         fix[((fix.shape[0] - new_rows) // 2):((fix.shape[0] - new_rows) // 2 + new_rows), :] = fix_img
 
     return fix
-####
+#### ****
 class MIT1003_full(Dataset):
     def __init__(self, return_path=False, N=None,
                  img_h = det_input_h, img_w = det_input_w): #'train', 'test', 'val'
@@ -2337,8 +2337,8 @@ class MIT1003_full(Dataset):
         self.list_names = list_names
 
         if N is not None:
-            # self.list_names = list_names[:N]
-            self.list_names = list_names[-N:]
+            self.list_names = list_names[:N]
+            # self.list_names = list_names[-N:]
 
         # embed()
         print("Init MIT1003 full dataset.")
