@@ -42,8 +42,7 @@ def draw_rect(im, cords, color = None):
 
 def bbox_area(bbox):
     area = (bbox[:,2] - bbox[:,0])*(bbox[:,3] - bbox[:,1])
-    if area==0:
-        area += 1e-6
+    area[area==0] += 1e-6
     return area
     # return (bbox[:,2] - bbox[:,0])*(bbox[:,3] - bbox[:,1])
         
