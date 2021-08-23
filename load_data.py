@@ -769,7 +769,10 @@ class MS_COCO_map_full_aug(Dataset):
             boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
         else:
             boxes_tmp_tmp = scipy.io.loadmat(box_path)['boxes']  # exlude props with area larger than PRO_RATIO
-            boxes_tmp = [box for box in boxes_tmp_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            # boxes_tmp = [box for box in boxes_tmp_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            # y1 x1 y2 x2 not normalized
+            boxes_tmp = [box for box in boxes_tmp_tmp if
+                         (box[2] - box[0])*1.0/img_HEIGHT * (box[3] - box[1])*1.0/img_WIDTH < PRO_RATIO]
             if len(boxes_tmp) > 0:
                 boxes_tmp = np.vstack(boxes_tmp)
                 boxes_tmp = boxes_tmp[:MAX_BNUM, :]
@@ -789,10 +792,10 @@ class MS_COCO_map_full_aug(Dataset):
             boxes = np.zeros_like(boxes_tmp)
             # y1 x1 y2 x2 not normalized
             # swap, not normalized
-            boxes[:, 0] = boxes_tmp[:, 1] #* image.shape[1] # x1
-            boxes[:, 2] = boxes_tmp[:, 3] #* image.shape[1] # x2
-            boxes[:, 1] = boxes_tmp[:, 0] #* image.shape[0] # y1
-            boxes[:, 3] = boxes_tmp[:, 2] #* image.shape[0] # y2
+            boxes[:, 0] = boxes_tmp[:, 1] * 1.0 #* image.shape[1] # x1
+            boxes[:, 2] = boxes_tmp[:, 3] * 1.0 #* image.shape[1] # x2
+            boxes[:, 1] = boxes_tmp[:, 0] * 1.0 #* image.shape[0] # y1
+            boxes[:, 3] = boxes_tmp[:, 2] * 1.0 #* image.shape[0] # y2
 
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
