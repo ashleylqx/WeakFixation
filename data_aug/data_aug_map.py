@@ -493,8 +493,10 @@ class RandomRotate(object):
         img = cv2.resize(img, (w,h))
         map = cv2.resize(map, (w,h))
 
-        pdb.set_trace()
-        new_bbox[:,:4] /= [scale_factor_x, scale_factor_y, scale_factor_x, scale_factor_y] 
+        # pdb.set_trace()
+        print('data_aug_map, bboxes', bboxes.dtype)
+        print('data_aug_map, new_bbox', new_bbox.dtype)
+        new_bbox[:,:4] /= [scale_factor_x, scale_factor_y, scale_factor_x, scale_factor_y]
     
         bboxes  = new_bbox
     

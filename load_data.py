@@ -790,6 +790,7 @@ class MS_COCO_map_full_aug(Dataset):
             boxes_[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h # y2
         else:
             boxes = np.zeros_like(boxes_tmp)
+            print('load_data, boxes', boxes.dtype)
             # pdb.set_trace()
             # y1 x1 y2 x2 not normalized
             # swap, not normalized
@@ -797,7 +798,7 @@ class MS_COCO_map_full_aug(Dataset):
             boxes[:, 2] = boxes_tmp[:, 3] * 1.0 #* image.shape[1] # x2
             boxes[:, 1] = boxes_tmp[:, 0] * 1.0 #* image.shape[0] # y1
             boxes[:, 3] = boxes_tmp[:, 2] * 1.0 #* image.shape[0] # y2
-
+            print('load_data, boxes', boxes.dtype)
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
