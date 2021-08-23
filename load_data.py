@@ -189,7 +189,9 @@ class SALICON_full(Dataset):
             boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
         else:
             boxes_tmp_tmp = scipy.io.loadmat(box_path)['boxes']  # exlude props with area larger than PRO_RATIO
-            boxes_tmp = [box for box in boxes_tmp_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            # y1 x1 y2 x2, not normalized
+            boxes_tmp = [box for box in boxes_tmp_tmp
+                         if (box[2] - box[0])*1.0/img_HEIGHT * (box[3] - box[1])*1.0/img_WIDTH < PRO_RATIO]
             if len(boxes_tmp) > 0:
                 boxes_tmp = np.vstack(boxes_tmp)
                 boxes_tmp = boxes_tmp[:MAX_BNUM, :]
@@ -2369,9 +2371,10 @@ class MIT1003_full(Dataset):
         else:
             # boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
             # boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-            # This is also x1, y1, x2, y2
+            # This is also x1, y1, x2, y2, not normalized
             boxes_tmp = scipy.io.loadmat(box_path)['proposals'][0][0][0]  # exlude props with area larger than PRO_RATIO
-            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            boxes = [box for box in boxes_tmp if
+                     (box[2] - box[0])*1.0/img_WIDTH * (box[3] - box[1])*1.0/img_HEIGHT < PRO_RATIO]
             if len(boxes) > 0:
                 boxes = np.vstack(boxes)
                 boxes = boxes[:MAX_BNUM, :]

@@ -41,7 +41,11 @@ def draw_rect(im, cords, color = None):
     return im
 
 def bbox_area(bbox):
-    return (bbox[:,2] - bbox[:,0])*(bbox[:,3] - bbox[:,1])
+    area = (bbox[:,2] - bbox[:,0])*(bbox[:,3] - bbox[:,1])
+    if area==0:
+        area += 1e-6
+    return area
+    # return (bbox[:,2] - bbox[:,0])*(bbox[:,3] - bbox[:,1])
         
 def clip_box(bbox, clip_box, alpha):
     """Clip the bounding boxes to the borders of an image
