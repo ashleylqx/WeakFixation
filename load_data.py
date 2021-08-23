@@ -180,7 +180,7 @@ class SALICON_full(Dataset):
         box_path = os.path.join(self.edge_boxes, self.list_names[index]+'.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
+        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         # image = cv2.imread(rgb_ima)
         # saliency = cv2.imread(sal_path, 0)
         fixation = scipy.io.loadmat(fix_path)
@@ -400,7 +400,7 @@ class MS_COCO_full(Dataset):
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
+        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
 
         image = cv2.resize(image, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA).astype(np.float32)
 
@@ -516,7 +516,7 @@ class MS_COCO_ALL_full(Dataset):
 
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
+        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         image = cv2.resize(image, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA).astype(np.float32)
         img_processed = transform(image/255.)
 
@@ -608,7 +608,7 @@ class MS_COCO_map_full(Dataset):
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
+        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         saliency = cv2.imread(sal_path, 0)
 
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
@@ -650,7 +650,7 @@ class MS_COCO_map_full(Dataset):
             return img_processed, label, boxes, sal_processed, self.list_names[index]
         else:
             return img_processed, label, boxes, sal_processed
-
+#### ####
 class MS_COCO_map_full_aug(Dataset):
     def __init__(self, mode='train', return_path=False, N=None, prior = 'nips08',
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -760,34 +760,39 @@ class MS_COCO_map_full_aug(Dataset):
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index] + '.png')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
+        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         saliency = cv2.imread(sal_path, 0)
         if PRO_RATIO is None:
-            boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
+            boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
         else:
-            boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
-            boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-            if len(boxes) > 0:
-                boxes = np.vstack(boxes)
-                boxes = boxes[:MAX_BNUM, :]
+            boxes_tmp_tmp = scipy.io.loadmat(box_path)['boxes']  # exlude props with area larger than PRO_RATIO
+            boxes_tmp = [box for box in boxes_tmp_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
+            if len(boxes_tmp) > 0:
+                boxes_tmp = np.vstack(boxes_tmp)
+                boxes_tmp = boxes_tmp[:MAX_BNUM, :]
             else:
-                boxes = np.zeros((0, boxes_tmp.shape[1]))
+                boxes_tmp = np.zeros((0, boxes_tmp_tmp.shape[1]))
 
-
-        if boxes.shape[0]==0:
+        if boxes_tmp.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
-            boxes_ = np.zeros_like(boxes)
-            boxes_[:, 0] = boxes[:, 0] * self.img_w
-            boxes_[:, 2] = boxes[:, 2] * self.img_w
-            boxes_[:, 1] = boxes[:, 1] * self.img_h
-            boxes_[:, 3] = boxes[:, 3] * self.img_h
+            boxes_ = np.zeros_like(boxes_tmp)
+            # y1 x1 y2 x2 not normalized
+            # swap, normalize
+            boxes_[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w # x1
+            boxes_[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w # x2
+            boxes_[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h # y1
+            boxes_[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h # y2
         else:
-            boxes[:, 0] = boxes[:, 0] * image.shape[1]
-            boxes[:, 2] = boxes[:, 2] * image.shape[1]
-            boxes[:, 1] = boxes[:, 1] * image.shape[0]
-            boxes[:, 3] = boxes[:, 3] * image.shape[0]
+            boxes = np.zeros_like(boxes_tmp)
+            # y1 x1 y2 x2 not normalized
+            # swap, not normalized
+            boxes[:, 0] = boxes_tmp[:, 1] #* image.shape[1] # x1
+            boxes[:, 2] = boxes_tmp[:, 3] #* image.shape[1] # x2
+            boxes[:, 1] = boxes_tmp[:, 0] #* image.shape[0] # y1
+            boxes[:, 3] = boxes_tmp[:, 2] #* image.shape[0] # y2
 
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
@@ -1253,7 +1258,7 @@ class MS_COCO_ALL_map_full_aug_prior(Dataset):
             return img_processed, label, boxes_, sal_processed, self.list_names[index]
         else:
             return img_processed, label, boxes_, sal_processed
-
+#### #### TODO adapt for mgc
 class MS_COCO_ALL_map_full_aug(Dataset):
     def __init__(self, mode=None, return_path=False, N=None, prior = 'nips08',
                  img_h = input_h, img_w = input_w): #'train', 'test', 'val'
@@ -2344,7 +2349,7 @@ class MIT1003_full(Dataset):
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.jpeg.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_WIDTH, img_HEIGHT = image.shape[0], image.shape[1]
+        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         # image = cv2.imread(rgb_ima)
         saliency = cv2.imread(sal_path, 0)
 

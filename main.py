@@ -5049,10 +5049,10 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         # assert os.path.exists(rf_path)
         # ds_train = MS_COCO_ALL_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) #, N=48 ******
-        # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior)
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior=prior) # ********
         # # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w)
         # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # *******
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior) # *******
 
         # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w) #, N=24
@@ -8240,10 +8240,10 @@ def main_Wildcat_WK_hd_compf_map(args):
             cudnn.benchmark = True
         gpu_number = torch.cuda.device_count()
         # # ds_train = MS_COCO_map_full(mode='train', img_h=input_h, img_w=input_w)
-        # ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior = prior) # , N=48 # ***
+        ds_train = MS_COCO_map_full_aug(mode='train', img_h=input_h, img_w=input_w, prior = prior) # , N=48 # ***
         # # ds_train = ILSVRC_full(mode='train', img_h=input_h, img_w=input_w)
         # # ds_validate = ILSVRC_full(mode='val', img_h=input_h, img_w=input_w)
-        ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)  # *******
+        # ds_train = MS_COCO_ALL_map_full_aug(mode='all', img_h=input_h, img_w=input_w, prior=prior)  # *******
 
         ds_validate = SALICON_full(mode='val', img_h=input_h, img_w=input_w) # , N=24
 
