@@ -195,7 +195,7 @@ class SALICON_full(Dataset):
                 boxes_tmp = boxes_tmp[:MAX_BNUM, :]
             else:
                 boxes_tmp = np.zeros((0, boxes_tmp_tmp.shape[1]))
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = np.zeros_like(boxes_tmp).astype(np.float32)
 
         if os.path.exists(sal_path):
             saliency = cv2.imread(sal_path, 0)
@@ -407,7 +407,7 @@ class MS_COCO_full(Dataset):
         img_processed = transform(image/255.)
 
         boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = np.zeros_like(boxes_tmp).astype(np.float32)
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
@@ -521,7 +521,7 @@ class MS_COCO_ALL_full(Dataset):
         img_processed = transform(image/255.)
 
         boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = np.zeros_like(boxes_tmp).astype(np.float32)
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
@@ -614,7 +614,7 @@ class MS_COCO_map_full(Dataset):
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
 
         boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        boxes = np.zeros_like(boxes_tmp)
+        boxes = np.zeros_like(boxes_tmp).astype(np.float32)
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
@@ -781,7 +781,7 @@ class MS_COCO_map_full_aug(Dataset):
 
         if boxes_tmp.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
-            boxes_ = np.zeros_like(boxes_tmp)
+            boxes_ = np.zeros_like(boxes_tmp).astype(np.float32)
             # y1 x1 y2 x2 not normalized
             # swap, normalize
             boxes_[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w # x1
@@ -789,8 +789,8 @@ class MS_COCO_map_full_aug(Dataset):
             boxes_[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h # y1
             boxes_[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h # y2
         else:
-            boxes = np.zeros_like(boxes_tmp)
-            print('load_data, boxes', boxes.dtype)
+            boxes = np.zeros_like(boxes_tmp).astype(np.float32)
+            # print('load_data, boxes', boxes.dtype)
             # pdb.set_trace()
             # y1 x1 y2 x2 not normalized
             # swap, not normalized
@@ -798,7 +798,7 @@ class MS_COCO_map_full_aug(Dataset):
             boxes[:, 2] = boxes_tmp[:, 3] * 1.0 #* image.shape[1] # x2
             boxes[:, 1] = boxes_tmp[:, 0] * 1.0 #* image.shape[0] # y1
             boxes[:, 3] = boxes_tmp[:, 2] * 1.0 #* image.shape[0] # y2
-            print('load_data, boxes', boxes.dtype)
+            # print('load_data, boxes', boxes.dtype)
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
