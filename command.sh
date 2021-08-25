@@ -178,3 +178,10 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --phase train_cw_aug_alt_alpha_sa_sp
 
 # without A'
 CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --phase train_cw_aug_sa_art --model_name sa_210428_sgd --train-batch 48 --test-batch 24 --batch-size 24 --lr 0.01 --n_epochs 90 --schedule 31 61 # single_scale test
+
+####### correct use_grid error #########
+
+
+####### mcg proposal ###########
+CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py --phase train_cw_aug --model_name basemodel_210822_sgd_mcg --train-batch 48 --test-batch 24 --batch-size 24 --lr 0.01 --n_epochs 90 --schedule 31 61
+
