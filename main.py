@@ -105,7 +105,7 @@ run = 'sa_art_210607_all_adam' # 1e-5, init from basemodel_alt_210531_all_adam 1
 run = 'sa_sp_fixf_210610_all_adam' # 1e-5, init from sa_art_210607_all_adam 1.6912; train COCO_ALL
 run = 'tmp' #
 
-# run = 'basemodel_21822_sgd_mcg'
+run = 'basemodel_21822_sgd_mcg'
 
 '''old run folder'''
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
@@ -5118,7 +5118,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             adjust_learning_rate(optimizer, i_epoch, args.schedule) # for SGD
             is_best = False
 
-            ###train_cps, train_h, train_map = train_Wildcat_WK_hd_compf_map_cw(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
+            train_cps, train_h, train_map = train_Wildcat_WK_hd_compf_map_cw(i_epoch, model, optimizer, logits_loss, h_loss, train_dataloader, args)
 
             # tmp_eval_loss = eval_Wildcat_WK_hd_compf_salicon_cw(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
             # tmp_eval_loss, map_loss = eval_Wildcat_WK_hd_compf_salicon_cw(i_epoch, model, logits_loss, h_loss, eval_dataloader, args)
@@ -9016,7 +9016,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         #                              shuffle=False, num_workers=2)
 
         # ds_test = PASCAL_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
-        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w, N=10)  # N=4,
+        ds_test = MIT1003_full(return_path=True, img_h=input_h, img_w=input_w)  # N=4,
         test_dataloader = DataLoader(ds_test, batch_size=args.test_batch, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
         tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
