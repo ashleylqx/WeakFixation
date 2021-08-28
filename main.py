@@ -8966,6 +8966,44 @@ def main_Wildcat_WK_hd_compf_map(args):
                                                                tgt_sizes=tgt_sizes, metrics=eval_metrics)
 
 
+    elif phase == 'running_time':
+        from thop import profile
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # for storing all the elements
+
+        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                           fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_gbs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+        #
+        # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_norn_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+        #
+        # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nobs_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+        #
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_nopsal_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_new_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+        #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf)
+
+        if args.use_gpu:
+            model.cuda()
+
+        model_name = args.model_name
+        print(model_name)
+
+        im_size = 224
+        input = torch.randn(1, 3, im_size, im_size, dtype=torch.float).cuda()
+        flops, params = profile(model, inputs=(input,))
+        print('For %dx%d input:' % (im_size, im_size))
+        print('FLOPs = ' + str(flops / 1000 ** 3) + 'G')
+        print('Params = ' + str(params / 1000 ** 2) + 'M')
+
+
     elif phase == 'test_cw_sa_sp_multiscale_rank_rebuttal':
         # # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp_rank(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
         # #                     fix_feature=fix_feature, dilate=dilate, use_grid=True, normalize_feature=normf) # for storing all the elements
