@@ -108,6 +108,7 @@ run = 'tmp' #
 run = 'basemodel_21822_sgd_mcg'
 run = 'basemodel_alt_21822_adam_mcg'
 run = 'basemodel_alt_21828_adam_mcg'
+run = 'basemodel_alt_21829_adam_mcg' # 1e-4
 
 '''old run folder'''
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
