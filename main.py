@@ -8997,8 +8997,17 @@ def main_Wildcat_WK_hd_compf_map(args):
         print(model_name)
 
         im_size = 224
-        input = torch.randn(1, 3, im_size, im_size, dtype=torch.float).cuda()
-        boxes = torch.randn(1, MAX_BNUM, 4, dtype=torch.float).cuda()
+        input = torch.randn(1, 3, im_size, im_size, dtype=torch.float).cuda() # [-1, 1]
+        # boxes = torch.randn(1, MAX_BNUM, 4, dtype=torch.float).cuda()
+        boxes = torch.zeros(1, MAX_BNUM, 4, dtype=torch.float).cuda()
+        top_left = torch.rand(MAX_BNUM, 2, dtype=torch.float).cuda() # [0, 1]
+        top_left /= 2 # [0, 1]
+        deltas = torch.randn(MAX_BNUM, 2, dtype=torch.float).cuda()
+        bottom_down = top_left + deltas
+        bottom_down = torch.clip(bottom_down, 0, 1)
+        boxes[0, : , :2] = top_left
+        boxes[0, : , 2:] = bottom_down
+
         box_num = [MAX_BNUM,]
         flops, params = profile(model, inputs=(input,boxes, box_num))
         print('For %dx%d input:' % (im_size, im_size))
