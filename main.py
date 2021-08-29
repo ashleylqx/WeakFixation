@@ -8998,8 +8998,8 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         im_size = 224
         input = torch.randn(1, 3, im_size, im_size, dtype=torch.float).cuda()
-        boxes = torch.randn(MAX_BNUM, 4, dtype=torch.float).cuda()
-        box_num = MAX_BNUM
+        boxes = torch.randn(1, MAX_BNUM, 4, dtype=torch.float).cuda()
+        box_num = [MAX_BNUM,]
         flops, params = profile(model, inputs=(input,boxes, box_num))
         print('For %dx%d input:' % (im_size, im_size))
         print('FLOPs = ' + str(flops / 1000 ** 3) + 'G')
