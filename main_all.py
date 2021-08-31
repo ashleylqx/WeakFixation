@@ -12096,7 +12096,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
         tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
-        eval_metrics = ('nss',)
+        eval_metrics = ('aucj',) #('nss',)
 
         # for e_num in E_NUM:
 

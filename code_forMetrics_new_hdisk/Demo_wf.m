@@ -1743,7 +1743,7 @@ for i = 1:length(Datasets)
         %    meanMetric{i}(k,j) = result;
         %    fprintf('%s :%.4f \n', Metrics{j}, result);
         %end
-        for j =1:length(Metrics)
+        for j =1:1 %1:length(Metrics)
             if ~exist([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'file')
                 if isequal(Datasets{i}, 'MIT1003')
                     [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
