@@ -2756,7 +2756,7 @@ def test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
 
 def save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_file, dataloader, args, tgt_sizes,
                                                  metrics=('kld', 'nss', 'cc', 'sim', 'aucj', 'aucs')):
-    # if best_model_file != 'no_training':
+    # if load_weight: #
     #     checkpoint = torch.load(os.path.join(args.path_out, 'Models', best_model_file+'.pt'))  # checkpoint is a dict, containing much info
     #     # model.load_state_dict(checkpoint['state_dict'])
     #     saved_state_dict = checkpoint['state_dict']
@@ -8933,6 +8933,26 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         model_name = args.model_name
         print(model_name)
+
+        # ***** resume from previous ******
+        # checkpoint = torch.load(os.path.join(path_models, args.ckptname), map_location='cuda:0')  # checkpoint is a dict, containing much info
+        best_model = torch.load(os.path.join(path_models, args.bestname), map_location='cuda:0')
+        saved_state_dict = best_model['state_dict']
+        new_params = model.state_dict().copy()
+        if list(saved_state_dict.keys())[0][:7] == 'module.':
+            for k, y in saved_state_dict.items():
+                if k[7:] in new_params.keys():
+                    new_params[k[7:]] = y
+        else:
+            for k, y in saved_state_dict.items():
+                if k in new_params.keys():
+                    new_params[k] = y
+        model.load_state_dict(new_params)
+
+        c_epoch = best_model['epoch']
+
+        # best_model = torch.load(os.path.join(path_models, args.bestname), map_location='cuda:0')
+        # nss_value = best_model['nss']
 
         # folder_name = 'Preds/PASCAL-S'
         folder_name = 'Preds/MIT1003'
