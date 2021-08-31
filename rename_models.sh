@@ -7,7 +7,7 @@ target1="val_9_sum_three"
 for num in {0..10}
 do
     postfix=`printf "_epoch%02d.pt" $num`
-    mycmd='ln -s ${model1}${postfix} ${target1}${postfix}'
+    mycmd="ln -s ${model1}${postfix} ${target1}${postfix}"
     echo $mycmd
 done
 
