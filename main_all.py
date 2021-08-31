@@ -12069,13 +12069,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         # best_model_file = 'no_training'
         ##E_NUM = [1]
         ModelDict = {
-                     # 'val_7_sum_three': 11,
-                     # 'val_8_sum_three': 8,
-                     # 'val_9_sum_three': 3,
-                     # 'val_6_sum': 5,
-                     # 'val_7_sum_two_1': 20,
-                     # 'val_7_sum_two_2': 20,
-                     'val_sum': 2,
+                     #'val_7_sum_three': 11, # may not all down
+                     'val_8_sum_three': 0, #8, # may not all down
+                     #'val_9_sum_three': 3,
+                     #'val_6_sum': 5,
+                     'val_7_sum_two_1': 2, #20,
+                     #'val_7_sum_two_2': 20,
+                     #'val_sum': 2,
                      }
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
@@ -12182,7 +12182,7 @@ def main_Wildcat_WK_hd_compf_map(args):
             #     #                             n_gaussian, normf, MAX_BNUM, rf_weight, hth_weight,FEATURE_DIM,kmax,kmin,alpha,num_maps,fix_feature, dilate, e_num) #_gcn_all
 
         for model_name in ModelDict.keys():
-            for e_num in range(ModelDict[model_name]):
+            for e_num in [ModelDict[model_name]]: #range(ModelDict[model_name]):
                 best_model_file = '%s_epoch%02d' % (model_name, e_num)
                 print("Testing %s ..." % best_model_file)
 
