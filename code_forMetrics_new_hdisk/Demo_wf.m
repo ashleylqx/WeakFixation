@@ -21,9 +21,9 @@ end
 base_path = '/research/dept2/qxlai/';
 
 Datasets{1} = 'MIT1003';
-Datasets{2} = 'PASCAL-S';
-Datasets{3} = 'DUTOMRON';
-Datasets{4} = 'TORONTO';
+%Datasets{2} = 'PASCAL-S';
+%Datasets{3} = 'DUTOMRON';
+%Datasets{4} = 'TORONTO';
 % Datasets{2} = 'Hollywood-2';
 % Datasets{3} = 'DHF1K';
 
@@ -41,6 +41,8 @@ Metrics{3} = 'AUC_shuffled';
 Results{1} = 'UNISAL';
 Results{2} = 'scribble_saliency';
 Results{3} = 'scwssod';
+Results{4} = 'val_8_sum_three_multiscale';
+Results{5} = 'val_7_sum_two_1_multiscale';
 % Results{1} = 'SALLSTM';
 % Results{1} = 'resnet50_wildcat_wk_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch03';
 % Results{1} = 'resnet50_wildcat_wk_comp2_conv_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch00';
@@ -1690,10 +1692,10 @@ Results{3} = 'scwssod';
 % Results{18} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_aug3_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch07';
 
 %%
-for i = 2:3 % 1:length(Datasets)
+for i = 1:length(Datasets)
     disp(Datasets{i});
     options.Result_path = [base_path, 'WF/Preds/', Datasets{i}, '/'];
-    for k = 2:3 %length(Results)
+    for k = 4:5 %length(Results)
 %     for k =length(Results):-1:1    
         % saliency prediction results
         % options.SALIENCY_DIR = [options.Result_path Datasets{i} '/' Results{k} '/'];
