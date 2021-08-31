@@ -5676,6 +5676,7 @@ def main_Wildcat_WK_hd_compf_map(args):
     # phase = 'train_ils_tgt_aug'
     # phase = 'train_cw_ils_tgt_aug'
     phase = 'test_cw_sa_sp_multiscale_rank_rebuttal'  ### for generating outputs of submodules
+    phase = 'test_cw_sa_sp_multiscale_tip2021'  ### for testing model with multiple priors
 
     kmax = 1
     kmin = None
@@ -12095,6 +12096,7 @@ def main_Wildcat_WK_hd_compf_map(args):
         test_dataloader = DataLoader(ds_test, batch_size=args.batch_size, collate_fn=collate_fn_mit1003_rn,
                                      shuffle=False, num_workers=2)
         tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
+        eval_metrics = ('nss',)
 
         # for e_num in E_NUM:
 
@@ -12199,9 +12201,6 @@ def main_Wildcat_WK_hd_compf_map(args):
                             new_params[k] = y
                 model.load_state_dict(new_params)
 
-
-                tgt_sizes = [int(224 * i) for i in (0.5, 0.75, 1.0, 1.25, 1.50, 2.0)]
-                eval_metrics = ('nss',)
                 results = save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, model_name, test_dataloader,args,
                                                                        tgt_sizes=tgt_sizes, metrics=eval_metrics)
                 # test_Wildcat_WK_hd_compf_multiscale_cw_sa_sp_rank(model, folder_name, best_model_file, test_dataloader, args, tgt_sizes=tgt_sizes)
