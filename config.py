@@ -1,7 +1,8 @@
 # base_path = '/home/qx/'
 # base_path = '/home/hz1/QX/'
-base_path = '/research/dept2/qxlai/'
+# base_path = '/research/dept2/qxlai/'
 # base_path = '/raid/QX/'
+base_path = '/raid/Research/workspace/tfzhou/qxlai/'
 
 
 input_h = 224 #224

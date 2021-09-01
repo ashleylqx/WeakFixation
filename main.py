@@ -111,6 +111,12 @@ run = 'basemodel_alt_21828_adam_mcg'
 run = 'basemodel_alt_21829_adam_mcg' # 1e-4
 run = 'sa_art_210822_adam_mcg' #1e-5, init alt_210829, 1.6131
 
+run = 'basemodel_alt_210901_adam_mcg' # 1e-5
+# run = 'basemodel_alt_210901_adam_mcg_f' # 1e-5 use_grid=False
+# run = 'basemodel_alt_210902_adam_mcg' # 1e-4
+
+
+
 '''old run folder'''
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm_fixf'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
