@@ -111,8 +111,8 @@ run = 'basemodel_alt_21828_adam_mcg'
 run = 'basemodel_alt_21829_adam_mcg' # 1e-4
 run = 'sa_art_210822_adam_mcg' #1e-5, init alt_210829, 1.6131
 
-run = 'basemodel_alt_210901_adam_mcg' # 1e-5
-# run = 'basemodel_alt_210901_adam_mcg_f' # 1e-5 use_grid=False
+#run = 'basemodel_alt_210901_adam_mcg' # 1e-5
+run = 'basemodel_alt_210901_adam_mcg_f' # 1e-5 use_grid=False
 # run = 'basemodel_alt_210902_adam_mcg' # 1e-4
 
 
@@ -8042,12 +8042,12 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                  num_maps=num_maps,
-                                                 fix_feature=fix_feature, dilate=dilate, use_grid=True, # False for no grid
+                                                 fix_feature=fix_feature, dilate=dilate, use_grid=False, # False for no grid
                                                  normalize_feature=normf)
 
         model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                      num_maps=num_maps,
-                                                     fix_feature=fix_feature, dilate=dilate, use_grid=True, # False for no grid
+                                                     fix_feature=fix_feature, dilate=dilate, use_grid=False, # False for no grid
                                                      normalize_feature=normf)
         
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_noobj(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
