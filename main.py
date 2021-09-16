@@ -114,8 +114,13 @@ run = 'sa_art_210822_adam_mcg' #1e-5, init alt_210829, 1.6131
 #run = 'basemodel_alt_210901_adam_mcg' # 1e-5
 run = 'basemodel_alt_210901_adam_mcg_f' # 1e-5 use_grid=False
 # run = 'basemodel_alt_210902_adam_mcg' # 1e-4
-
-
+run = 'basemodel_alt_210901_adam_mcg' # 1e-5 use_grid=False
+run = 'sa_art_210907_adam_mcg' # 1e-5, use_grid=True, init using tfzhou basemodel_alt_210901_adam_mcg_f
+run = 'sa_art_210908_adam_mcg' # 1e-4, same as above; smaller batch size
+run = 'sa_sp_fixf_210909_adam_mcg' # init with basemodel_alt_210901_adam_mcg_f, 1e-5, four gpu
+run = 'sa_sp_fixf_210909_adam_mcg_2' # 1e-4, same init as above, two gpu
+run = 'sa_sp_fixf_210909_adam_mcg_3' # 1e-4, init with 1.64 (use_grid=True), two gpu
+run = 'sa_art_210909_adam_mcg_2' # 1e-4, init with 1.64, four gpu
 
 '''old run folder'''
 # run = 'hd_gs_A{}_gd_nf4_normT_eb_{}_aug7_a_A4_fdim{}_34_bms_thm'.format(n_gaussian, MAX_BNUM, FEATURE_DIM, BMS_R) # 1.0
@@ -5458,7 +5463,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         model.load_state_dict(new_params)
 
         s_epoch = 0
-        nss_value = checkpoint['nss']
+        #nss_value = checkpoint['nss']
+        nss_value = 1.5
         model_name = args.model_name
         print(model_name)
 
@@ -6269,7 +6275,8 @@ def main_Wildcat_WK_hd_compf_map(args):
         model.load_state_dict(new_params)
 
         s_epoch = 0
-        nss_value = checkpoint['nss']
+        #nss_value = checkpoint['nss']
+        nss_value = 1.5
         model_name = args.model_name
         print(model_name)
 
@@ -8042,12 +8049,12 @@ def main_Wildcat_WK_hd_compf_map(args):
 
         model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                  num_maps=num_maps,
-                                                 fix_feature=fix_feature, dilate=dilate, use_grid=False, # False for no grid
+                                                 fix_feature=fix_feature, dilate=dilate, use_grid=True, # False for no grid
                                                  normalize_feature=normf)
 
         model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
                                                      num_maps=num_maps,
-                                                     fix_feature=fix_feature, dilate=dilate, use_grid=False, # False for no grid
+                                                     fix_feature=fix_feature, dilate=dilate, use_grid=True, # False for no grid
                                                      normalize_feature=normf)
         
         # model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_noobj(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,

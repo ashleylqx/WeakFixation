@@ -12070,12 +12070,13 @@ def main_Wildcat_WK_hd_compf_map(args):
         ##E_NUM = [1]
         ModelDict = {
                      #'val_7_sum_three': 11, # may not all down
-                     'val_8_sum_three': 0, #8, # may not all down
+                     #'val_8_sum_three': 0, #8, # may not all down
                      #'val_9_sum_three': 3,
                      #'val_6_sum': 5,
-                     'val_7_sum_two_1': 2, #20,
+                     #'val_7_sum_two_1': 2, #20,
                      #'val_7_sum_two_2': 20,
                      #'val_sum': 2,
+                     'no_comp': 9
                      }
         # E_NUM.extend(list(range(5,16)))
         prior = 'nips08'
