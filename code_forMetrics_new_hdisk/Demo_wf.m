@@ -21,7 +21,7 @@ end
 base_path = '/research/dept2/qxlai/';
 
 Datasets{1} = 'MIT1003';
-%Datasets{2} = 'PASCAL-S';
+Datasets{2} = 'PASCAL-S';
 %Datasets{3} = 'DUTOMRON';
 %Datasets{4} = 'TORONTO';
 % Datasets{2} = 'Hollywood-2';
@@ -43,6 +43,10 @@ Results{2} = 'scribble_saliency';
 Results{3} = 'scwssod';
 Results{4} = 'val_8_sum_three_multiscale';
 Results{5} = 'val_7_sum_two_1_multiscale';
+Results{6} = 'gbvs';
+Results{7} = 'sa_sp_fixf_210911_adam_mcg_multiscale';
+Results{8} = 'sa_sp_fixf_210911_adam_mcg_2_multiscale';
+Results{9} = 'no_comp_multiscale';
 % Results{1} = 'SALLSTM';
 % Results{1} = 'resnet50_wildcat_wk_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch03';
 % Results{1} = 'resnet50_wildcat_wk_comp2_conv_kmax1_kminNone_a0.7_M4_fFalse_dlFalse_448_epoch00';
@@ -1692,10 +1696,10 @@ Results{5} = 'val_7_sum_two_1_multiscale';
 % Results{18} = 'resnet50_wildcat_wk_hd_cbA16_compf_cls_att_gd_nf4_normTrue_hb_aug3_nips08_rf0.1_hth0.1_ms_kmax1_kminNone_a0.7_M4_fFalse_dlTrue_one2_224_epoch07';
 
 %%
-for i = 1:length(Datasets)
+for i = 1:1 %length(Datasets)
     disp(Datasets{i});
     options.Result_path = [base_path, 'WF/Preds/', Datasets{i}, '/'];
-    for k = 4:5 %length(Results)
+    for k = 9:9 %length(Results)
 %     for k =length(Results):-1:1    
         % saliency prediction results
         % options.SALIENCY_DIR = [options.Result_path Datasets{i} '/' Results{k} '/'];
@@ -1743,7 +1747,7 @@ for i = 1:length(Datasets)
         %    meanMetric{i}(k,j) = result;
         %    fprintf('%s :%.4f \n', Metrics{j}, result);
         %end
-        for j =1:1 %1:length(Metrics)
+        for j =1:length(Metrics)
             if ~exist([CACHE Datasets{i} '_' Results{k} '_' Metrics{j} '.mat'], 'file')
                 if isequal(Datasets{i}, 'MIT1003')
                     [result, allMetric, ~] = evaluationFunc_wf(options, Metrics{j});
