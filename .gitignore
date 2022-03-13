@@ -7,8 +7,6 @@ data/
 checkpoints/
 checkpoint/
 
-docker/debug.sh
-
 # local config file
 utils/local_config.py
 
