@@ -1057,7 +1057,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         hard_sal_map = hard_sal_map + tmp_sal_map # _mres
 
         masked_cw_maps = torch.mul(cw_maps, hard_sal_map)
-        masked_cw_maps = masked_cw_maps + cw_maps  # TODO: comp_self_res
+        masked_cw_maps = masked_cw_maps + cw_maps
         pred_comp_logits = self.spatial_pooling.spatial(masked_cw_maps) ## 1
 
         sal_map = self.to_attention_size(hard_sal_map)
