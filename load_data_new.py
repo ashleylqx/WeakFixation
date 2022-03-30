@@ -1,30 +1,14 @@
-import os
-import pdb
-import sys
-import cv2
 import pickle
 import scipy.misc
 import scipy.io
-from scipy import ndimage
 from scipy.ndimage import gaussian_filter
-import numpy as np
-import random
 
-# --- coco api --------------
-import json
-import time
-from collections import defaultdict
-PYTHON_VERSION = sys.version_info[0]
-if PYTHON_VERSION == 2:
-    from urllib import urlretrieve
-elif PYTHON_VERSION == 3:
-    from urllib.request import urlretrieve
 
 def _isArrayLike(obj):
     return hasattr(obj, '__iter__') and hasattr(obj, '__len__')
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from torchvision import transforms
 
 from config_new import *
@@ -38,41 +22,24 @@ transform = transforms.Compose([
         transforms.Normalize(mean=[0.485, 0.456, 0.406], # rgb_mean,
                              std=[0.229, 0.224, 0.225])])
 
-Proposal_Methods = ['eb500', 'mcg']
-prop_idx = 1
-prop_m = Proposal_Methods[prop_idx]
+prop_m = 'eb500' # type of bounding boxes
 
 def imageProcessing(image, saliency, h=input_h, w=input_w):
     image = cv2.resize(image, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
     saliency = cv2.resize(saliency, (output_w, output_h), interpolation=cv2.INTER_AREA).astype(np.float32)
 
-    # remove mean value
-    # image -= bgr_mean
-    # transform to tensor
-    # image = torch.FloatTensor(image)
-
-    # swap channel dimensions to RGB
-    # image = image.permute(2, 0, 1)
-    # if np.max(saliency) != 0:
-    #     saliency = saliency*0.2/np.max(saliency)
-
     return transform(image/255.), torch.FloatTensor(saliency/255.)
-    # return transform(image/255.), torch.FloatTensor(saliency)
 
 def resize_fixation_mat(fix, rows=output_h, cols=output_w):
     out = np.zeros((rows, cols))
     resolution = fix["resolution"][0]
-    # print('resolution:', resolution)
+
     factor_scale_r = rows*1.0 / resolution[0]
     factor_scale_c = cols*1.0 / resolution[1]
-    # print('factor_scale_r:', factor_scale_r)
-    # print('factor_scale_c:', factor_scale_c)
+
     coords = []
     for gaze in fix["gaze"][0]: # previous (1, N, 3)
         coords.extend(gaze[2])
-
-    # for gaze in fix["gaze"]:  # new(N, 1, 3)
-    #     coords.extend(gaze[0][2])
 
     for coord in coords:
         # print('coord:', coord[0], coord[1])
@@ -110,14 +77,13 @@ def fixationProcessing_mat(fix_mat, h=output_h, w=output_w):
     return fix
 
 ##### ****
+# 'train', 'test', 'val'
 class SALICON_full(Dataset):
     def __init__(self, mode='train', return_path=False, N=None,
-                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
-
+                 img_h=input_h, img_w=input_w):
         self.path_dataset = PATH_SALICON
         self.path_images = os.path.join(self.path_dataset, 'images', mode)
-        # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
-        # self.path_features = os.path.join(self.path_dataset, 'features', mode)
+
         if mode=='val':
             self.edge_boxes = os.path.join(self.path_dataset, prop_m, mode)
         else:
@@ -130,33 +96,15 @@ class SALICON_full(Dataset):
         self.img_h = img_h
         self.img_w = img_w
 
-        # self.normalize_feature = normalize_feature
-
-        # get list images
         list_names = os.listdir(self.path_images)
         list_names = np.array([n.split('.')[0] for n in list_names])
         self.list_names = list_names
-        # list_names = np.array(['COCO_val2014_000000030785',
-        #                        'COCO_val2014_000000061507',
-        #                        'COCO_val2014_000000091883',
-        #                        'COCO_val2014_000000123480',
-        #                        'COCO_val2014_000000031519',
-        #                        'COCO_val2014_000000061520',
-        #                        'COCO_val2014_000000091909',
-        #                        'COCO_val2014_000000123580'])
-        # self.list_names = list_names
 
         if N is not None:
             self.list_names = list_names[:N]
 
-
-        # self.coco = COCO(os.path.join(PATH_COCO, 'annotations', 'instances_%s2014.json'%mode))
         self.imgNsToCat = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_{}.p'.format(mode)), "rb"))
 
-        # if mode=='train':
-        #     random.shuffle(self.list_names)
-
-        # embed()
         print("Init SALICON full dataset in mode {}".format(mode))
         print("\t total of {} images.".format(self.list_names.shape[0]))
 
@@ -164,7 +112,6 @@ class SALICON_full(Dataset):
         return self.list_names.shape[0]
 
     def __getitem__(self, index):
-
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index]+'.png')
@@ -173,8 +120,7 @@ class SALICON_full(Dataset):
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
         img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
-        # image = cv2.imread(rgb_ima)
-        # saliency = cv2.imread(sal_path, 0)
+
         fixation = scipy.io.loadmat(fix_path)
         fix_processed = fixationProcessing_mat(fixation)
 
@@ -187,33 +133,15 @@ class SALICON_full(Dataset):
             saliency = gaussian_filter(fix_processed, sigma=5)
 
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
-        # img_processed, sal_processed, ori_img = imageProcessing_img(image, saliency, h=self.img_h, w=self.img_w)
 
-        # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
-        # label_indices = self.coco.imgNsToCat[self.list_names[index]]
+
         label = torch.zeros(coco_num_classes)
         if len(label_indices)>0:
             label[label_indices] = 1
         else:
             label[0] = 1
 
-        # -------------------------------
-        # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
-        # if self.normalize_feature:
-        #     # box_features = box_features / (np.max(box_features, axis=-1, keepdims=True)+1e-8)
-        #     box_f_max = np.max(box_features, axis=-1, keepdims=True)
-        #     box_f_max[box_f_max==0.] = 1e-8
-        #     box_features = box_features / box_f_max
-        # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        # # x1, y1, x2, y2, normalized
-        # boxes[:, 0] = boxes[:, 0] * self.img_w
-        # boxes[:, 2] = boxes[:, 2] * self.img_w
-        # boxes[:, 1] = boxes[:, 1] * self.img_h
-        # boxes[:, 3] = boxes[:, 3] * self.img_h
-
-        # y1, x1, y2, x2 not normalized
-        # swap and normalize
         boxes[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w  # x1
         boxes[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w  # x2
         boxes[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h  # y1
@@ -225,104 +153,33 @@ class SALICON_full(Dataset):
             return img_processed, label, boxes, sal_processed, fix_processed
 
 #### *****
+# 'train', 'test', 'val'
 class MS_COCO_map_full_aug(Dataset):
-    def __init__(self, mode='train', return_path=False, N=None, prior = 'nips08',
-                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
-
+    def __init__(self, mode='train', return_path=False, N=None, prior='nips08',
+                 img_h=input_h, img_w=input_w):
         self.path_dataset = PATH_COCO
         self.path_images = os.path.join(self.path_dataset, mode+'2014')
-        # self.path_features = os.path.join(self.path_dataset, 'features_2', mode)
-        # self.path_features = os.path.join(self.path_dataset, 'features', mode)
+
         self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
 
-        self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s'%prior)
+        self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s' % prior)
         self.return_path = return_path
 
         self.img_h = img_h
         self.img_w = img_w
 
-        # self.normalize_feature = normalize_feature
-
-        # get list images
         list_names = os.listdir(self.path_images)
         list_names = np.array([n.split('.')[0] for n in list_names])
-        # list_names = os.listdir(self.edge_boxes)
-        # list_names = np.array([n.split('.')[0][:-7] for n in list_names])
+
         self.list_names = list_names
 
         if N is not None:
             self.list_names = list_names[:N]
 
-
-        # self.coco = COCO(os.path.join(PATH_COCO, 'annotations', 'instances_%s2014.json'%mode))
         self.imgNsToCat = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_{}.p'.format(mode)), "rb"))
 
-        #self.seq = Sequence([RandomHSV(40, 40, 40),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     RandomScale(0.2, diff=True),
-        #                     RandomTranslate(0.2, diff=True),
-        #                     RandomRotate(10),
-        #                     RandomShear(0.2)]
-        #                    ) # 1st attempt _aug
+        self.seq = RandomRotate(5)
 
-        # self.seq = Sequence([RandomHSV(20, 20, 20),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     RandomScale(0.1, diff=True),
-        #                     RandomTranslate(0.1, diff=True),
-        #                     RandomRotate(10),
-        #                     RandomShear(0.1)]
-        #                    ) # 2nd attempt _aug2
-
-        #self.seq = Sequence([RandomHSV(10, 10, 10),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     RandomScale(0.05, diff=True),
-        #                     RandomTranslate(0.05, diff=True),
-        #                     RandomRotate(5),
-        #                     RandomShear(0.05)]
-        #                    ) # _aug3
-
-        #self.seq = Sequence([#RandomHSV(10, 10, 10),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     RandomScale(0.1, diff=True),
-        #                     RandomTranslate(0.1, diff=True),
-        #                     RandomRotate(5)], [0.2,0.2,0.2,0.2]
-        #                     #RandomShear(0.1)]
-        #                    ) # _aug4
-
-        #self.seq = Sequence([RandomHSV(5, 5, 5),
-        #                    RandomHorizontalFlip(), #p=0.5
-        #                    RandomScale(0.1, diff=True),
-        #                    RandomTranslate(0.1, diff=True),
-        #                    RandomRotate(5)], [0.2,0.2,0.2,0.2,0.2]
-        #                    #RandomShear(0.1)]
-        #                   ) # _aug5
-
-        # self.seq = RandomHorizontalFlip() # _aug6
-        self.seq = RandomRotate(5) # _aug7 ## BEST
-        # self.seq = RandomRotate(10) # _aug7_2
-        # self.seq = RandomScale(0.1, diff=True) # _aug8
-        # self.seq = RandomScale(0.01, diff=True) # _aug8_2
-        # self.seq = RandomScale(0.05, diff=True) # _aug8_3
-
-        # self.seq = Sequence([ # RandomHSV(10, 10, 10),
-        #                     RandomHorizontalFlip(), #p=0.5
-        #                     # RandomScale(0.1, diff=True),
-        #                     # RandomTranslate(0.1, diff=True),
-        #                     RandomRotate(5)]
-        #                     #RandomShear(0.1)]
-        #                     ) # _aug9
-
-        # self.seq = RandomTranslate(0.1, diff=True) # _aug10
-
-        # self.seq = RandomHSV(5, 5, 5) # _aug11
-
-        # self.seq = RandomShear(0.05) # _aug12
-
-
-        # if mode=='train':
-        #     random.shuffle(self.list_names)
-
-        # embed()
         print("Init MS_COCO full dataset in mode {}".format(mode))
         print("\t total of {} images.".format(self.list_names.shape[0]))
 
@@ -330,7 +187,6 @@ class MS_COCO_map_full_aug(Dataset):
         return self.list_names.shape[0]
 
     def __getitem__(self, index):
-
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index] + '.png')
@@ -345,18 +201,14 @@ class MS_COCO_map_full_aug(Dataset):
         if boxes_tmp.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
             boxes_ = np.zeros_like(boxes_tmp).astype(np.float32)
-            # y1 x1 y2 x2 not normalized
-            # swap, normalize
+
             boxes_[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w # x1
             boxes_[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w # x2
             boxes_[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h # y1
             boxes_[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h # y2
         else:
             boxes = np.zeros_like(boxes_tmp).astype(np.float32)
-            # print('load_data, boxes', boxes.dtype)
-            # pdb.set_trace()
-            # y1 x1 y2 x2 not normalized
-            # swap, not normalized
+
             boxes[:, 0] = boxes_tmp[:, 1] * 1.0 #* image.shape[1] # x1
             boxes[:, 2] = boxes_tmp[:, 3] * 1.0 #* image.shape[1] # x2
             boxes[:, 1] = boxes_tmp[:, 0] * 1.0 #* image.shape[0] # y1
@@ -365,24 +217,6 @@ class MS_COCO_map_full_aug(Dataset):
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
-
-            # if boxes_.min()<0:
-            #     pdb.set_trace()
-
-            #np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
-            #np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
-            #np.clip(boxes_[:, 1], 0., image.shape[0], out=boxes_[:, 1])
-            #np.clip(boxes_[:, 3], 0., image.shape[0], out=boxes_[:, 3])
-
-            #boxes_[boxes_[:, 0] < 0., 0] = 0.
-            #boxes_[boxes_[:, 0] > image.shape[1], 0] = image.shape[1]
-            #boxes_[boxes_[:, 2] < boxes_[:, 0], 2] = boxes_[:, 0]
-            #boxes_[boxes_[:, 2] > image.shape[1], 2] = image.shape[1]
-
-            #boxes_[boxes_[:, 1] < 0., 1] = 0.
-            #boxes_[boxes_[:, 1] > image.shape[0], 1] = image.shape[0]
-            #boxes_[boxes_[:, 3] < boxes_[:, 1], 3] = boxes_[:, 1]
-            #boxes_[boxes_[:, 3] > image.shape[0], 3] = image.shape[0]
 
             np.clip(boxes_[:, 0], 0., image.shape[1], out=boxes_[:, 0])
             np.clip(boxes_[:, 2], 0., image.shape[1], out=boxes_[:, 2])
@@ -396,7 +230,6 @@ class MS_COCO_map_full_aug(Dataset):
 
         # get coco label
         label_indices = self.imgNsToCat[self.list_names[index]]
-        # label_indices = self.coco.imgNsToCat[self.list_names[index]]
         label = torch.zeros(coco_num_classes)
         if len(label_indices)>0:
             label[label_indices] = 1
@@ -450,15 +283,14 @@ def fixationProcessing(fix_img, h=output_h, w=output_w):
         fix[((fix.shape[0] - new_rows) // 2):((fix.shape[0] - new_rows) // 2 + new_rows), :] = fix_img
 
     return fix
-#### ****
-class MIT1003_full(Dataset):
-    def __init__(self, return_path=False, N=None,
-                 img_h = det_input_h, img_w = det_input_w): #'train', 'test', 'val'
 
+#### ****
+# 'train', 'test', 'val'
+class MIT1003_full(Dataset):
+    def __init__(self, return_path=False, N=None, img_h=det_input_h, img_w=det_input_w):
         self.path_dataset = PATH_MIT1003
         self.path_images = os.path.join(self.path_dataset, 'ALLSTIMULI')
-        # self.path_features = os.path.join(self.path_dataset, 'features_2')
-        # self.path_features = os.path.join(self.path_dataset, 'features')
+
         self.edge_boxes = os.path.join(self.path_dataset, prop_m)
         self.path_saliency = os.path.join(self.path_dataset, 'ALLFIXATIONMAPS')
         self.path_fixation = os.path.join(self.path_dataset, 'ALLFIXATIONS')
@@ -467,16 +299,12 @@ class MIT1003_full(Dataset):
         self.img_h = img_h
         self.img_w = img_w
 
-        # self.normalize_feature = normalize_feature
-
-        # get list images
         list_names = os.listdir(self.path_images)
         list_names = np.array([n.split('.')[0] for n in list_names])
         self.list_names = list_names
 
         if N is not None:
             self.list_names = list_names[:N]
-            # self.list_names = list_names[-N:]
 
         # embed()
         print("Init MIT1003 full dataset.")
@@ -486,7 +314,6 @@ class MIT1003_full(Dataset):
         return self.list_names.shape[0]
 
     def __getitem__(self, index):
-
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpeg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index]+'_fixMap.jpg')
@@ -495,7 +322,7 @@ class MIT1003_full(Dataset):
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
         img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
-        # image = cv2.imread(rgb_ima)
+
         saliency = cv2.imread(sal_path, 0)
 
         fixation = cv2.imread(fix_path, 0)
@@ -505,22 +332,6 @@ class MIT1003_full(Dataset):
 
         boxes = scipy.io.loadmat(box_path)['proposals'][0][0][0][:MAX_BNUM, :]
 
-        # -------------------------------
-        # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
-        # if self.normalize_feature:
-        #     # box_features = box_features / (np.max(box_features, axis=-1, keepdims=True)+1e-8)
-        #     box_f_max = np.max(box_features, axis=-1, keepdims=True)
-        #     box_f_max[box_f_max == 0.] = 1e-8
-        #     box_features = box_features / box_f_max
-        # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
-        # # x1, y1, x2, y2, normalized
-        # boxes[:, 0] = boxes[:, 0] * self.img_w
-        # boxes[:, 2] = boxes[:, 2] * self.img_w
-        # boxes[:, 1] = boxes[:, 1] * self.img_h
-        # boxes[:, 3] = boxes[:, 3] * self.img_h
-
-        # x1, y1, x2, y2, not normalized
-        # normalize
         boxes[:, 0] = boxes[:, 0] * 1.0 / img_WIDTH * self.img_w
         boxes[:, 2] = boxes[:, 2] * 1.0 / img_WIDTH * self.img_w
         boxes[:, 1] = boxes[:, 1] * 1.0 / img_HEIGHT * self.img_h
@@ -533,14 +344,12 @@ class MIT1003_full(Dataset):
 
 # ==========PASCAL-S==================
 #=== can use collate_fn_mit1003, they share the save output format =====================
+# 'train', 'test', 'val'
 class PASCAL_full(Dataset):
-    def __init__(self, return_path=False, N=None,
-                 img_h = input_h, img_w = input_w): #'train', 'test', 'val'
-
+    def __init__(self, return_path=False, N=None, img_h=input_h, img_w=input_w):
         self.path_dataset = PATH_PASCAL
         self.path_images = os.path.join(self.path_dataset, 'images')
-        # self.path_features = os.path.join(self.path_dataset, 'features_2')
-        # self.path_features = os.path.join(self.path_dataset, 'features')
+
         self.edge_boxes = os.path.join(self.path_dataset, prop_m)
         self.path_saliency = os.path.join(self.path_dataset, 'maps')
         self.path_fixation = os.path.join(self.path_dataset, 'fixation')
@@ -549,9 +358,6 @@ class PASCAL_full(Dataset):
         self.img_h = img_h
         self.img_w = img_w
 
-        # self.normalize_feature = normalize_feature
-
-        # get list images
         list_names = os.listdir(self.path_images)
         list_names = np.array([n.split('.')[0] for n in list_names])
         self.list_names = list_names
@@ -567,7 +373,6 @@ class PASCAL_full(Dataset):
         return self.list_names.shape[0]
 
     def __getitem__(self, index):
-
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index]+'.png')
@@ -575,7 +380,7 @@ class PASCAL_full(Dataset):
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        # image = cv2.imread(rgb_ima)
+
         saliency = cv2.imread(sal_path, 0)
 
         fixation = cv2.imread(fix_path, 0)
@@ -585,14 +390,6 @@ class PASCAL_full(Dataset):
 
         boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
-        # load features and transfor to geometric Data
-        # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
-        # if self.normalize_feature:
-        #     # box_features = box_features / (np.max(box_features, axis=-1, keepdims=True)+1e-8)
-        #     box_f_max = np.max(box_features, axis=-1, keepdims=True)
-        #     box_f_max[box_f_max == 0.] = 1e-8
-        #     box_features = box_features / box_f_max
-        # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
         boxes[:, 0] = boxes[:, 0] * self.img_w
         boxes[:, 2] = boxes[:, 2] * self.img_w
         boxes[:, 1] = boxes[:, 1] * self.img_h
@@ -603,24 +400,20 @@ class PASCAL_full(Dataset):
         else:
             return img_processed, boxes, sal_processed, fix_processed
 
-# ========MIT300====================
-class MIT300_full(Dataset):
-    def __init__(self, return_path=False, N=None,
-                 img_h = det_input_h, img_w = det_input_w): #'train', 'test', 'val'
 
+# ========MIT300====================
+# 'train', 'test', 'val'
+class MIT300_full(Dataset):
+    def __init__(self, return_path=False, N=None, img_h=det_input_h, img_w=det_input_w):
         self.path_dataset = PATH_MIT300
         self.path_images = os.path.join(self.path_dataset, 'images')
-        # self.path_features = os.path.join(self.path_dataset, 'features_2')
-        # self.path_features = os.path.join(self.path_dataset, 'features')
+
         self.edge_boxes = os.path.join(self.path_dataset, prop_m)
         self.return_path = return_path
 
         self.img_h = img_h
         self.img_w = img_w
 
-        # self.normalize_feature = normalize_feature
-
-        # get list images
         list_names = os.listdir(self.path_images)
         list_names = np.array([n.split('.')[0] for n in list_names])
         self.list_names = list_names
@@ -636,7 +429,6 @@ class MIT300_full(Dataset):
         return self.list_names.shape[0]
 
     def __getitem__(self, index):
-
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
@@ -648,20 +440,11 @@ class MIT300_full(Dataset):
         img_processed = transform(image / 255.)
 
         boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
-        # print('boxes bf', boxes.max(), boxes.min())
-        # load features and transfor to geometric Data
-        # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))
-        # if self.normalize_feature:
-        #     # box_features = box_features / (np.max(box_features, axis=-1, keepdims=True)+1e-8)
-        #     box_f_max = np.max(box_features, axis=-1, keepdims=True)
-        #     box_f_max[box_f_max == 0.] = 1e-8
-        #     box_features = box_features / box_f_max
-        # boxes = np.load(os.path.join(self.path_features, '{}_boxes.npy'.format(self.list_names[index])))
+
         boxes[:, 0] = boxes[:, 0] * self.img_w
         boxes[:, 2] = boxes[:, 2] * self.img_w
         boxes[:, 1] = boxes[:, 1] * self.img_h
         boxes[:, 3] = boxes[:, 3] * self.img_h
-        # print('boxes aft', boxes.max(), boxes.min())
 
         if self.return_path:
             return img_processed, boxes, self.list_names[index]
@@ -669,9 +452,8 @@ class MIT300_full(Dataset):
             return img_processed, boxes
 
 
-# ========== collate_fn =========================
-# MS_COCO_map (no sal maps, multi labels)
-def collate_fn_coco_map_rn(batch): # batch: image, label, boxes(, image_name)
+# batch: image, label, boxes(, image_name)
+def collate_fn_coco_map_rn(batch):
     images = list()
     labels = list()
     rf_maps = list()
@@ -679,31 +461,16 @@ def collate_fn_coco_map_rn(batch): # batch: image, label, boxes(, image_name)
     boxes_nums = np.array([X[2].shape[0] for X in batch])
     max_boxes_num = np.max(boxes_nums)
     boxes_batch = np.zeros((len(batch), max_boxes_num, 4))
-    # box_features_batch = np.zeros((len(batch), max_boxes_num, batch[0][2].shape[-1]))-float('Inf')
 
     for i, X in enumerate(batch):
         images.append(X[0].unsqueeze(0))
         labels.append(X[1].unsqueeze(0))
-
-        # x = torch.from_numpy(X[2])
-        # y = None
-        # edge_index = gen_edge_index(x.size(0))
-        #
-        # if boxes_nums[i]>0:
-        #     box_features.append(Data(x=x, y=y, edge_index=edge_index))
-
-        # box_features_batch[i, :boxes_nums[i], :] = X[2]
         boxes_batch[i, :boxes_nums[i], :] = X[2]
-
         rf_maps.append(X[3].unsqueeze(0))
 
     images_batch = torch.cat(images, dim=0)
     labels_batch = torch.cat(labels, dim=0)
-    # if len(box_features) > 0:
-    #     box_features_batch = Batch.from_data_list(box_features)
-    # else:
-    #     box_features_batch = None
-    # box_features_batch = torch.FloatTensor(box_features_batch)
+
     boxes_batch = torch.FloatTensor(boxes_batch)
     boxes_nums_batch = torch.LongTensor(boxes_nums)
     rf_maps_batch = torch.cat(rf_maps, dim=0)
@@ -717,15 +484,14 @@ def collate_fn_coco_map_rn(batch): # batch: image, label, boxes(, image_name)
 
 
 # SALICON (with sal maps, multiple labels)
-def collate_fn_salicon_rn(batch): # batch: image, label, boxes, sal_map, fix_map(, image_name)
+# batch: image, label, boxes, sal_map, fix_map(, image_name)
+def collate_fn_salicon_rn(batch):
     images = list()
     labels = list()
-    # box_features = list()
 
     boxes_nums = np.array([X[2].shape[0] for X in batch])
     max_boxes_num = np.max(boxes_nums)
     boxes_batch = np.zeros((len(batch), max_boxes_num, 4))
-    # box_features_batch = np.zeros((len(batch), max_boxes_num, batch[0][2].shape[-1]))
 
     sal_maps = list()
     fix_maps = list()
@@ -733,28 +499,13 @@ def collate_fn_salicon_rn(batch): # batch: image, label, boxes, sal_map, fix_map
     for i, X in enumerate(batch):
         images.append(X[0].unsqueeze(0))
         labels.append(X[1].unsqueeze(0))
-
-        #x = torch.from_numpy(X[2])
-        #y = None
-        #edge_index = gen_edge_index(x.size(0))
-        #if boxes_nums[i] > 0:
-        #    box_features.append(Data(x=x, y=y, edge_index=edge_index))
-
-        # box_features_batch[i, :boxes_nums[i], :] = X[2]
-
         boxes_batch[i, :boxes_nums[i], :] = X[2]
-
         sal_maps.append(X[3].unsqueeze(0))
         fix_maps.append(torch.from_numpy(X[4]).unsqueeze(0))
 
     images_batch = torch.cat(images, dim=0)
     labels_batch = torch.cat(labels, dim=0)
-    #if len(box_features) > 0:
-    #    box_features_batch = Batch.from_data_list(box_features)
-    #else:
-    #    box_features_batch = None
 
-    # box_features_batch = torch.FloatTensor(box_features_batch)
     boxes_batch = torch.FloatTensor(boxes_batch)
     boxes_nums_batch = torch.LongTensor(boxes_nums)
 
@@ -770,41 +521,25 @@ def collate_fn_salicon_rn(batch): # batch: image, label, boxes, sal_map, fix_map
 
 
 # MIT1003 (with sal maps, no labels)
-def collate_fn_mit1003_rn(batch): # batch: image, boxes, sal_map, fix_map(, image_name)
+# batch: image, boxes, sal_map, fix_map(, image_name)
+def collate_fn_mit1003_rn(batch):
     images = list()
-    # box_features = list()
 
     boxes_nums = np.array([X[1].shape[0] for X in batch])
     max_boxes_num = np.max(boxes_nums)
     boxes_batch = np.zeros((len(batch), max_boxes_num, 4))
-    # box_features_batch = np.zeros((len(batch), max_boxes_num, batch[0][1].shape[-1]))
 
     sal_maps = list()
     fix_maps = list()
 
     for i, X in enumerate(batch):
         images.append(X[0].unsqueeze(0))
-
-        # x = torch.from_numpy(X[1])
-        # y = None
-        # edge_index = gen_edge_index(x.size(0))
-        # if boxes_nums[i] > 0:
-        #     box_features.append(Data(x=x, y=y, edge_index=edge_index))
-
-        # box_features_batch[i, :boxes_nums[i], :] = X[1]
-
         boxes_batch[i, :boxes_nums[i], :] = X[1]
-
         sal_maps.append(X[2].unsqueeze(0))
         fix_maps.append(torch.from_numpy(X[3]).unsqueeze(0))
 
     images_batch = torch.cat(images, dim=0)
-    # if len(box_features)>0:
-    #     box_features_batch = Batch.from_data_list(box_features)
-    # else:
-    #     box_features_batch = None
 
-    # box_features_batch = torch.FloatTensor(box_features_batch)
     boxes_batch = torch.FloatTensor(boxes_batch)
     boxes_nums_batch = torch.LongTensor(boxes_nums)
 
@@ -818,10 +553,11 @@ def collate_fn_mit1003_rn(batch): # batch: image, boxes, sal_map, fix_map(, imag
         image_names_batch = [X[-1] for X in batch]
         return images_batch, boxes_batch, boxes_nums_batch, sal_maps_batch, fix_maps_batch, image_names_batch
 
+
 # MIT300 (no sal maps, no labels)
-def collate_fn_mit300_rn(batch): # batch: image, boxes(, image_name)
+# batch: image, boxes(, image_name)
+def collate_fn_mit300_rn(batch):
     images = list()
-    # box_features = list()
 
     boxes_nums = np.array([X[1].shape[0] for X in batch])
     max_boxes_num = np.max(boxes_nums)
@@ -829,20 +565,9 @@ def collate_fn_mit300_rn(batch): # batch: image, boxes(, image_name)
 
     for i, X in enumerate(batch):
         images.append(X[0].unsqueeze(0))
-
-        # x = torch.from_numpy(X[1])
-        # y = None
-        # edge_index = gen_edge_index(x.size(0))
-        # if boxes_nums[i] > 0:
-        #     box_features.append(Data(x=x, y=y, edge_index=edge_index))
-        # print('X[1]', X[1].max(), X[1].min())
         boxes_batch[i, :boxes_nums[i], :] = X[1]
 
     images_batch = torch.cat(images, dim=0)
-    # if len(box_features)>0:
-    #     box_features_batch = Batch.from_data_list(box_features)
-    # else:
-    #     box_features_batch = None
 
     boxes_batch = torch.FloatTensor(boxes_batch)
     boxes_nums_batch = torch.LongTensor(boxes_nums)
