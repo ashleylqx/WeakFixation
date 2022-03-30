@@ -429,223 +429,6 @@ class attention_module_multi_head_RN_cls(torch.nn.Module):
         return embedding
 
 # same as paper. apply attention at (linear_out + roi_feat)
-class attention_module_multi_head_RN_cls_sa_art(torch.nn.Module):
-    # fc_new_1 [num_rois, 1024]
-    # attention, [num_rois, feat_dim]
-    # attention_module_multi_head, eq. 5,4,3,2, 6(last half)
-    # get attention_1 [num_rois, 1024] to concat with the fc_new_1 in eq.6
-    # fc_all_1 = fc_new_1 + attention_1
-    """ Attetion module with vectorized version
-
-        Args:
-            roi_feat: [num_rois, feat_dim]
-            position_embedding: [num_rois, nongt_dim, emb_dim]
-            nongt_dim:
-            fc_dim: should be same as group
-            feat_dim: dimension of roi_feat, should be same as dim[2]
-            dim: a 3-tuple of (query, key, output)
-            group:
-            index:
-
-        Returns:
-            output: [num_rois, ovr_feat_dim, output_dim]
-    """
-    def __init__(self, emb_dim=64, fc_dim=16, feat_dim=1024,
-                      cls_num=coco_num_classes, dim=(1024, 1024, 1024), group=16, index=1):
-        super(attention_module_multi_head_RN_cls_sa_art, self).__init__()
-        assert dim[0] == dim[1]
-        assert fc_dim == group
-
-        self.cls_num = cls_num
-        self.emb_dim = emb_dim # position_embedding.size(-1)
-        self.fc_dim = fc_dim
-        self.feat_dim = feat_dim
-        self.dim = dim
-        self.group = group
-        self.index = index
-        self.dim_group = (self.dim[0] // self.group, self.dim[1] // self.group, self.dim[2] // self.group) # (64,64,64)
-
-        # eval('self.pair_pos_fc1_%d = torch.nn.Linear(self.emb_dim, self.fc_dim)'%self.index)
-        self.pair_pos_fc1 = torch.nn.Linear(self.emb_dim, self.fc_dim) # WG
-        self.query = torch.nn.Linear(self.feat_dim, self.dim[0]) # WQ, roi_feat is the fA in eq.4 [num_rois, feat_dim]
-        self.key = torch.nn.Linear(self.feat_dim, self.dim[1]) # WK, nongt_roi_feat is the fA in eq.4 [nongt_dim, feat_dim]
-
-        self.linear_out = torch.nn.Conv2d(self.fc_dim*self.feat_dim, self.dim[2], kernel_size=(1,1), groups=self.fc_dim)
-        # groups param == Nr in the paper, conv contains the concat op in eq.6
-
-        self.read_out = torch.nn.Linear(self.dim[2], self.cls_num)
-
-        self.self_attention = torch.nn.Conv2d(self.dim[2], 1, kernel_size=(1, 1))
-
-    def forward(self, bbox, roi_feat):
-        nongt_dim = roi_feat.size(0)
-        # nongt_roi_feat = roi_feat[:nongt_dim, :]
-        # nongt_roi_feat = roi_feat.detach()
-        nongt_roi_feat = roi_feat
-        # bbox contains negative values
-        position_matrix = self.extract_position_matrix(bbox, nongt_dim=nongt_dim)
-        # print('position_matrix', position_matrix.max(), position_matrix.min())
-        # position_matrix contains nan
-        position_embedding = self.extract_position_embedding(position_matrix, feat_dim=self.emb_dim)
-
-        # [num_rois, nongt_dim, emb_dim]-->[num_rois*nongt_dim, emb_dim]
-        position_embedding_reshape = position_embedding.view(-1, position_embedding.size(2))
-
-        # WG in eq.5
-        # [num_rois*nongt_dim, emb_dim] position_embedding_reshape --> [num_rois*nongt_dim, fc_dim] position_feat_1
-        # position_embedding_reshape contains nan
-        position_feat_1 = self.pair_pos_fc1(position_embedding_reshape)
-        if torch.isnan(position_feat_1).any():
-            pdb.set_trace()
-        position_feat_1_relu = F.relu(position_feat_1)
-        if torch.isnan(position_feat_1_relu).any():
-            pdb.set_trace()
-        # position_feat_1_relu = F.relu(self.pair_pos_fc1(position_embedding_reshape))
-        # aff_weight, [num_rois, nongt_dim, fc_dim]
-        aff_weight = position_feat_1_relu.view(-1, nongt_dim, self.fc_dim)
-        # aff_weight, [num_rois, fc_dim, nongt_dim]
-        aff_weight = aff_weight.permute(0, 2, 1)
-
-        q_data = self.query(roi_feat)
-        q_data_batch = q_data.view(-1, self.group, self.dim_group[0]) #[num_rois, group, dim_group[0]]
-        q_data_batch = q_data_batch.permute(1, 0, 2) #[group, num_rois, dim_group[0]]
-
-        k_data = self.key(nongt_roi_feat)
-        k_data_batch = k_data.view(-1, self.group, self.dim_group[1])
-        k_data_batch = k_data_batch.permute(1, 0, 2) # [group, nongt_dim, dim_group[0]]
-
-        # v_data = nongt_roi_feat.detach() # version 1
-        v_data = nongt_roi_feat # version 2
-
-        aff = torch.bmm(q_data_batch, k_data_batch.permute(0, 2, 1))
-        # aff_scale, [group, num_rois, nongt_dim]
-        aff_scale = torch.mul(aff, 1./math.sqrt(float(self.dim_group[1])))
-        aff_scale = aff_scale.permute(1, 0, 2) # input of the log function before wA
-
-        # eq.5 e^(log(wG)+wA)=wG+e^(wA)
-        # weighted_aff, [num_rois, fc_dim, nongt_dim]
-        aff_weight[aff_weight<1e-6] = 1e-6
-        weighted_aff = torch.log(aff_weight) + aff_scale
-        aff_softmax = F.softmax(weighted_aff, dim=2)
-        # [num_rois * fc_dim, nongt_dim]
-        aff_softmax_reshape = aff_softmax.view(-1, aff_softmax.size(2))
-
-        # output_t, [num_rois * fc_dim, feat_dim]
-        output_t = torch.matmul(aff_softmax_reshape, v_data)
-        # output_t, [num_rois, fc_dim * feat_dim, 1, 1]
-        output_t = output_t.view(-1, self.fc_dim*self.feat_dim, 1, 1)
-
-        # linear_out, [num_rois, dim[2], 1, 1]
-        linear_out = self.linear_out(output_t)
-        # output [num_rois, dim[2]]
-        # pdb.set_trace()
-        linear_out = linear_out.squeeze(-1).squeeze(-1)
-        linear_out = roi_feat + linear_out  # TODO: the article use residual to enhance the input feature.
-
-        # self attention mechanism; competition
-        linear_out = linear_out.unsqueeze(-1).unsqueeze(-1)
-        linear_out_score = self.self_attention(linear_out)  # (N, 1, 1, 1)
-        linear_out_score_sft = torch.softmax(linear_out_score, dim=0)  # (N, 1, 1, 1)
-        if ATT_RES:
-            linear_out = torch.mul(linear_out, linear_out_score_sft) + linear_out
-        else:
-            linear_out = torch.mul(linear_out, linear_out_score_sft)
-        linear_out = linear_out.squeeze(-1).squeeze(-1)
-
-        # return linear_out.squeeze(-1).squeeze(-1)
-        # pdb.set_trace()
-        # output = self.read_out(linear_out.mean(dim=0, keepdim=True)) # not good
-        output = self.read_out(linear_out.sum(dim=0, keepdim=True)) # all the previous experiments
-        # print('output', output.max(), output.min())
-
-        output = torch.sigmoid(output)  # output [b_s, num_rois, 1]
-        # output = torch.softmax(output, 1)  # output [b_s, num_rois, 1]
-        # pdb.set_trace()
-        return output, linear_out_score_sft.max(), linear_out_score_sft.min(),\
-                torch.argmax(linear_out_score_sft)
-
-        # return output.view(1, self.grid_N, self.grid_N)
-
-    def extract_position_matrix(self, bbox, nongt_dim):
-        '''
-        relation network for object detection cvpr2018
-        Extract position matrix
-        Args:
-            bbox: [num_boxes, 4]
-        returns:
-            position_matrix: [num_boxes, nongt_dim, 4]
-        '''
-
-        # xmin, ymin, xmax, ymax are [num_boxes, 1]
-        xmin, ymin, xmax, ymax = torch.split(bbox, 1, dim=1)
-
-        bbox_width = xmax - xmin + 1.
-        bbox_height = ymax - ymin + 1.
-        center_x = 0.5 * (xmin + xmax)
-        center_y = 0.5 * (ymin + ymax)
-
-        # delta_x [num_boxes, num_boxes]
-        delta_x = center_x.repeat(1, xmin.size(0)) - torch.transpose(center_x, 1, 0).repeat(xmin.size(0), 1)
-        delta_x = torch.div(delta_x, bbox_width)
-        delta_x[delta_x.abs() < 1e-3] = 1e-3
-        delta_x = torch.log(delta_x.abs())
-
-        if torch.isnan(delta_x).any():
-            pdb.set_trace()
-
-        delta_y = center_y.repeat(1, xmin.size(0)) - torch.transpose(center_y, 1, 0).repeat(xmin.size(0), 1)
-        delta_y = torch.div(delta_y, bbox_height)
-        delta_y[delta_y.abs() < 1e-3] = 1e-3
-        delta_y = torch.log(delta_y.abs())
-
-        if torch.isnan(delta_y).any():
-            pdb.set_trace()
-
-        delta_width = torch.div(bbox_width, torch.transpose(bbox_width, 1, 0))
-        delta_width[delta_width.abs() < 1e-3] = 1e-3
-        delta_width = torch.log(delta_width)
-
-        if torch.isnan(delta_width).any():
-            pdb.set_trace()
-
-        delta_height = torch.div(bbox_height, torch.transpose(bbox_height, 1, 0))
-        delta_height[delta_height.abs() < 1e-3] = 1e-3
-        delta_height = torch.log(delta_height)
-
-        if torch.isnan(delta_height).any():
-            pdb.set_trace()
-
-        # len(concat_list)=4, each element is of [num_boxes, num_boxes]
-        concat_list = [delta_x, delta_y, delta_width, delta_height]
-
-        # get 0~nongt_dim (default 300) values at dim 1
-        # sym [num_boxes, nongt_dim] --> [num_boxes, nongt_dim, 1]
-        # position_matrix [num_boxes, nongt_dim, 4]
-        for idx, sym in enumerate(concat_list):
-            tmp = sym[:, :nongt_dim]
-            concat_list[idx] = tmp.unsqueeze(2)
-
-        position_matrix = torch.cat(concat_list, dim=2)
-        return position_matrix
-
-    # Usage: position_embedding = self.extract_position_embedding(position_matrix, feat_dim=64)
-    def extract_position_embedding(self, position_mat, feat_dim, wave_length=1000):
-        # position_mat, [num_rois, nongt_dim, 4]
-        # feat_range [0,1, ... ,7], full: fist input is shape, second is value
-        # dim_mat=[1., 2.37137365, 5.62341309, 13.33521461, 31.62277603, 74.98941803, 177.82794189, 421.69650269]
-        feat_range = torch.arange(0, feat_dim / 8).float().to(position_mat.device)
-        dim_mat = torch.pow(torch.full((1,), wave_length).to(position_mat.device), (8. / feat_dim) * feat_range)
-
-        position_mat = position_mat.unsqueeze(3)  # [num_rois, nongt_dim, 4, 1]
-        div_mat = torch.div(position_mat, dim_mat)  # [num_rois, nongt_dim, 4, 8]
-        sin_mat = torch.sin(div_mat)
-        cos_mat = torch.cos(div_mat)
-        # embedding, [num_rois, nongt_dim, 4, feat_dim/4]
-        embedding = torch.cat([sin_mat, cos_mat], dim=3)
-        # embedding, [num_rois, nongt_dim, feat_dim]
-        embedding = embedding.view(embedding.size(0), embedding.size(1), feat_dim)
-        return embedding
-
 class attention_module_multi_head_RN_cls_sa_art_sp(torch.nn.Module):
     # fc_new_1 [num_rois, 1024]
     # attention, [num_rois, feat_dim]
@@ -1277,7 +1060,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls_sa_art(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
+        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
                                                                dim=[FEATURE_DIM]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
@@ -1429,8 +1212,10 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         for b_i in range(img.size(0)):
             if boxes_nums[b_i] > 0:
                 # hard_scores[b_i, :] = self.relation_net(boxes[b_i, :boxes_nums[b_i], :], box_feature[b_i, :boxes_nums[b_i], :])
-                hard_scores[b_i, :], att_scores[b_i, 0], att_scores[b_i, 1], att_scores[b_i, 2] = \
+                hard_scores[b_i, :], linear_out_score_sft = \
                      self.relation_net(boxes_list[b_i], box_feature[b_i])
+                att_scores[b_i, 0], att_scores[b_i, 1], att_scores[b_i, 2]= \
+                    linear_out_score_sft.max(), linear_out_score_sft.min(), torch.argmax(linear_out_score_sft)
 
         # hard_sal_map = torch.mul(hard_scores.unsqueeze(-1).unsqueeze(-1).expand_as(cw_maps),  # TODO change map to hd_map
         #                cw_maps).sum(1, keepdim=True)
