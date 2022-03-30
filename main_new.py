@@ -31,15 +31,11 @@ from load_data_new import collate_fn_salicon_rn, collate_fn_mit1003_rn, collate_
 from models_new import Wildcat_WK_hd_gs_compf_cls_att_A4_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp
 
 from custom_loss_new import HLoss
-from config import *
+from config_new import *
 from utils import *
 
 from tensorboardX import SummaryWriter
 
-cps_weight = 1.0
-hth_weight = 0.1
-hdsup_weight = 0.1
-rf_weight = 0.1
 
 def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
     model.train()

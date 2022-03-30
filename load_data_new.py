@@ -27,7 +27,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
-from config import *
+from config_new import *
 
 from data_aug.data_aug_map import *
 from data_aug.bbox_util import *
@@ -177,18 +177,8 @@ class SALICON_full(Dataset):
         # saliency = cv2.imread(sal_path, 0)
         fixation = scipy.io.loadmat(fix_path)
         fix_processed = fixationProcessing_mat(fixation)
-        if PRO_RATIO is None:
-            boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        else:
-            boxes_tmp_tmp = scipy.io.loadmat(box_path)['boxes']  # exlude props with area larger than PRO_RATIO
-            # y1 x1 y2 x2, not normalized
-            boxes_tmp = [box for box in boxes_tmp_tmp
-                         if (box[2] - box[0])*1.0/img_HEIGHT * (box[3] - box[1])*1.0/img_WIDTH < PRO_RATIO]
-            if len(boxes_tmp) > 0:
-                boxes_tmp = np.vstack(boxes_tmp)
-                boxes_tmp = boxes_tmp[:MAX_BNUM, :]
-            else:
-                boxes_tmp = np.zeros((0, boxes_tmp_tmp.shape[1]))
+
+        boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
         boxes = np.zeros_like(boxes_tmp).astype(np.float32)
 
         if os.path.exists(sal_path):
@@ -349,19 +339,8 @@ class MS_COCO_map_full_aug(Dataset):
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
         img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         saliency = cv2.imread(sal_path, 0)
-        if PRO_RATIO is None:
-            boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
-        else:
-            boxes_tmp_tmp = scipy.io.loadmat(box_path)['boxes']  # exlude props with area larger than PRO_RATIO
-            # boxes_tmp = [box for box in boxes_tmp_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-            # y1 x1 y2 x2 not normalized
-            boxes_tmp = [box for box in boxes_tmp_tmp if
-                         (box[2] - box[0])*1.0/img_HEIGHT * (box[3] - box[1])*1.0/img_WIDTH < PRO_RATIO]
-            if len(boxes_tmp) > 0:
-                boxes_tmp = np.vstack(boxes_tmp)
-                boxes_tmp = boxes_tmp[:MAX_BNUM, :]
-            else:
-                boxes_tmp = np.zeros((0, boxes_tmp_tmp.shape[1]))
+
+        boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
 
         if boxes_tmp.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
@@ -524,21 +503,7 @@ class MIT1003_full(Dataset):
 
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
 
-        if PRO_RATIO is None:
-            # boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
-            boxes = scipy.io.loadmat(box_path)['proposals'][0][0][0][:MAX_BNUM, :]
-        else:
-            # boxes_tmp = scipy.io.loadmat(box_path)['bboxes']  # exlude props with area larger than PRO_RATIO
-            # boxes = [box for box in boxes_tmp if (box[2] - box[0]) * (box[3] - box[1]) < PRO_RATIO]
-            # This is also x1, y1, x2, y2, not normalized
-            boxes_tmp = scipy.io.loadmat(box_path)['proposals'][0][0][0]  # exlude props with area larger than PRO_RATIO
-            boxes = [box for box in boxes_tmp if
-                     (box[2] - box[0])*1.0/img_WIDTH * (box[3] - box[1])*1.0/img_HEIGHT < PRO_RATIO]
-            if len(boxes) > 0:
-                boxes = np.vstack(boxes)
-                boxes = boxes[:MAX_BNUM, :]
-            else:
-                boxes = np.zeros((0, boxes_tmp.shape[1]))
+        boxes = scipy.io.loadmat(box_path)['proposals'][0][0][0][:MAX_BNUM, :]
 
         # -------------------------------
         # box_features = np.load(os.path.join(self.path_features, '{}_box_features.npy'.format(self.list_names[index])))

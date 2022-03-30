@@ -1,5 +1,4 @@
 import numpy as np
-from numbers import Number
 import math
 import pdb
 
@@ -9,32 +8,16 @@ import torch.nn.functional as F
 
 from torchvision.models.resnet import Bottleneck
 
-from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
 from torchvision.ops import MultiScaleRoIAlign
-from torchvision.ops import boxes as box_ops
-# from torchvision.ops import misc as misc_nn_ops
-# from torchvision.ops import roi_align
-from torchvision.models.detection.rpn import AnchorGenerator, RPNHead, RegionProposalNetwork
-from torchvision.models.detection.faster_rcnn import TwoMLPHead, FastRCNNPredictor
 from torchvision.ops.feature_pyramid_network import FeaturePyramidNetwork, LastLevelMaxPool
-from torchvision.models.detection import _utils as det_utils
-from torchvision.models.detection.image_list import ImageList
 
 from torch.autograd.function import once_differentiable
-
-# import kornia
-# # gauss = kornia.filters.GaussianBlur2d((11, 11), (4.33, 4.33))
-# # gauss = kornia.filters.GaussianBlur2d((3, 3), (1., 1.))
-# gauss = kornia.filters.GaussianBlur2d((5, 5), (1.67, 1.67))
-# # gauss = kornia.filters.GaussianBlur2d((7, 7), (2.33, 2.33))
 
 from collections import OrderedDict
 
 from wildcat_pooling import WildcatPool2d, ClassWisePool
 
-from convLSTM import ConvLSTM
-
-from config import *
+from config_new import *
 
 def gen_grid_boxes(in_h, in_w, N=14):
     x = torch.linspace(0., in_w, N+1)
@@ -546,10 +529,7 @@ class attention_module_multi_head_RN_cls_sa_art_sp(torch.nn.Module):
         linear_out = linear_out.unsqueeze(-1).unsqueeze(-1)
         linear_out_score = self.self_attention(linear_out)  # (N, 1, 1, 1)
         linear_out_score_sft = torch.softmax(linear_out_score, dim=0)  # (N, 1, 1, 1)
-        if ATT_RES:
-            linear_out = torch.mul(linear_out, linear_out_score_sft) + linear_out
-        else:
-            linear_out = torch.mul(linear_out, linear_out_score_sft)
+        linear_out = torch.mul(linear_out, linear_out_score_sft)
         linear_out = linear_out.squeeze(-1).squeeze(-1)
 
         # return linear_out.squeeze(-1).squeeze(-1)
@@ -719,8 +699,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
-                                                               dim=[FEATURE_DIM]*3)
+        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes,
+                                                               dim=[512]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         # self.to_cw_feature_size = torch.nn.Upsample(size=(14, 14))
@@ -734,11 +714,11 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
 
         self.box_roi_pool = MultiScaleRoIAlign(
             featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
-            output_size=BOI_SIZE,
+            output_size=7,
             sampling_ratio=2)
 
         resolution = self.box_roi_pool.output_size[0]
-        representation_size = FEATURE_DIM
+        representation_size = 512
         out_channels = 256
         self.box_head = TwoMLPHead_my(
             out_channels * resolution ** 2,
@@ -785,35 +765,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
         # print('box_feature[0]', box_feature[0].max(), box_feature[0].min())
 
         if self.use_grid:
-            # box_feature_grid = self.embed_grid_feature(x).permute(0, 2, 3, 1)  # embed layer using Conv2d
-            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
-
-            # x = self.features(img.detach())
-            # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
-            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
-            if FEATURE_DIM==256:
-                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
-            elif FEATURE_DIM==512:
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([F.adaptive_avg_pool2d(features['layer3'], output_size=(7,7)),
-                #                               F.adaptive_avg_pool2d(features['layer4'], output_size=(7,7))],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([torch.max_pool2d(features['layer3'], kernel_size=features['layer3'].size(2)//7),
-                #                               torch.max_pool2d(features['layer4'], kernel_size=features['layer4'].size(2)//7)],
-                #                              dim=1).permute(0, 2, 3, 1)
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                             dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer2']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-
-            elif FEATURE_DIM==1024:
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2']),
-                                              self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                             dim=1).permute(0, 2, 3, 1)
-
+            box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                                         dim=1).permute(0, 2, 3, 1)
             box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
 
             assert box_feature_grid.size(1) == self.grid_N
@@ -1060,8 +1013,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
-                                                               dim=[FEATURE_DIM]*3)
+        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes,
+                                                               dim=[512]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         # self.to_cw_feature_size = torch.nn.Upsample(size=(14, 14))
@@ -1075,11 +1028,11 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
 
         self.box_roi_pool = MultiScaleRoIAlign(
             featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
-            output_size=BOI_SIZE,
+            output_size=7,
             sampling_ratio=2)
 
         resolution = self.box_roi_pool.output_size[0]
-        representation_size = FEATURE_DIM
+        representation_size = 512
         out_channels = 256
         self.box_head = TwoMLPHead_my(
             out_channels * resolution ** 2,
@@ -1126,35 +1079,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         # print('box_feature[0]', box_feature[0].max(), box_feature[0].min())
 
         if self.use_grid:
-            # box_feature_grid = self.embed_grid_feature(x).permute(0, 2, 3, 1)  # embed layer using Conv2d
-            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
-
-            # x = self.features(img.detach())
-            # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
-            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
-            if FEATURE_DIM==256:
-                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
-            elif FEATURE_DIM==512:
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([F.adaptive_avg_pool2d(features['layer3'], output_size=(7,7)),
-                #                               F.adaptive_avg_pool2d(features['layer4'], output_size=(7,7))],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([torch.max_pool2d(features['layer3'], kernel_size=features['layer3'].size(2)//7),
-                #                               torch.max_pool2d(features['layer4'], kernel_size=features['layer4'].size(2)//7)],
-                #                              dim=1).permute(0, 2, 3, 1)
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                             dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer2']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-
-            elif FEATURE_DIM==1024:
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2']),
-                                              self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                             dim=1).permute(0, 2, 3, 1)
-
+            box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                                         dim=1).permute(0, 2, 3, 1)
             box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
 
             assert box_feature_grid.size(1) == self.grid_N
@@ -1324,8 +1250,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=FEATURE_DIM, fc_dim=RN_GROUP, group=RN_GROUP, cls_num=n_classes,
-                                                               dim=[FEATURE_DIM]*3)
+        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes,
+                                                               dim=[512]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         # self.to_cw_feature_size = torch.nn.Upsample(size=(14, 14))
@@ -1339,11 +1265,11 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
 
         self.box_roi_pool = MultiScaleRoIAlign(
             featmap_names=['layer1', 'layer2', 'layer3', 'layer4'],
-            output_size=BOI_SIZE,
+            output_size=7,
             sampling_ratio=2)
 
         resolution = self.box_roi_pool.output_size[0]
-        representation_size = FEATURE_DIM
+        representation_size = 512
         out_channels = 256
         self.box_head = TwoMLPHead_my(
             out_channels * resolution ** 2,
@@ -1391,35 +1317,8 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         # print('box_feature[0]', box_feature[0].max(), box_feature[0].min())
 
         if self.use_grid:
-            # box_feature_grid = self.embed_grid_feature(x).permute(0, 2, 3, 1)  # embed layer using Conv2d
-            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
-
-            # x = self.features(img.detach())
-            # box_feature_grid = self.embed_grid_feature(features.view(x.size(0), -1)) # better?
-            # box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
-            if FEATURE_DIM==256:
-                box_feature_grid = self.to_grid_size(features['layer4']).permute(0, 2, 3, 1)
-            elif FEATURE_DIM==512:
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([F.adaptive_avg_pool2d(features['layer3'], output_size=(7,7)),
-                #                               F.adaptive_avg_pool2d(features['layer4'], output_size=(7,7))],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([torch.max_pool2d(features['layer3'], kernel_size=features['layer3'].size(2)//7),
-                #                               torch.max_pool2d(features['layer4'], kernel_size=features['layer4'].size(2)//7)],
-                #                              dim=1).permute(0, 2, 3, 1)
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                             dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer2']), self.to_grid_size(features['layer4'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-                # box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2'])],
-                #                              dim=1).permute(0, 2, 3, 1)
-
-            elif FEATURE_DIM==1024:
-                box_feature_grid = torch.cat([self.to_grid_size(features['layer1']), self.to_grid_size(features['layer2']),
-                                              self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
-                                             dim=1).permute(0, 2, 3, 1)
-
+            box_feature_grid = torch.cat([self.to_grid_size(features['layer3']), self.to_grid_size(features['layer4'])],
+                                         dim=1).permute(0, 2, 3, 1)
             box_feature_grid = box_feature_grid.view(x.size(0), -1, box_feature_grid.size(3))
 
             assert box_feature_grid.size(1) == self.grid_N
