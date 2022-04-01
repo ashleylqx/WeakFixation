@@ -24,7 +24,7 @@ from logger import Logger
 from load_data import SALICON_full, MIT1003_full, MS_COCO_map_full_aug
 from load_data import collate_fn_salicon_rn, collate_fn_mit1003_rn, collate_fn_coco_map_rn
 
-from models import WeakFixation_base, WeakFixation_base_comp, WeakFixation
+from models import WeakFixation
 
 from custom_loss import HLoss
 from config import *
