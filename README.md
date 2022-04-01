@@ -27,7 +27,9 @@ Google Drive: <https://drive.google.com/file/d/1CWWv79RYwh1tRY82VtsjZ1N4KxyccTa_
 Baidu Disk: <https://pan.baidu.com/s/1HfZNfNAsKqzJRAbX4WU7eA>  (password:`s216`)
 
 Our evaluation code is adapted from [this matlab tool](https://github.com/cvzoya/saliency/tree/master/code_forMetrics).
+<!--
 A python version can be found at [this repository](https://github.com/tarunsharma1/saliency_metrics).
+-->
 
 ## Datasets Preparation
 

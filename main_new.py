@@ -446,8 +446,9 @@ def save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
             pred_maps = output[1]
 
             pred_maps_all += F.interpolate(pred_maps, size=(output_h, output_w), mode='bilinear', align_corners=True)
-            pred_final = (pred_maps_all / len(tgt_sizes))
-            pred_final_np = pred_final.detach().cpu().numpy()
+
+        pred_final = (pred_maps_all / len(tgt_sizes))
+        pred_final_np = pred_final.detach().cpu().numpy()
 
         for b_i in range(ori_inputs.size(0)):
             ori_img = scipy.misc.imread(os.path.join(PATH_MIT1003, 'ALLSTIMULI', img_name[b_i] + '.jpeg'))  # height, width, channel

@@ -162,7 +162,7 @@ class MS_COCO_map_full_aug(Dataset):
 
         self.edge_boxes = os.path.join(self.path_dataset, mode + '2014_%s' % prop_m)
 
-        self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s' % prior)
+        self.path_saliency = os.path.join(self.path_dataset, mode + '2014_%s'%prior)
         self.return_path = return_path
 
         self.img_h = img_h
@@ -178,7 +178,7 @@ class MS_COCO_map_full_aug(Dataset):
 
         self.imgNsToCat = pickle.load(open(os.path.join(PATH_COCO, 'imgNsToCat_{}.p'.format(mode)), "rb"))
 
-        self.seq = RandomRotate(5)
+        self.seq = RandomRotate(5) # _aug7 ## BEST
 
         print("Init MS_COCO full dataset in mode {}".format(mode))
         print("\t total of {} images.".format(self.list_names.shape[0]))
@@ -190,30 +190,26 @@ class MS_COCO_map_full_aug(Dataset):
         # Image and saliency map paths
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index] + '.png')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB') # (h,w,c)
-        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
         saliency = cv2.imread(sal_path, 0)
 
-        boxes_tmp = scipy.io.loadmat(box_path)['boxes'][:MAX_BNUM, :]
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
-        if boxes_tmp.shape[0]==0:
+        if boxes.shape[0]==0:
             img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
-            boxes_ = np.zeros_like(boxes_tmp).astype(np.float32)
-
-            boxes_[:, 0] = boxes_tmp[:, 1] * 1.0 / img_WIDTH * self.img_w # x1
-            boxes_[:, 2] = boxes_tmp[:, 3] * 1.0 / img_WIDTH * self.img_w # x2
-            boxes_[:, 1] = boxes_tmp[:, 0] * 1.0 / img_HEIGHT * self.img_h # y1
-            boxes_[:, 3] = boxes_tmp[:, 2] * 1.0 / img_HEIGHT * self.img_h # y2
+            boxes_ = np.zeros_like(boxes)
+            boxes_[:, 0] = boxes[:, 0] * self.img_w
+            boxes_[:, 2] = boxes[:, 2] * self.img_w
+            boxes_[:, 1] = boxes[:, 1] * self.img_h
+            boxes_[:, 3] = boxes[:, 3] * self.img_h
         else:
-            boxes = np.zeros_like(boxes_tmp).astype(np.float32)
+            boxes[:, 0] = boxes[:, 0] * image.shape[1]
+            boxes[:, 2] = boxes[:, 2] * image.shape[1]
+            boxes[:, 1] = boxes[:, 1] * image.shape[0]
+            boxes[:, 3] = boxes[:, 3] * image.shape[0]
 
-            boxes[:, 0] = boxes_tmp[:, 1] * 1.0 #* image.shape[1] # x1
-            boxes[:, 2] = boxes_tmp[:, 3] * 1.0 #* image.shape[1] # x2
-            boxes[:, 1] = boxes_tmp[:, 0] * 1.0 #* image.shape[0] # y1
-            boxes[:, 3] = boxes_tmp[:, 2] * 1.0 #* image.shape[0] # y2
-            # print('load_data, boxes', boxes.dtype)
             image_, saliency_, boxes_ = self.seq(image.copy(), saliency.copy(), boxes.copy())
 
             img_processed, sal_processed = imageProcessing(image_, saliency_, h=self.img_h, w=self.img_w)
@@ -321,7 +317,6 @@ class MIT1003_full(Dataset):
         box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
-        img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
 
         saliency = cv2.imread(sal_path, 0)
 
@@ -332,10 +327,10 @@ class MIT1003_full(Dataset):
 
         boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
-        boxes[:, 0] = boxes[:, 0] * 1.0 / img_WIDTH * self.img_w
-        boxes[:, 2] = boxes[:, 2] * 1.0 / img_WIDTH * self.img_w
-        boxes[:, 1] = boxes[:, 1] * 1.0 / img_HEIGHT * self.img_h
-        boxes[:, 3] = boxes[:, 3] * 1.0 / img_HEIGHT * self.img_h
+        boxes[:, 0] = boxes[:, 0] * self.img_w
+        boxes[:, 2] = boxes[:, 2] * self.img_w
+        boxes[:, 1] = boxes[:, 1] * self.img_h
+        boxes[:, 3] = boxes[:, 3] * self.img_h
 
         if self.return_path:
             return img_processed, boxes, sal_processed, fix_processed, self.list_names[index]
