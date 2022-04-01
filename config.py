@@ -1,38 +1,20 @@
-# base_path = '/home/qx/'
-# base_path = '/home/hz1/QX/'
-base_path = '/research/dept2/qxlai/'
-# base_path = '/raid/QX/'
-#base_path = '/raid/Research/workspace/tfzhou/qxlai/'
+base_path = '/home/qx/'
 
-
-input_h = 224 #224
-input_w = 224 #224
-img_area = input_h*input_w*1.0
+input_h = 224
+input_w = 224
 
 det_input_h = 800
 det_input_w = 800
-# image_sizes = [(det_input_h, det_input_w)]
-# img_det.size(-2)*img_det.size(-1)*1.
-det_img_area = det_input_h*det_input_w*1.0
-
-hm_k = 8 #25% from 32 samples
 
 output_h = 56
 output_w = 56
 
-SALGAN_RESIZE = [224, 224]
+# PASCAL-S
+PATH_PASCAL = base_path + 'DataSets/PASCAL-S/'
 
-# train_log_interval = 400
-# eval_log_interval = 100
-# test_log_interval = 20
-train_log_interval = 10
-eval_log_interval = 5
-test_log_interval = 5
+# MIT300
+PATH_MIT300 = base_path + 'DataSets/MIT300/'
 
-tb_log_interval = 10
-# PATH_LOG = base_path + 'tbx_log/'
-# PATH_LOG = base_path + 'WF/log/'
-PATH_LOG = base_path + 'WF/log2/'
 # SALICON
 PATH_SALICON = base_path + 'DataSets/SALICON/'
 bgr_mean = [103.939, 116.779, 123.68]
@@ -40,9 +22,6 @@ rgb_mean = [123.68, 116.779, 103.939]
 
 # MIT1003
 PATH_MIT1003 = base_path + 'DataSets/MIT1003/'
-
-# MIT300
-PATH_MIT300 = base_path + 'DataSets/MIT300/'
 
 # COCO
 PATH_COCO = base_path + 'DataSets/MS_COCO/'
@@ -75,58 +54,21 @@ coco_id_name_map={1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airp
                    88: 'teddy bear', 89: 'hair drier', 90: 'toothbrush'}
 
 coco_num_classes = 91
-# num_classes = len(coco_classes)
-
-# ILSVRC2012
-PATH_ILSVRC = base_path + 'DataSets/ILSVRC2012/'
-
-ilsvrc_num_classes = 1000
-ilsvrc_num_tgt_classes = 85 # 85 124 169 207
-# ILSVRC_TGT_CLS = [49, 91, 122, 131, 149, 333]
-ILSVRC_TGT_CLS = [207, 176, 169, 140, 130, 124, 116, 108, 85]
-
-# PASCAL-S
-PATH_PASCAL = base_path + 'DataSets/PASCAL-S/'
-
-# tiny-imagenet
-PATH_TINY_I = base_path + 'DataSets/tiny-imagenet'
-
 
 # image mixed with mask
 # rf_maps = alpha * aux_map + (1-alpha)*prior_map
 ALPHA = 0.95 #0.50
 
-n_gaussian = 16# default 8
-n_gaussian_A = 16# default 8
-
-rn_emb_dim=64 # default 64
-
-
-# graph network
-embed_dim = 128
-
-augment = False
-augment_ratio = 0.2
-augment_range = int(6./augment_ratio)+1
+# number of gaussian maps
+n_gaussian = 16
+n_gaussian_A = 16
 
 scales = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
 
 MAX_BNUM = 50 #100 # 50 for all the augs
 
-FEATURE_DIM = 512 #512 #128 #256 #512 # 1024
-BOI_SIZE = 7 # default 7
-GRID_SIZE = 7 # default 7
-RN_GROUP = 1 #2 #4 #16 #8
-
-VIB_n_sample = 6
-VIB_beta = 1e-3
-VIB_dim = 256
-
-ATT_RES = False
-
-GBVS_R = 0.5 #0.25
-BMS_R = 0.25
-
-ALT_RATIO = 1.05
-
-PRO_RATIO = None #0.35
+# weight of loss term
+cps_weight = 1.0
+hth_weight = 0.1
+hdsup_weight = 0.1
+rf_weight = 0.1
