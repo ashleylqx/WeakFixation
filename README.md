@@ -105,7 +105,9 @@ Baidu Disk: <https://pan.baidu.com/s/1Mn7U3UTKOVUW7w6WC5w65w> password:`bgft`
 ### Configurations
 1. Set the `base_path` in `config.py` be the parent folder of `DataSets`.
 2. Put the downloaded `model_best.pt` in `<code_path>/WF/Models/best/`.
-3. Download weight `resnet50.pth` from [pytorch github](https://download.pytorch.org/models/resnet50-0676ba61.pth) and put it in `<code_path>/Weights/`.
+<!--
+4. Download weight `resnet50.pth` from [pytorch github](https://download.pytorch.org/models/resnet50-0676ba61.pth) and put it in `<code_path>/Weights/`.
+-->
 
 ### Prediction
 Run 
