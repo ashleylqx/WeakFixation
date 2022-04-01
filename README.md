@@ -110,11 +110,12 @@ Baidu Disk: <https://pan.baidu.com/s/1Mn7U3UTKOVUW7w6WC5w65w> password:`bgft`
 ### Prediction
 Run 
 ```commandline
-python main_new.py --phase test --model_name best --bestname model_best.pt --batch-size 4
+python main.py --phase test --model_name best --bestname model_best.pt --batch-size 2
 ```
 
 The saliency prediction results will be saved in `<code_path>/WF/Preds/MIT1003/<model_name>_multiscale/`.
 
+Please evaluate the prediction results using the above mentioned [matlab tool](https://github.com/cvzoya/saliency/tree/master/code_forMetrics).
 
 
 ## Training
@@ -122,9 +123,14 @@ The saliency prediction results will be saved in `<code_path>/WF/Preds/MIT1003/<
 Coming soon.
 
 ## Citation
-If you find this repository useful, please cite the following reference.
+If you find this repository useful, please consider citing the following reference.
 ```
-
+@ARTICLE{lai2022weakly,
+    title={Weakly supervised visual saliency prediction},
+    author={Qiuxia Lai and Tianfei Zhou and Salman Khan and Hanqiu Sun and Jianbing Shen and Ling Shao},
+    journal={IEEE Trans. on Image Processing},
+    year={2022}
+}
 ```
 
 ## Contact
