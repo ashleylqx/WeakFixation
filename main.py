@@ -246,8 +246,7 @@ def parse_arguments():
     parser.add_argument('--phase', default='test', type=str, help='running phase')
     parser.add_argument('--ckptname', default='checkpoint.pt', type=str, help='filename of model')
     parser.add_argument('--bestname', default='model_best.pt', type=str, help='filename of best model')
-    parser.add_argument('--model_name', default='210426_sgd', type=str, help='folder of model')
-    parser.add_argument('--init_model', default='210426_sgd', type=str, help='folder of init model')
+    parser.add_argument('--model_name', default='wf_model', type=str, help='folder of model')
 
     return parser.parse_args()
 
