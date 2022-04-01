@@ -31,12 +31,26 @@ A python version can be found at [this repository](https://github.com/tarunsharm
 
 ## Datasets Preparation
 
-The bounding boxes of each dataset are generated using [EdgeBox](https://github.com/pdollar/edges).
+### For training
+We use `MS-COCO 2014 - train` for training, and a subset of `MS-COCO - val` (i.e., the `val` of `SALICON`) for evaluation.
 
-**Training**: The images are downloaded from the [official website](https://cocodataset.org). The bounding boxes of `MS-COCO` can be downloaded from [Baidu Disk Link (train)](https://pan.baidu.com/s/11Jb4P0h_tECbmkypVri2oA) (password:`5ecm`) and [Baidu Disk Link (eval)](https://pan.baidu.com/s/11WzSLZ_BxbpuMoxqD96lcg) (password:`qdrg`).
+**Images** available at the [official website](https://cocodataset.org). 
 
-**Testing**: Taking `MIT1003` as an example. You may download the dataset along with the bounding boxes from this [Baidu Disk Link](https://pan.baidu.com/s/1amWZZeNbGVHgSmD9vlsPCg) (password:`ten8`) OR [Google Drive](https://drive.google.com/file/d/1PCuxks2f5Aem8u0GwcbdLP2e11zySLyQ/view?usp=sharing) for a fast try.
+**Bounding boxes**: [Baidu Disk Link (train)](https://pan.baidu.com/s/11Jb4P0h_tECbmkypVri2oA) (password:`5ecm`) and [Baidu Disk Link (eval)](https://pan.baidu.com/s/11WzSLZ_BxbpuMoxqD96lcg) (password:`qdrg`). 
+OR generated using [EdgeBox](https://github.com/pdollar/edges).
 
+**Saliency prior maps**: [Baidu Disk Link (train)](https://pan.baidu.com/s/1WrKHsTyMjygf9MUtxk4cqQ) (password:`u8h2`) and [Baidu Disk Link (val)](https://pan.baidu.com/s/1os1ryvubS_p0ueRr3tPUDA) (password:`qxxe`). 
+OR generated using the [official matlab code](http://www.houxiaodi.com/publication.html) of *Dynamic visual attention: Searching for coding length increments, NeurIPS 2008*.
+
+
+
+
+### For testing
+Taking `MIT1003` as an example. 
+You may download the dataset along with the bounding boxes from this [Baidu Disk Link](https://pan.baidu.com/s/1amWZZeNbGVHgSmD9vlsPCg) (password:`ten8`) OR [Google Drive](https://drive.google.com/file/d/1PCuxks2f5Aem8u0GwcbdLP2e11zySLyQ/view?usp=sharing) for a fast try.
+
+
+### Dataset arrangement
 The datasets are arranged as:
 
         DataSets
@@ -45,6 +59,23 @@ The datasets are arranged as:
              |---val2014
              |---train2014_eb500
              |---val2014_eb500
+             |---train2014_nips08
+             |---val2014_nips08
+        |----SALICON
+             |---images
+                |---train
+                |---val
+                |---test
+             |---fixations
+                |---train
+                |---val
+                |---test
+             |---maps
+                |---train
+                |---val
+             |---eb500
+                |---train
+                |---val
         |----MIT1003
              |---ALLSTIMULI
                  |--xxx.jpeg
@@ -57,27 +88,32 @@ The datasets are arranged as:
              |---eb500
                  |--xxx.mat
                  |--...
-        |----PASCAL-S
-        |--...
         
 
 
 
 ## Testing
 
-### Download weights from:
+### Download weight `model_best.pt` from:
 
 Google Drive: <https://drive.google.com/file/d/1KxyXNWo_mxPkRo1sf2jHFMB_Jxzc6msY/view?usp=sharing>
 
 Baidu Disk: <https://pan.baidu.com/s/1Mn7U3UTKOVUW7w6WC5w65w> password:`bgft`
 
-### Configure the directories
+### Configurations
+1. Set the `base_path` in `config.py` be the parent folder of `DataSets`.
+2. Put the downloaded `model_best.pt` in `<code_path>/WF/Models/best/`.
+3. Download weight `resnet50.pth` from [pytorch github](https://download.pytorch.org/models/resnet50-0676ba61.pth) and put it in `<code_path>/Weights/`.
 
-### Run the following command:
-
+### Prediction
+Run 
 ```commandline
-
+python main_new.py --phase test --model_name best --bestname model_best.pt --batch-size 4
 ```
+
+The saliency prediction results will be saved in `<code_path>/WF/Preds/MIT1003/<model_name>_multiscale/`.
+
+
 
 ## Training
 
@@ -91,4 +127,4 @@ If you find this repository useful, please cite the following reference.
 
 ## Contact
 
-Qiuxia Lai: ashleylqx`at`gmail.com
+Qiuxia Lai: ashleylqx`at`gmail.com | qxlai`at`cuc.edu.cn

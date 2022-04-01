@@ -3,9 +3,8 @@
 __pycache__/
 .vscode/
 
-data/
-checkpoints/
-checkpoint/
+WF/
+Weights/
 
 # local config file
 utils/local_config.py

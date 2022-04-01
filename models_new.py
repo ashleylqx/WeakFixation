@@ -31,9 +31,10 @@ def gen_grid_boxes(in_h, in_w, N=14):
 
     return torch.cat(grid_boxes, dim=1) # leave dim 0 for batch size repeat
 
-class CenterBias_G(torch.nn.Module):
+# Global center prior
+class CenterPrior_G(torch.nn.Module):
     def __init__(self, n=16, in_h=14, in_w=14):
-        super(CenterBias_G, self).__init__()
+        super(CenterPrior_G, self).__init__()
         # define some layer members
         self.n = n
         self.output_h = in_h
@@ -73,9 +74,10 @@ class CenterBias_G(torch.nn.Module):
         maps = self.gen_gaussian_map(self.params.to(x.device))
         return maps
 
-class CenterBias_A(torch.nn.Module):
+# Adaptive center prior
+class CenterPrior_A(torch.nn.Module):
     def __init__(self, n=16, input_c=coco_num_classes, in_h=14, in_w=14):
-        super(CenterBias_A, self).__init__()
+        super(CenterPrior_A, self).__init__()
         # define some layer members
         self.n = n
         self.output_h = in_h
@@ -154,18 +156,6 @@ class resnet50_dilate(torch.nn.Module):
                        base_width=64, dilation=2, norm_layer=None)
         )
 
-        # downsample_ly4 = torch.nn.Sequential(
-        #     torch.nn.Conv2d(1024, 2048, kernel_size=1, stride=1, bias=False),
-        #     torch.nn.BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-        # )
-        # self.layer4 = torch.nn.Sequential(
-        #     Bottleneck(inplanes=1024, planes=512, stride=1, downsample=downsample_ly4, groups=1,
-        #                base_width=64, dilation=4, norm_layer=None),
-        #     Bottleneck(inplanes=2048, planes=512, stride=1, downsample=None, groups=1,
-        #                base_width=64, dilation=4, norm_layer=None),
-        #     Bottleneck(inplanes=2048, planes=512, stride=1, downsample=None, groups=1,
-        #                base_width=64, dilation=4, norm_layer=None)
-        # )
         self.layer4 = blocks.layer4
 
         # keep original
@@ -189,7 +179,7 @@ class resnet50_dilate(torch.nn.Module):
 
         return x
 
-class attention_module_multi_head_RN_cls(torch.nn.Module):
+class RelationNet_base(torch.nn.Module):
     """ Attetion module with vectorized version
 
         Args:
@@ -204,7 +194,7 @@ class attention_module_multi_head_RN_cls(torch.nn.Module):
     """
     def __init__(self, emb_dim=64, fc_dim=16, feat_dim=1024,
                       cls_num=coco_num_classes, dim=(1024, 1024, 1024), group=16, index=1):
-        super(attention_module_multi_head_RN_cls, self).__init__()
+        super(RelationNet_base, self).__init__()
         assert dim[0] == dim[1]
         assert fc_dim == group
 
@@ -357,7 +347,7 @@ class attention_module_multi_head_RN_cls(torch.nn.Module):
         return embedding
 
 # same as paper. apply attention at (linear_out + roi_feat)
-class attention_module_multi_head_RN_cls_sa_art_sp(torch.nn.Module):
+class RelationNet(torch.nn.Module):
     """ Attetion module with vectorized version
 
         Args:
@@ -372,7 +362,7 @@ class attention_module_multi_head_RN_cls_sa_art_sp(torch.nn.Module):
     """
     def __init__(self, emb_dim=64, fc_dim=16, feat_dim=1024,
                       cls_num=coco_num_classes, dim=(1024, 1024, 1024), group=16, index=1):
-        super(attention_module_multi_head_RN_cls_sa_art_sp, self).__init__()
+        super(RelationNet, self).__init__()
         assert dim[0] == dim[1]
         assert fc_dim == group
 
@@ -540,7 +530,7 @@ class attention_module_multi_head_RN_cls_sa_art_sp(torch.nn.Module):
         return embedding
 
 
-class TwoMLPHead_my(torch.nn.Module):
+class TwoMLPHead(torch.nn.Module):
     """
     Standard heads for FPN-based models
 
@@ -549,7 +539,7 @@ class TwoMLPHead_my(torch.nn.Module):
         representation_size (int): size of the intermediate representation
     """
     def __init__(self, in_channels, representation_size):
-        super(TwoMLPHead_my, self).__init__()
+        super(TwoMLPHead, self).__init__()
         self.fc6 = torch.nn.Linear(in_channels, representation_size)
         self.fc7 = torch.nn.Linear(representation_size, representation_size)
 
@@ -563,15 +553,15 @@ class TwoMLPHead_my(torch.nn.Module):
 
 
 # ***
-class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
+class WeakFixation_base(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False,
                  use_grid=False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw, self).__init__()
+        super(WeakFixation_base, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         model = resnet50_dilate()
 
-        ckpt_file = base_path + 'Weights/resnet50.pth'
+        ckpt_file =  'Weights/resnet50.pth'
         pretrained_dict = torch.load(ckpt_file)
         model.load_state_dict(pretrained_dict)
 
@@ -601,13 +591,13 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes,
-                                                               dim=[512]*3)
+        self.relation_net = RelationNet_base(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes,
+                                             dim=[512]*3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         self.to_output_size = torch.nn.Upsample(size=(output_h, output_w))
 
-        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
+        self.centerbias = CenterPrior_A(n=n_gaussian, input_c=n_classes * num_maps) #, in_h=28, in_w=28
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
@@ -620,7 +610,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw(torch.nn.Module):
         resolution = self.box_roi_pool.output_size[0]
         representation_size = 512
         out_channels = 256
-        self.box_head = TwoMLPHead_my(
+        self.box_head = TwoMLPHead(
             out_channels * resolution ** 2,
             representation_size)
 
@@ -757,15 +747,15 @@ def gen_attention_map(att_scores, boxes, input_size, output_size):
     return GenAttentionMapFunction.apply(att_scores, boxes, input_size, output_size)
 
 
-class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
+class WeakFixation_base_comp(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False,
                  use_grid=False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, self).__init__()
+        super(WeakFixation_base_comp, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         model = resnet50_dilate()
 
-        ckpt_file = base_path + 'Weights/resnet50.pth'
+        ckpt_file =  'Weights/resnet50.pth'
         pretrained_dict = torch.load(ckpt_file)
         model.load_state_dict(pretrained_dict)
 
@@ -795,12 +785,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes, dim=[512]*3)
+        self.relation_net = RelationNet(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes, dim=[512] * 3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         self.to_output_size = torch.nn.Upsample(size=(output_h, output_w))
 
-        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
+        self.centerbias = CenterPrior_A(n=n_gaussian, input_c=n_classes * num_maps) #, in_h=28, in_w=28
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
@@ -813,7 +803,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         resolution = self.box_roi_pool.output_size[0]
         representation_size = 512
         out_channels = 256
-        self.box_head = TwoMLPHead_my(
+        self.box_head = TwoMLPHead(
             out_channels * resolution ** 2,
             representation_size)
 
@@ -906,15 +896,15 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(torch.nn.Module):
         return pred_comp_logits, sal_map, att_scores #, gaussian, gs_map
 
 
-class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
+class WeakFixation(torch.nn.Module):
     def __init__(self, n_classes, kmax=1, kmin=None, alpha=0.7, num_maps=4, fix_feature=False,
                  use_grid=False):
-        super(Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp, self).__init__()
+        super(WeakFixation, self).__init__()
         self.n_classes = n_classes
         self.use_grid = use_grid
         model = resnet50_dilate()
 
-        ckpt_file = base_path + 'Weights/resnet50.pth'
+        ckpt_file =  'Weights/resnet50.pth'
         pretrained_dict = torch.load(ckpt_file)
         model.load_state_dict(pretrained_dict)
 
@@ -944,12 +934,12 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         self.boxes_grid = gen_grid_boxes(in_h=input_h, in_w=input_w, N=7)  # 7 with features_fd
         self.grid_N = self.boxes_grid.size(1)
 
-        self.relation_net = attention_module_multi_head_RN_cls_sa_art_sp(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes, dim=[512]*3)
+        self.relation_net = RelationNet(feat_dim=512, fc_dim=1, group=1, cls_num=n_classes, dim=[512] * 3)
 
         self.to_cw_feature_size = torch.nn.Upsample(size=(28, 28))
         self.to_output_size = torch.nn.Upsample(size=(output_h, output_w))
 
-        self.centerbias = CenterBias_A(n=n_gaussian, input_c=n_classes*num_maps) #, in_h=28, in_w=28
+        self.centerbias = CenterPrior_A(n=n_gaussian, input_c=n_classes * num_maps) #, in_h=28, in_w=28
         # self.centerbias = CenterBias_G(n=n_gaussian)
 
         self.gen_g_feature = torch.nn.Conv2d(n_classes * num_maps + n_gaussian, n_classes * num_maps, kernel_size=1)
@@ -962,7 +952,7 @@ class Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(torch.nn.Module):
         resolution = self.box_roi_pool.output_size[0]
         representation_size = 512
         out_channels = 256
-        self.box_head = TwoMLPHead_my(
+        self.box_head = TwoMLPHead(
             out_channels * resolution ** 2,
             representation_size)
 

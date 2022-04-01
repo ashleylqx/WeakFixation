@@ -24,11 +24,11 @@ from logger import Logger
 from load_data_new import SALICON_full, MIT1003_full, MS_COCO_map_full_aug
 from load_data_new import collate_fn_salicon_rn, collate_fn_mit1003_rn, collate_fn_coco_map_rn
 
-from models_new import Wildcat_WK_hd_gs_compf_cls_att_A4_cw, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art, Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp
+from models_new import WeakFixation_base, WeakFixation_base_comp, WeakFixation
 
 from custom_loss_new import HLoss
 from config_new import *
-from utils import *
+from utils_new import *
 
 def train_Wildcat_WK_hd_compf_map_cw(epoch, model, optimizer, logits_loss, info_loss, dataloader, args):
     model.train()
@@ -414,7 +414,7 @@ def save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
                                                  metrics=('kld', 'nss', 'cc', 'sim', 'aucj')):
     model.eval()
 
-    out_folder = os.path.join(args.path_out, folder_name, best_model_file)
+    out_folder = os.path.join(folder_name, best_model_file)
     if len(tgt_sizes)>1:
         out_folder = out_folder+'_multiscale'
 
@@ -456,7 +456,7 @@ def save_Wildcat_WK_hd_compf_multiscale_cw_sa_sp(model, folder_name, best_model_
                               postprocess_prediction(pred_final_np[b_i][0], size=[ori_img.shape[0], ori_img.shape[1]]))
 
     if len(metrics) > 0:
-        results = evaluate(args, folder_name, out_folder, metrics)
+        results = evaluate(args, out_folder, metrics)
         return results
 
 def checkBounds(dim, data):
@@ -475,7 +475,7 @@ def makeFixationMap(dim,pts):
 
     return map
 
-def evaluate(args, folder_name, best_model_file, metrics):
+def evaluate(args, out_folder, metrics):
     assert len(metrics) > 0
 
     results = {metric: tnt.meter.AverageValueMeter() for metric in metrics}
@@ -483,7 +483,6 @@ def evaluate(args, folder_name, best_model_file, metrics):
         results[metric].reset()
     path_saliency = os.path.join(PATH_MIT1003, 'ALLFIXATIONMAPS')
     path_fixation = os.path.join(PATH_MIT1003, 'ALLFIXATIONS')
-    out_folder = os.path.join(args.path_out, folder_name, best_model_file)
     pred_files = os.listdir(out_folder)
 
     for f_i in range(len(pred_files)):
@@ -556,13 +555,13 @@ def main(args):
         print('Using CPU.')
 
     # *** 210427 ***
-    if phase == 'train_cw_aug':
+    if phase == 'train_base':
         print('lr %.4f'%args.lr)
 
         prior = 'nips08'
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                         fix_feature=fix_feature, use_grid=True) #################
+        model = WeakFixation_base(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                                  fix_feature=fix_feature, use_grid=True) #################
 
         '''optimizer'''
         optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay) ############
@@ -625,7 +624,7 @@ def main(args):
         eval_dataloader = DataLoader(ds_validate, batch_size=args.test_batch*gpu_number, collate_fn=collate_fn_salicon_rn,
                                      shuffle=False, num_workers=2)
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = os.path.join(args.path_out, 'Preds/MIT1003')
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -680,18 +679,18 @@ def main(args):
         print('Best model nss: %.4f' % (nss_value))
 
     # **** 210502 ***
-    elif phase == 'train_cw_alt_alpha':
+    elif phase == 'train_base_alt':
         print('lr %.4f' % args.lr)
 
         prior = 'nips08'
         #########################################
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
-                                                     num_maps=num_maps,
-                                                     fix_feature=fix_feature, use_grid=True)
+        model = WeakFixation_base(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+                                  num_maps=num_maps,
+                                  fix_feature=fix_feature, use_grid=True)
 
-        model_aux = Wildcat_WK_hd_gs_compf_cls_att_A4_cw(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
-                                                         num_maps=num_maps,
-                                                         fix_feature=fix_feature, use_grid=True)
+        model_aux = WeakFixation_base(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha,
+                                      num_maps=num_maps,
+                                      fix_feature=fix_feature, use_grid=True)
 
         model_name = args.model_name
         print(model_name)
@@ -784,7 +783,7 @@ def main(args):
                                      collate_fn=collate_fn_salicon_rn,
                                      shuffle=False, num_workers=2)
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = os.path.join(args.path_out, 'Preds/MIT1003')
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -846,13 +845,13 @@ def main(args):
         print('Best model nss: %.4f' % (nss_value))
 
     # *** 210511 ***
-    elif phase == 'train_cw_aug_sa_art':
+    elif phase == 'train_base_comp':
         print('lr %.4f'%args.lr)
 
         prior = 'nips08'
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                         fix_feature=fix_feature, use_grid=True) #################
+        model = WeakFixation_base_comp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                                       fix_feature=fix_feature, use_grid=True) #################
 
 
         '''init model'''
@@ -935,7 +934,7 @@ def main(args):
         eval_dataloader = DataLoader(ds_validate, batch_size=args.test_batch * gpu_number, collate_fn=collate_fn_salicon_rn,
                                      shuffle=False, num_workers=2)
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = os.path.join(args.path_out, 'Preds/MIT1003')
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -989,13 +988,13 @@ def main(args):
         print('Best model nss: %.4f' % (nss_value))
 
     # *** 210512 ***
-    elif phase == 'train_cw_aug_sa_sp_fixf':
+    elif phase == 'train':
         print('lr %.4f'%args.lr)
 
         prior = 'nips08'
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                         fix_feature=fix_feature, use_grid=True)
+        model = WeakFixation(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                             fix_feature=fix_feature, use_grid=True)
 
         '''checkpoint (init)'''
         checkpoint = torch.load(os.path.join(args.path_out, 'Models', args.init_model, args.bestname))
@@ -1079,7 +1078,7 @@ def main(args):
         eval_dataloader = DataLoader(ds_validate, batch_size=args.test_batch * gpu_number, collate_fn=collate_fn_salicon_rn,
                                      shuffle=False, num_workers=2)
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = os.path.join(args.path_out, 'Preds/MIT1003')
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -1146,8 +1145,8 @@ def main(args):
 
         prior = 'nips08'
 
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                         fix_feature=fix_feature, use_grid=True) #################
+        model = WeakFixation(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                             fix_feature=fix_feature, use_grid=True) #################
 
         '''init model'''
         checkpoint = torch.load(os.path.join(args.path_out, 'Models', args.init_model, args.bestname))
@@ -1220,7 +1219,7 @@ def main(args):
         eval_dataloader = DataLoader(ds_validate, batch_size=args.test_batch*gpu_number, collate_fn=collate_fn_salicon_rn,
                                      shuffle=False, num_workers=2)
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = os.path.join(args.path_out, 'Preds/MIT1003')
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -1275,9 +1274,9 @@ def main(args):
         print('Best model nss: %.4f' % (nss_value))
 
     # generate saliency maps
-    elif phase == 'test_cw_sa_sp_multiscale_210822':
-        model = Wildcat_WK_hd_gs_compf_cls_att_A4_cw_sa_art_sp(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
-                           fix_feature=fix_feature, use_grid=True)
+    elif phase == 'test':
+        model = WeakFixation(n_classes=coco_num_classes, kmax=kmax, kmin=kmin, alpha=alpha, num_maps=num_maps,
+                             fix_feature=fix_feature, use_grid=True)
 
         if args.use_gpu:
             model.cuda()
@@ -1298,7 +1297,7 @@ def main(args):
                     new_params[k] = y
         model.load_state_dict(new_params)
 
-        folder_name = 'Preds/MIT1003'
+        folder_name = os.path.join(args.path_out, 'Preds/MIT1003')
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -1314,10 +1313,10 @@ def main(args):
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path_out", default=base_path + 'WF/',
+    parser.add_argument("--path_out", default='WF/',
                         type=str,
                         help="""set output path for the trained model""")
-    parser.add_argument("--batch-size", default=24, type=int, help="""Set batch size""")
+    parser.add_argument("--batch-size", default=4, type=int, help="""Set batch size""")
     parser.add_argument("--train-batch", default=36, type=int, help="""Set batch size""")
     parser.add_argument("--test-batch", default=20, type=int, help="""Set batch size""")
     parser.add_argument("--n_epochs", default=200, type=int,
@@ -1335,11 +1334,9 @@ def parse_arguments():
                         help="""Patience for learning rate scheduler (default 3)""")
     parser.add_argument("--use_gpu", type=bool, default=False,
                         help="""Whether use GPU (default False)""")
-    parser.add_argument("--clip", type=float, default=1e-2,
-                        help="""Glip gradient norm of relation net""")
     parser.add_argument('--resume', action='store_true',
                         help='whether to resume from folder')
-    parser.add_argument('--phase', default='train_cw_aug_sa_sp', type=str, help='running phase')
+    parser.add_argument('--phase', default='test', type=str, help='running phase')
     parser.add_argument('--ckptname', default='checkpoint.pt', type=str, help='filename of model')
     parser.add_argument('--bestname', default='model_best.pt', type=str, help='filename of best model')
     parser.add_argument('--model_name', default='210426_sgd', type=str, help='folder of model')

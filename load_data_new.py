@@ -318,7 +318,7 @@ class MIT1003_full(Dataset):
         rgb_ima = os.path.join(self.path_images, self.list_names[index]+'.jpeg')
         sal_path = os.path.join(self.path_saliency, self.list_names[index]+'_fixMap.jpg')
         fix_path = os.path.join(self.path_fixation, self.list_names[index]+'_fixPts.jpg')
-        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '.jpeg.mat')
+        box_path = os.path.join(self.edge_boxes, self.list_names[index] + '_bboxes.mat')
 
         image = scipy.misc.imread(rgb_ima, mode='RGB')
         img_HEIGHT, img_WIDTH = image.shape[0], image.shape[1]
@@ -330,7 +330,7 @@ class MIT1003_full(Dataset):
 
         img_processed, sal_processed = imageProcessing(image, saliency, h=self.img_h, w=self.img_w)
 
-        boxes = scipy.io.loadmat(box_path)['proposals'][0][0][0][:MAX_BNUM, :]
+        boxes = scipy.io.loadmat(box_path)['bboxes'][:MAX_BNUM, :]
 
         boxes[:, 0] = boxes[:, 0] * 1.0 / img_WIDTH * self.img_w
         boxes[:, 2] = boxes[:, 2] * 1.0 / img_WIDTH * self.img_w
