@@ -128,7 +128,7 @@ class resnet50_dilate(torch.nn.Module):
     def __init__(self):
         super(resnet50_dilate, self).__init__()
 
-        blocks = models.resnet50(pretrained=False)
+        blocks = models.resnet50(pretrained=True)
         self.conv1 = blocks.conv1
         self.bn1 = blocks.bn1
         self.relu = blocks.relu
@@ -446,9 +446,9 @@ class WeakFixation(torch.nn.Module):
         self.use_grid = use_grid
         model = resnet50_dilate()
 
-        ckpt_file =  'Weights/resnet50.pth'
-        pretrained_dict = torch.load(ckpt_file)
-        model.load_state_dict(pretrained_dict)
+        #ckpt_file =  'Weights/resnet50.pth'
+        #pretrained_dict = torch.load(ckpt_file)
+        #model.load_state_dict(pretrained_dict)
 
         pooling = torch.nn.Sequential()
         pooling.add_module('class_wise', ClassWisePool(num_maps))
